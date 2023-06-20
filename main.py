@@ -1,7 +1,7 @@
-from TowerDescent.Scripts.BaseClasses import *
-from TowerDescent.Scripts.Player import Player
-from TowerDescent.Scripts.TestObjects import TargetObject, Ground
-from TowerDescent.Scripts.Enemies import FlyingGuy
+from Scripts.BaseClasses import *
+from Scripts.Player import Player
+from Scripts.TestObjects import TargetObject, Ground
+from Scripts.Enemies import FlyingGuy
 
 Player1 = Player(0, 100, Sprite('Sprites/player.png'))
 GameManager.player = Player1

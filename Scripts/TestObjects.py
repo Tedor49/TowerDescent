@@ -1,4 +1,4 @@
-from TowerDescent.Scripts.BaseClasses import *
+from Scripts.BaseClasses import *
 
 
 class TargetObject(InteractableObject):

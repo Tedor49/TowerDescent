@@ -1,6 +1,7 @@
-from TowerDescent.Scripts.BaseClasses import *
-from TowerDescent.Scripts.Weapons import Weapon
-from TowerDescent.Scripts.Attacks import Attack
+from Scripts.BaseClasses import *
+from Scripts.Weapons import Weapon
+from Scripts.Attacks import Attack
+
 
 class Enemy(InteractableObject):
     def __init__(self, x, y, sprite, player_enemy, dx=0, dy=0, g=0.000):
@@ -23,15 +24,15 @@ class FlyingGuy(Enemy):
             our_x = self.hitbox.getx() + self.hitbox.x_size / 2
             our_y = self.hitbox.gety() + self.hitbox.y_size / 2
             length = ((x - our_x) ** 2 + (y - our_y) ** 2) ** (1 / 2)
-            vector = ((x - our_x) / length, (y - our_y) / length)
-            self.dx = vector[0] / 3
-            self.dy = vector[1] / 3
-            self.x += self.dx * GameManager.time_elapsed
-            self.y += self.dy * GameManager.time_elapsed
-            self.weapon.shoot(x, y)
-
-            for i in self.hitbox.check_intersections():
-                if type(i.parent) == Attack and i.parent.parent != self:
-                    self.hp -= 1
+            if length < 500 and self.player_enemy.hp != 0:
+                vector = ((x - our_x) / length, (y - our_y) / length)
+                self.dx = vector[0] / 3
+                self.dy = vector[1] / 3
+                self.x += self.dx * GameManager.time_elapsed
+                self.y += self.dy * GameManager.time_elapsed
+                self.weapon.shoot(x, y)
+                for i in self.hitbox.check_intersections():
+                    if type(i.parent) == Attack and i.parent.parent != self:
+                        self.hp -= 1
         else:
             GameManager.toRemove.append(self)
