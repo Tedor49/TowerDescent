@@ -9,7 +9,7 @@ import time
 class Player(InteractableObject):
     def __init__(self, x, y, sprite, dx=0, dy=0, g=0.002):
         super().__init__(x, y, sprite, dx, dy, g)
-        self.hp = 4
+        self.hp = 1000
         self.weapon = Weapon(self, x, y)
         self.coyote = 0
         self.prev_jump_pressed = False
