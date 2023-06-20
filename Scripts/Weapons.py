@@ -38,3 +38,25 @@ class Bomber(GameObject):
             attack.do(x, y)
         else:
             self.coolDown -= GameManager.time_elapsed
+
+
+class CQWeapon(InteractableObject):
+    def __init__(self, x, y, sprite, parent, dx=0, dy=0):
+        super().__init__(x, y, sprite, dx, dy)
+        self.parent = parent
+        self.hitbox = Hitbox(self, self.parent.hitbox.x_size*0.75, self.parent.hitbox.y_size*0.75, 4)
+        self.damage = 1
+        self.angle = 0
+        self.ongoing = False
+
+    def attack(self, *args):
+        if not self.ongoing:
+            self.ongoing = True
+
+    def tick(self):
+        self.angle += 1
+        self.x = self.parent.getx() + self.parent.hitbox.x_size - 100
+        self.y = self.parent.gety()
+        if self.angle == 45:
+            self.angle = 0
+            self.ongoing = False

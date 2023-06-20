@@ -4,13 +4,24 @@ import math
 import time
 
 
-class Bullet(InteractableObject):
-    def __init__(self, x, y, sprite, parent, dx=0, dy=0):
+class Attack(InteractableObject):
+    def __init__(self, x, y, sprite, parent, dx = 0, dy = 0):
         super().__init__(x, y, sprite, dx, dy)
-        self.hitbox = Hitbox(self, 4, 4)
         self.parent = parent
-        self.damage = 1
         self.angle = 0
+
+    def do(self, to_x, to_y):
+        pass
+
+    def tick(self):
+        pass
+
+
+class Bullet(Attack):
+    def __init__(self, x, y, sprite, parent, dx=0, dy=0):
+        super().__init__(x, y, sprite, parent, dx, dy)
+        self.hitbox = Hitbox(self, 4, 4)
+        self.damage = 1
 
 
     def do(self, to_x, to_y):
@@ -30,39 +41,13 @@ class Bullet(InteractableObject):
                 GameManager.toRemove.append(self)
 
 
-class CQWeapon(InteractableObject):
-    def __init__(self, x, y, sprite, parent, dx=0, dy=0):
-        super().__init__(x, y, sprite, dx, dy)
-        self.parent = parent
-        self.hitbox = Hitbox(self, self.parent.hitbox.x_size*0.75, self.parent.hitbox.y_size*0.75, 4)
-        self.damage = 1
-        self.angle = 0
-        self.ongoing = False
-
-    def attack(self, *args):
-        if not self.ongoing:
-            self.ongoing = True
-
-    def tick(self):
-        self.angle += 1
-        self.x = self.parent.getx() + self.parent.hitbox.x_size - 100
-        self.y = self.parent.gety()
-        if self.angle == 45:
-            self.angle = 0
-            self.ongoing = False
-
-
-class Bomb(InteractableObject):
+class Bomb(Attack):
     def __init__(self, x, y, sprite, parent, dx=0, dy=0):
         super().__init__(x, y, sprite, dx, dy)
         self.hitbox = Hitbox(self, 4, 4)
-        self.parent = parent
-        self.damage = 1
-        self.angle = 0
         self.landed = False
         self.timer = time.time()
         self.g = 1
-
 
     def do(self, to_x, to_y):
         pass
