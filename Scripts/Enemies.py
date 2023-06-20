@@ -18,7 +18,6 @@ class FlyingGuy(Enemy):
         self.weapon = Gun(self, x, y)
         self.hitbox = Hitbox(self, 100, 100)
         self.last_attack = time.time() - 1
-
     def tick(self):
         if self.hp > 0:
             x = self.player_enemy.hitbox.getx() + self.player_enemy.hitbox.x_size / 2
@@ -53,7 +52,6 @@ class SpecialFlyingGuy(Enemy):
         self.weapon = Bomber(self, x, y)
         self.hitbox = Hitbox(self, 100, 100)
         self.last_attack = time.time() - 1
-
     def tick(self):
         if self.hp > 0:
             x = self.player_enemy.hitbox.getx() + self.player_enemy.hitbox.x_size / 2
@@ -62,8 +60,9 @@ class SpecialFlyingGuy(Enemy):
             our_y = self.hitbox.gety() + self.hitbox.y_size / 2
             length = ((x - our_x) ** 2 + (y - our_y) ** 2) ** (1 / 2)
             if length < 500 and self.player_enemy.hp != 0:
-                self.x += -(self.x - self.player_enemy.x) * GameManager.time_elapsed
-                if (self.x == self.player_enemy.x and self.y > self.player_enemy.y):
+                if abs(our_x - x) < 5 and our_y < y:
                     self.weapon.attack(x, y)
+                else:
+                    self.x += (x - our_x)/abs(x - our_x) * GameManager.time_elapsed / 3
         else:
             GameManager.toRemove.append(self)

@@ -29,8 +29,8 @@ class Bomber(GameObject):
 
     def attack(self, x, y):
         if self.coolDown <= 0:
-            self.coolDown = 150
-            sprite = Sprite('Sprites/bomb.jpg')
+            self.coolDown = 600
+            sprite = Sprite('Sprites/bomb.png')
             starting_x = self.parent.x + self.parent.hitbox.x_size / 2
             starting_y = self.parent.y + self.parent.hitbox.y_size / 2
             attack = Bomb(starting_x, starting_y, sprite, self.parent)

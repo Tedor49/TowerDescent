@@ -61,6 +61,7 @@ class Bomb(InteractableObject):
         self.angle = 0
         self.landed = False
         self.timer = time.time()
+        self.g = 1
 
 
     def do(self, to_x, to_y):
@@ -69,12 +70,16 @@ class Bomb(InteractableObject):
     def tick(self):
         if not self.landed:
             self.dy += self.g * GameManager.time_elapsed
+            self.y += self.dy
         for i in self.hitbox.check_intersections():
-            if type(i.parent) == Ground:
+            if type(i.parent) == Ground and not self.landed:
                 self.landed = True
                 self.timer = time.time()
-                self.hitbox = Hitbox(self, 200, 200)
-                self.hitbox -= self.hitbox.x_size
-                self.hitbox -= self.hitbox.y_size
-
+                self.hitbox.x_size = 200
+                self.hitbox.y_size = 200
+                self.hitbox.x -= self.hitbox.x_size
+                self.hitbox.y -= self.hitbox.y_size
+        print(time.time() - self.timer, self.landed)
+        if time.time() - self.timer > 2:
+            GameManager.toRemove.append(self)
 

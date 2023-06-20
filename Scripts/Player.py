@@ -56,6 +56,6 @@ class Player(InteractableObject):
                     self.coyote = 100
                     self.dy = 0
             if type(i.parent) == Bomb:
-                if time.time() - i.timer == 3:
+                if time.time() - i.parent.timer == 3:
                     GameManager.toRemove.append(i)
                     self.hp -= 5
