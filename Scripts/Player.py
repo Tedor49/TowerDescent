@@ -1,8 +1,8 @@
 import pygame
-from Scripts.BaseClasses import GameManager, InteractableObject, Hitbox
-from Scripts.Weapons import Weapon
+from Scripts.BaseClasses import GameManager, InteractableObject, Hitbox, Sprite
+from Scripts.Weapons import Gun
 from Scripts.TestObjects import Ground
-from Scripts.Attacks import Attack
+from Scripts.Attacks import Bullet, CQWeapon, Bomb
 import time
 
 
@@ -10,11 +10,11 @@ class Player(InteractableObject):
     def __init__(self, x, y, sprite, dx=0, dy=0, g=0.002):
         super().__init__(x, y, sprite, dx, dy, g)
         self.hp = 1000
-        self.weapon = Weapon(self, x, y)
+        self.hitbox = Hitbox(self, 200, 200)
+        self.weapon = Gun(self, x, y)
         self.coyote = 0
         self.prev_jump_pressed = False
         self.climb_height = 7
-        self.hitbox = Hitbox(self, 200, 200)
         self.last_attack = time.time() - 1
 
     def tick(self):
@@ -23,8 +23,7 @@ class Player(InteractableObject):
         self.x += dx * (keys[pygame.K_d] - keys[pygame.K_a]) * GameManager.time_elapsed
         if pygame.mouse.get_pressed()[0]:
             x, y = pygame.mouse.get_pos()
-            self.weapon.shoot(x, y)
-
+            self.weapon.attack(x, y)
         if keys[pygame.K_w] and not self.prev_jump_pressed and self.coyote > 0:
             self.dy = -0.5
         else:
@@ -39,7 +38,7 @@ class Player(InteractableObject):
         self.coyote -= GameManager.time_elapsed
 
         for i in self.hitbox.check_intersections():
-            if type(i.parent) == Attack and time.time() - self.last_attack >= 1:
+            if type(i.parent) == Bullet and time.time() - self.last_attack >= 1:
                 self.hp -= i.parent.damage
                 self.last_attack = time.time()
                 if self.hp == 0:
@@ -56,3 +55,7 @@ class Player(InteractableObject):
                 if climbed < self.climb_height:
                     self.coyote = 100
                     self.dy = 0
+            if type(i.parent) == Bomb:
+                if time.time() - i.timer == 3:
+                    GameManager.toRemove.append(i)
+                    self.hp -= 5

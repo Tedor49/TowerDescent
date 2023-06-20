@@ -1,6 +1,7 @@
 from Scripts.BaseClasses import *
-from Scripts.Weapons import Weapon
-from Scripts.Attacks import Attack
+from Scripts.Weapons import Gun, Bomber
+from Scripts.Attacks import Bullet, CQWeapon
+import time
 
 
 class Enemy(InteractableObject):
@@ -14,8 +15,9 @@ class Enemy(InteractableObject):
 class FlyingGuy(Enemy):
     def __init__(self, x, y, sprite, player_enemy, dx=0, dy=0, g=0.000):
         super().__init__(x, y, sprite, player_enemy, dx, dy, g)
-        self.weapon = Weapon(self, x, y)
+        self.weapon = Gun(self, x, y)
         self.hitbox = Hitbox(self, 100, 100)
+        self.last_attack = time.time() - 1
 
     def tick(self):
         if self.hp > 0:
@@ -30,9 +32,38 @@ class FlyingGuy(Enemy):
                 self.dy = vector[1] / 3
                 self.x += self.dx * GameManager.time_elapsed
                 self.y += self.dy * GameManager.time_elapsed
-                self.weapon.shoot(x, y)
+                self.weapon.attack(x, y)
                 for i in self.hitbox.check_intersections():
-                    if type(i.parent) == Attack and i.parent.parent != self:
+                    if type(i.parent) == Bullet and i.parent.parent != self and time.time() - self.last_attack > 0.6:
+                        self.last_attack = time.time()
+                        self.x -= 50
                         self.hp -= 1
+                    if type(i.parent) == CQWeapon and i.parent.parent != self and i.parent.ongoing and time.time() - self.last_attack > 0.6:
+                        self.last_attack = time.time()
+                        self.x += i.parent.parent.hitbox.x_sized * (self.x - i.parent.parent.getx()) / abs(self.x - i.parent.parent.getx())
+                        print(1)
+                        self.hp -= 1
+        else:
+            GameManager.toRemove.append(self)
+
+
+class SpecialFlyingGuy(Enemy):
+    def __init__(self, x, y, sprite, player_enemy, dx=0, dy=0, g=0.000):
+        super().__init__(x, y, sprite, player_enemy, dx, dy, g)
+        self.weapon = Bomber(self, x, y)
+        self.hitbox = Hitbox(self, 100, 100)
+        self.last_attack = time.time() - 1
+
+    def tick(self):
+        if self.hp > 0:
+            x = self.player_enemy.hitbox.getx() + self.player_enemy.hitbox.x_size / 2
+            y = self.player_enemy.hitbox.gety() + self.player_enemy.hitbox.y_size / 2
+            our_x = self.hitbox.getx() + self.hitbox.x_size / 2
+            our_y = self.hitbox.gety() + self.hitbox.y_size / 2
+            length = ((x - our_x) ** 2 + (y - our_y) ** 2) ** (1 / 2)
+            if length < 500 and self.player_enemy.hp != 0:
+                self.x += -(self.x - self.player_enemy.x) * GameManager.time_elapsed
+                if (self.x == self.player_enemy.x and self.y > self.player_enemy.y):
+                    self.weapon.attack(x, y)
         else:
             GameManager.toRemove.append(self)
