@@ -79,7 +79,6 @@ class Bomb(InteractableObject):
                 self.hitbox.y_size = 200
                 self.hitbox.x -= self.hitbox.x_size
                 self.hitbox.y -= self.hitbox.y_size
-        print(time.time() - self.timer, self.landed)
         if time.time() - self.timer > 2:
             GameManager.toRemove.append(self)
 
