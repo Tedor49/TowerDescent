@@ -1,18 +1,34 @@
 from Scripts.BaseClasses import *
 
+import math
+import time
 
 class Attack(InteractableObject):
     def __init__(self, x, y, sprite, parent, dx=0, dy=0):
-        global count
         super().__init__(x, y, sprite, dx, dy)
-        self.hitbox = Hitbox(self, 4, 4)
         self.parent = parent
+        self.angle = 0
+
+    def do(self, to_x, to_y):
+        pass
+
+    def tick(self):
+        pass
+
+
+class Bullet(Attack):
+    def __init__(self, x, y, sprite, parent, dx=0, dy=0):
+        super().__init__(x, y, sprite, parent, dx, dy)
+        self.hitbox = Hitbox(self, 4, 4)
         self.damage = 1
+
 
     def do(self, to_x, to_y):
         length = ((to_x - self.getx()) ** 2 + (to_y - self.gety()) ** 2) ** (1 / 2)
         vector = ((to_x - self.getx()) / length * 5, (to_y - self.gety()) / length * 5)
         self.dx, self.dy = vector
+        self.angle = math.atan2(self.dy, self.dx)
+        self.sprite.image = pygame.transform.rotate(self.sprite.image, 180-self.angle*180/math.pi)
 
     def tick(self):
         movement = ((self.x, self.y),
@@ -23,12 +39,39 @@ class Attack(InteractableObject):
             if i.parent == self.parent:
                 pass
             elif type(i.parent) == Ground:
-                movement, dxmul, dymul = i.modify_movement(movement, self.hitbox, mode="slide")
-                self.dx *= dxmul
-                self.dy *= dymul
+                movement, dx_mul, dy_mul = i.modify_movement(movement, self.hitbox, mode="bounce")
+                self.dx *= dx_mul
+                self.dy *= dy_mul
             else:
                 GameManager.toRemove.append(self)
 
         self.x = movement[1][0]
         self.y = movement[1][1]
+
+class Bomb(Attack):
+    def __init__(self, x, y, sprite, parent, dx=0, dy=0):
+        super().__init__(x, y, sprite, dx, dy)
+        self.hitbox = Hitbox(self, 4, 4)
+        self.landed = False
+        self.timer = time.time()
+        self.g = 1
+
+    def do(self, to_x, to_y):
+        pass
+
+    def tick(self):
+        if not self.landed:
+            self.dy += self.g * GameManager.time_elapsed
+            self.y += self.dy
+        for i in self.hitbox.check_intersections():
+            if type(i.parent) == Ground and not self.landed:
+                self.landed = True
+                self.timer = time.time()
+                self.hitbox.x_size = 200
+                self.hitbox.y_size = 200
+                self.hitbox.x -= self.hitbox.x_size
+                self.hitbox.y -= self.hitbox.y_size
+        if time.time() - self.timer > 2:
+            GameManager.toRemove.append(self)
+
 
