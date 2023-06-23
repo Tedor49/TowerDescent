@@ -1,7 +1,6 @@
 from Scripts.BaseClasses import GameObject, Sprite, GameManager
 from Scripts.Attacks import Bullet, Bomb
 
-
 class Gun(GameObject):
     def __init__(self, parent, x, y):
         super().__init__(x, y)

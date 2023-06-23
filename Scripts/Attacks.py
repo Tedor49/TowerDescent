@@ -1,11 +1,10 @@
 from Scripts.BaseClasses import *
-from Scripts.TestObjects import Ground
+
 import math
 import time
 
-
 class Attack(InteractableObject):
-    def __init__(self, x, y, sprite, parent, dx = 0, dy = 0):
+    def __init__(self, x, y, sprite, parent, dx=0, dy=0):
         super().__init__(x, y, sprite, dx, dy)
         self.parent = parent
         self.angle = 0
@@ -32,14 +31,22 @@ class Bullet(Attack):
         self.sprite.image = pygame.transform.rotate(self.sprite.image, 180-self.angle*180/math.pi)
 
     def tick(self):
-        self.x += self.dx * GameManager.time_elapsed
-        self.y += self.dy * GameManager.time_elapsed
-        for i in self.hitbox.check_intersections():
+        movement = ((self.x, self.y),
+                    (self.x + self.dx * GameManager.time_elapsed, self.y + self.dy * GameManager.time_elapsed))
+
+        for i in self.hitbox.check_intersections(movement):
+            # print(i.parent)
             if i.parent == self.parent:
                 pass
-            elif i.parent != self.parent:
+            elif type(i.parent) == Ground:
+                movement, dx_mul, dy_mul = i.modify_movement(movement, self.hitbox, mode="bounce")
+                self.dx *= dx_mul
+                self.dy *= dy_mul
+            else:
                 GameManager.toRemove.append(self)
 
+        self.x = movement[1][0]
+        self.y = movement[1][1]
 
 class Bomb(Attack):
     def __init__(self, x, y, sprite, parent, dx=0, dy=0):
@@ -66,4 +73,5 @@ class Bomb(Attack):
                 self.hitbox.y -= self.hitbox.y_size
         if time.time() - self.timer > 2:
             GameManager.toRemove.append(self)
+
 
