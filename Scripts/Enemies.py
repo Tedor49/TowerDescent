@@ -1,6 +1,6 @@
-from TowerDescent.Scripts.BaseClasses import *
-from TowerDescent.Scripts.Weapons import Weapon
-from TowerDescent.Scripts.Attacks import Attack
+from Scripts.BaseClasses import *
+from Scripts.Weapons import Weapon
+from Scripts.Attacks import Attack
 
 class Enemy(InteractableObject):
     def __init__(self, x, y, sprite, player_enemy, dx=0, dy=0, g=0.000):
