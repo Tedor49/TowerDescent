@@ -1,9 +1,9 @@
-import pygame
 from Scripts.BaseClasses import *
 from Scripts.Weapons import Gun
 from Scripts.TestObjects import Ground
-from Scripts.Attacks import Bullet, CQWeapon, Bomb
+from Scripts.Attacks import Bullet, Bomb
 import time
+
 
 class Player(InteractableObject):
     def __init__(self, x, y, sprite, dx=0, dy=0, g=0.002):
@@ -35,10 +35,6 @@ class Player(InteractableObject):
             self.prev_jump_pressed = False
 
         self.coyote -= GameManager.time_elapsed
-
-
-        for i in self.hitbox.check_intersections():
-            
 
         movement = [[self.x, self.y],
                     [self.x + self.x_speed * (keys[pygame.K_d] - keys[pygame.K_a]) * GameManager.time_elapsed,

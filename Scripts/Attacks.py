@@ -3,6 +3,7 @@ from Scripts.BaseClasses import *
 import math
 import time
 
+
 class Attack(InteractableObject):
     def __init__(self, x, y, sprite, parent, dx=0, dy=0):
         super().__init__(x, y, sprite, dx, dy)
@@ -21,7 +22,6 @@ class Bullet(Attack):
         super().__init__(x, y, sprite, parent, dx, dy)
         self.hitbox = Hitbox(self, 4, 4)
         self.damage = 1
-
 
     def do(self, to_x, to_y):
         length = ((to_x - self.getx()) ** 2 + (to_y - self.gety()) ** 2) ** (1 / 2)
@@ -48,6 +48,7 @@ class Bullet(Attack):
         self.x = movement[1][0]
         self.y = movement[1][1]
 
+
 class Bomb(Attack):
     def __init__(self, x, y, sprite, parent, dx=0, dy=0):
         super().__init__(x, y, sprite, dx, dy)
@@ -73,5 +74,3 @@ class Bomb(Attack):
                 self.hitbox.y -= self.hitbox.y_size
         if time.time() - self.timer > 2:
             GameManager.toRemove.append(self)
-
-
