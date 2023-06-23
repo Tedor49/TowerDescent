@@ -1,5 +1,5 @@
-from TowerDescent.Scripts.BaseClasses import GameObject, Sprite, GameManager
-from TowerDescent.Scripts.Attacks import Attack
+from Scripts.BaseClasses import GameObject, Sprite, GameManager
+from Scripts.Attacks import Attack
 
 
 class Weapon(GameObject):
