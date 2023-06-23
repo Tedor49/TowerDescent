@@ -42,6 +42,7 @@ class Hitbox(GameObject):
     def modify_movement(self, movement, hbox, mode="stop"):
         if mode == "pass":
             return movement
+
         def vec(p1, p2):
             return p2[0] - p1[0], p2[1] - p1[1]
 
@@ -55,8 +56,7 @@ class Hitbox(GameObject):
 
         def intersect_lines(a1, b1, c1, a2, b2, c2):
             denominator = (a1 * b2 - a2 * b1)
-            return [(b1 * c2 - b2 * c1) / denominator,
-                (a2 * c1 - a1 * c2) / denominator]
+            return [(b1 * c2 - b2 * c1) / denominator, (a2 * c1 - a1 * c2) / denominator]
 
         def intersect_segments(seg1, seg2):
             if cross(*vec(seg1[0], seg1[1]), *vec(seg1[0], seg2[0])) * \
@@ -95,13 +95,13 @@ class Hitbox(GameObject):
             elif movvec_y < 0:
                 selsides.append("BOTTOM")
 
-            for side in selsides:
-                if intersect_segments(sides[side], segment):
-                    intersections.append([side, intersect_segments(sides[side], segment)])
-                    if side in ["TOP", "BOTTOM"]:
-                        intersections[-1][1][1] = sides[side][0][1]
+            for s in selsides:
+                if intersect_segments(sides[s], segment):
+                    intersections.append([s, intersect_segments(sides[s], segment)])
+                    if s in ["TOP", "BOTTOM"]:
+                        intersections[-1][1][1] = sides[s][0][1]
                     else:
-                        intersections[-1][1][0] = sides[side][0][0]
+                        intersections[-1][1][0] = sides[s][0][0]
 
             if not intersections:
                 return None
@@ -146,8 +146,6 @@ class Hitbox(GameObject):
         if mode == "stop":
             return movement[0], best_ray_endpoint
 
-        residual = (best_ray_endpoint, movement[1])
-
         if mode == "slide":
             dx_mul = 1
             dy_mul = 1
@@ -189,7 +187,8 @@ class Sprite(GameObject):
         super().__init__(x, y)
         self.parent = parent
         picture = pygame.image.load(image)
-        self.image = pygame.transform.scale(picture, (int(picture.get_size()[0] * stretch_x), int(picture.get_size()[1] * stretch_y)))
+        self.image = pygame.transform.scale(picture, (int(picture.get_size()[0] * stretch_x),
+                                                      int(picture.get_size()[1] * stretch_y)))
 
     def getx(self):
         return self.parent.getx() + self.x + GameManager.camera.getx()
@@ -283,8 +282,8 @@ class GameManager:
             GameManager.time_elapsed = 0
             self.update()
 
-
-    def update(self):
+    @staticmethod
+    def update():
         for i in GameManager.toAdd:
             GameManager.all_Sprites.add(i.sprite)
             GameManager.all_Hitboxes.add(i.hitbox)

@@ -1,6 +1,7 @@
 from Scripts.BaseClasses import *
 from Scripts.Weapons import Gun, Bomber
-from Scripts.Attacks import Bullet, CQWeapon
+from Scripts.Attacks import Bullet
+from Scripts.Weapons import CQWeapon
 import time
 
 
@@ -18,6 +19,7 @@ class FlyingGuy(Enemy):
         self.weapon = Gun(self, x, y)
         self.hitbox = Hitbox(self, 100, 100)
         self.last_attack = time.time() - 1
+
     def tick(self):
         if self.hp > 0:
             x = self.player_enemy.hitbox.getx() + self.player_enemy.hitbox.x_size / 2
@@ -37,10 +39,11 @@ class FlyingGuy(Enemy):
                         self.last_attack = time.time()
                         self.x -= 50
                         self.hp -= 1
-                    if type(i.parent) == CQWeapon and i.parent.parent != self and i.parent.ongoing and time.time() - self.last_attack > 0.6:
+                    if type(i.parent) == CQWeapon and i.parent.parent != self and \
+                            i.parent.ongoing and time.time() - self.last_attack > 0.6:
                         self.last_attack = time.time()
-                        self.x += i.parent.parent.hitbox.x_sized * (self.x - i.parent.parent.getx()) / abs(self.x - i.parent.parent.getx())
-                        print(1)
+                        self.x += i.parent.parent.hitbox.x_sized * \
+                            (self.x - i.parent.parent.getx()) / abs(self.x - i.parent.parent.getx())
                         self.hp -= 1
         else:
             GameManager.toRemove.append(self)
@@ -52,6 +55,7 @@ class SpecialFlyingGuy(Enemy):
         self.weapon = Bomber(self, x, y)
         self.hitbox = Hitbox(self, 100, 100)
         self.last_attack = time.time() - 1
+
     def tick(self):
         if self.hp > 0:
             x = self.player_enemy.hitbox.getx() + self.player_enemy.hitbox.x_size / 2
@@ -63,6 +67,6 @@ class SpecialFlyingGuy(Enemy):
                 if abs(our_x - x) < 5 and our_y < y:
                     self.weapon.attack(x, y)
                 else:
-                    self.x += (x - our_x)/abs(x - our_x) * GameManager.time_elapsed / 3
+                    self.x += (x - our_x) / abs(x - our_x) * GameManager.time_elapsed / 3
         else:
             GameManager.toRemove.append(self)

@@ -1,5 +1,6 @@
-from Scripts.BaseClasses import GameObject, Sprite, GameManager
+from Scripts.BaseClasses import *
 from Scripts.Attacks import Bullet, Bomb
+
 
 class Gun(GameObject):
     def __init__(self, parent, x, y):
@@ -48,7 +49,7 @@ class CQWeapon(InteractableObject):
         self.angle = 0
         self.ongoing = False
 
-    def attack(self, *args):
+    def attack(self):
         if not self.ongoing:
             self.ongoing = True
 
