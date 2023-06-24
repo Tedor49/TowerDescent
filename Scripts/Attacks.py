@@ -4,19 +4,6 @@ import math
 import time
 
 
-class Attack(InteractableObject):
-    def __init__(self, x, y, sprite, parent, dx=0, dy=0):
-        super().__init__(x, y, sprite, dx, dy)
-        self.parent = parent
-        self.angle = 0
-
-    def do(self, to_x, to_y):
-        pass
-
-    def tick(self):
-        pass
-
-
 class Bullet(Attack):
     def __init__(self, x, y, sprite, parent, dx=0, dy=0):
         super().__init__(x, y, sprite, parent, dx, dy)
@@ -47,6 +34,9 @@ class Bullet(Attack):
 
         self.x = movement[1][0]
         self.y = movement[1][1]
+
+        if (0 < self.x < 700) and (0 < self.y < 200):
+            GameManager.toRemove.append(self)
 
 
 class Bomb(Attack):
