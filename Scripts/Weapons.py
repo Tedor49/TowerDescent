@@ -14,7 +14,7 @@ class Gun(GameObject):
             sprite = Sprite('Sprites/bullet1.jpg')
             starting_x = self.parent.x + self.parent.hitbox.x_size / 2
             starting_y = self.parent.y + self.parent.hitbox.y_size / 2
-            attack = Bullet(starting_x, starting_y, sprite, self.parent)
+            attack = Bullet(starting_x, starting_y, sprite, Hitbox(4, 4), self.parent)
             sprite.parent = attack
             attack.do(x, y)
         else:
