@@ -6,18 +6,17 @@ import time
 
 
 class Enemy(InteractableObject):
-    def __init__(self, x, y, sprite, player_enemy, dx=0, dy=0, g=0.000):
-        super().__init__(x, y, sprite, dx, dy, g)
+    def __init__(self, x, y, sprite, hitbox, player_enemy, dx=0, dy=0, g=0.000):
+        super().__init__(x, y, sprite, hitbox, dx, dy, g)
         self.hp = 5
         self.touching_ground = False
         self.player_enemy = player_enemy
 
 
 class FlyingGuy(Enemy):
-    def __init__(self, x, y, sprite, player_enemy, dx=0, dy=0, g=0.000):
-        super().__init__(x, y, sprite, player_enemy, dx, dy, g)
+    def __init__(self, x, y, sprite, hitbox, player_enemy, dx=0, dy=0, g=0.000):
+        super().__init__(x, y, sprite, hitbox, player_enemy, dx, dy, g)
         self.weapon = Gun(self, x, y)
-        self.hitbox = Hitbox(self, 100, 100)
         self.last_attack = time.time() - 1
 
     def tick(self):
@@ -42,7 +41,7 @@ class FlyingGuy(Enemy):
                     if type(i.parent) == CQWeapon and i.parent.parent != self and \
                             i.parent.ongoing and time.time() - self.last_attack > 0.6:
                         self.last_attack = time.time()
-                        self.x += i.parent.parent.hitbox.x_sized * \
+                        self.x += i.parent.parent.hitbox.x_size * \
                             (self.x - i.parent.parent.getx()) / abs(self.x - i.parent.parent.getx())
                         self.hp -= 1
         else:

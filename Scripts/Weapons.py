@@ -14,7 +14,7 @@ class Gun(GameObject):
             sprite = Sprite('Sprites/bullet1.jpg')
             starting_x = self.parent.x + self.parent.hitbox.x_size / 2
             starting_y = self.parent.y + self.parent.hitbox.y_size / 2
-            attack = Bullet(starting_x, starting_y, sprite, self.parent)
+            attack = Bullet(starting_x, starting_y, sprite, Hitbox(4, 4), self.parent)
             sprite.parent = attack
             attack.do(x, y)
         else:
@@ -42,14 +42,13 @@ class Bomber(GameObject):
 
 class CQWeapon(InteractableObject):
     def __init__(self, x, y, sprite, parent, dx=0, dy=0):
-        super().__init__(x, y, sprite, dx, dy)
         self.parent = parent
-        self.hitbox = Hitbox(self, self.parent.hitbox.x_size*0.75, self.parent.hitbox.y_size*0.75, 4)
+        super().__init__(x, y, sprite, Hitbox(self.parent.hitbox.x_size*0.75, self.parent.hitbox.y_size*0.75, 4))
         self.damage = 1
         self.angle = 0
         self.ongoing = False
 
-    def attack(self):
+    def attack(self,x, y):
         if not self.ongoing:
             self.ongoing = True
 
