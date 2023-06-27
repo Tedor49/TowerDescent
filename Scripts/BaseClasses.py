@@ -192,9 +192,10 @@ class Hitbox(GameObject):
 
 
 class Sprite(GameObject):
-    def __init__(self, image, stretch_x=1, stretch_y=1, x=0, y=0, parent=None):
+    def __init__(self, image, stretch_x=1, stretch_y=1, z=1, x=0, y=0, parent=None):
         super().__init__(x, y)
         self.parent = parent
+        self.z = z
         picture = pygame.image.load(image)
         self.image = pygame.transform.scale(picture, (int(picture.get_size()[0] * stretch_x),
                                                       int(picture.get_size()[1] * stretch_y)))
@@ -297,14 +298,13 @@ class GameManager:
 
             for i in GameManager.all_Objects:
                 i.tick()
-            for i in GameManager.all_Sprites:
+            for i in sorted(GameManager.all_Sprites, key=lambda x: x.z):
                 i.draw()
             pygame.display.flip()
             GameManager.time_elapsed = 0
             self.update()
 
-    @staticmethod
-    def update():
+    def update(self):
         for i in GameManager.toAdd:
             i.add_to_manager()
         for i in GameManager.toRemove:

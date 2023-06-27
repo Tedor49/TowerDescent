@@ -4,7 +4,7 @@ from Scripts.TestObjects import TargetObject
 from Scripts.Enemies import FlyingGuy, SpecialFlyingGuy
 
 #bg
-InteractableObject(0, 0, Sprite("Sprites/test_room.png"))
+InteractableObject(0, 0, Sprite("Sprites/test_room.png", z=-1))
 
 #walls
 Ground(0, 0, 30, 720)
