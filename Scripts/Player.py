@@ -55,6 +55,8 @@ class Player(InteractableObject):
                 if time.time() - i.parent.timer == 3:
                     GameManager.toRemove.append(i)
                     self.hp -= 5
+            if type(i.parent) == Door:
+                i.parent.use()
 
         self.x = movement[1][0]
         self.y = movement[1][1]

@@ -1,3 +1,5 @@
+import time
+
 import pygame
 
 
@@ -249,6 +251,20 @@ class InteractableObject(GameObject):
             GameManager.all_Hitboxes.remove(self.hitbox)
         if self.sprite:
             GameManager.all_Sprites.remove(self.sprite)
+            
+class Attack(InteractableObject):
+    def __init__(self, x, y, sprite, parent, dx=0, dy=0):
+        super().__init__(x, y, sprite, dx, dy)
+        self.parent = parent
+        self.angle = 0
+        GameManager.toAdd.append(self)
+
+
+    def do(self, to_x, to_y):
+        pass
+
+    def tick(self):
+        pass
 
 
 class Camera(GameObject):
@@ -263,26 +279,28 @@ class Camera(GameObject):
 class GameManager:
     toAdd = []
     toRemove = []
-    all_Hitboxes = set()
-    all_Objects = set()
-    all_Sprites = set()
     screen = None
     clock = None
     player = None
     camera = None
     time_elapsed = 0
     tps = 120
+    currentRoom = None
+    all_Hitboxes = set()
+    all_Objects = set()
+    all_Sprites = set()
 
-    def __init__(self):
+    def __init__(self, StartingRoom):
         pygame.init()
         size = [960, 720]
         GameManager.screen = pygame.display.set_mode(size)
         pygame.display.set_caption('Tower Descent')
         GameManager.clock = pygame.time.Clock()
-
+        GameManager.currentRoom = StartingRoom
         self.update()
 
         running = True
+        StartingRoom.enter(GameManager.player.x, GameManager.player.y)
         while running:
             GameManager.clock.tick()
             for event in pygame.event.get():
@@ -292,7 +310,6 @@ class GameManager:
             if GameManager.time_elapsed < 1000 / GameManager.tps:
                 continue
             GameManager.screen.fill((255, 255, 255))
-
             for i in GameManager.all_Objects:
                 i.tick()
             for i in sorted(GameManager.all_Sprites, key=lambda x: x.z):
@@ -301,14 +318,54 @@ class GameManager:
             GameManager.time_elapsed = 0
             self.update()
 
-    def update(self):
-        for i in GameManager.toAdd:
-            i.add_to_manager()
+    @staticmethod
+    def update():
         for i in GameManager.toRemove:
-            if i in GameManager.all_Objects:
-                i.delete()
-        GameManager.toAdd = []
+            i.delete()
         GameManager.toRemove = []
+        for i in GameManager.toAdd:
+            GameManager.all_Sprites.add(i.sprite)
+            GameManager.all_Hitboxes.add(i.hitbox)
+            GameManager.all_Objects.add(i)
+            GameManager.currentRoom.filling.append(i)
+        if len(GameManager.toAdd) > 0:
+            print(GameManager.all_Objects)
+        GameManager.toAdd = []
+
+
+class Room:
+    def __init__(self, filling):
+        self.filling = filling
+
+    def enter(self, x, y):
+        GameManager.player.x = x
+        GameManager.player.y = y
+        self.filling.append(GameManager.player)
+        for i in self.filling:
+            GameManager.toAdd.append(i)
+
+    def quit(self):
+        for i in GameManager.all_Objects:
+            if isinstance(i, Attack):
+                if i in self.filling:
+                    self.filling.remove(i)
+            GameManager.toRemove.append(i)
+
+
+class Door(InteractableObject):
+    def __init__(self, x, y, sprite, from1, to1, toDoor, dx=0, dy=0, g=5):
+        super().__init__(x, y, sprite, dx, dy, g)
+        self.hitbox = Hitbox(self, 200, 200)
+        self.from1 = from1
+        self.toDoor = toDoor
+        self.to1 = to1
+        self.timer = time.time() - 3
+
+    def use(self):
+        if time.time() - self.timer > 3:
+            self.from1.quit()
+            self.to1.enter(self.toDoor.x, self.toDoor.y)
+            self.toDoor.timer = time.time()
 
 
 class Ground(InteractableObject):

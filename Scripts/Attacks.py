@@ -3,20 +3,6 @@ from Scripts.BaseClasses import *
 import math
 import time
 
-
-class Attack(InteractableObject):
-    def __init__(self, x, y, sprite, hitbox, parent, dx=0, dy=0):
-        super().__init__(x, y, sprite, hitbox, dx, dy)
-        self.parent = parent
-        self.angle = 0
-
-    def do(self, to_x, to_y):
-        pass
-
-    def tick(self):
-        pass
-
-
 class Bullet(Attack):
     def __init__(self, x, y, sprite, hitbox, parent, dx=0, dy=0):
         super().__init__(x, y, sprite, hitbox, parent, dx, dy)
@@ -46,13 +32,10 @@ class Bullet(Attack):
         self.x = movement[1][0]
         self.y = movement[1][1]
 
-        if not 0 < self.x < 960:
+        if not 0 < self.x < 960 or not 0 < self.y < 720:
             if self not in GameManager.toRemove:
                 GameManager.toRemove.append(self)
 
-        if not 0 < self.y < 720:
-            if self not in GameManager.toRemove:
-                GameManager.toRemove.append(self)
 
 
 class Bomb(Attack):
