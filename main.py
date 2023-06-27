@@ -24,7 +24,7 @@ Player1 = Player(60, 100, Sprite('Sprites/playernew.png'), Hitbox(50, 50))
 GameManager.player = Player1
 cam = Camera()
 GameManager.camera = cam
-#enemy = FlyingGuy(400, 100, Sprite('Sprites/player.png', 0.5, 0.5), Player1)
+enemy = FlyingGuy(700, 100, Sprite('Sprites/playernew.png'), Hitbox(50, 50), Player1)
 
 
 GameManager()

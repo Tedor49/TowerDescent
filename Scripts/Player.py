@@ -1,5 +1,5 @@
 from Scripts.BaseClasses import *
-from Scripts.Weapons import Gun
+from Scripts.Weapons import *
 from Scripts.TestObjects import Ground
 from Scripts.Attacks import Bullet, Bomb
 import time
@@ -18,7 +18,6 @@ class Player(InteractableObject):
         self.x_speed = 1
 
     def tick(self):
-
         keys = pygame.key.get_pressed()
 
         if pygame.mouse.get_pressed()[0]:

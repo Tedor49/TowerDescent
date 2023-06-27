@@ -98,7 +98,6 @@ class Hitbox(GameObject):
 
             for s in selsides:
                 if intersect_segments(sides[s], segment):
-                    print(sides[s], segment)
                     intersections.append([s, intersect_segments(sides[s], segment)])
                     if s == "TOP":
                         intersections[-1][1][1] = sides[s][0][1] - self.epsilon
@@ -138,13 +137,10 @@ class Hitbox(GameObject):
 
         connected_rays = []
 
-        print(movement)
-
         for i in range(len(rays)):
             intersection = ray_intersect(rays[i][0])
             if intersection:
                 connected_rays.append((intersection, rays[i]))
-                print(connected_rays[-1])
 
         if not connected_rays:
             return movement, 1, 1
@@ -281,6 +277,7 @@ class GameManager:
         pygame.init()
         size = [960, 720]
         GameManager.screen = pygame.display.set_mode(size)
+        pygame.display.set_caption('Tower Descent')
         GameManager.clock = pygame.time.Clock()
 
         self.update()
