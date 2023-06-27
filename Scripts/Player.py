@@ -1,15 +1,14 @@
 from Scripts.BaseClasses import *
-from Scripts.Weapons import Gun
+from Scripts.Weapons import *
 from Scripts.TestObjects import Ground
 from Scripts.Attacks import Bullet, Bomb
 import time
 
 
 class Player(InteractableObject):
-    def __init__(self, x, y, sprite, dx=0, dy=0, g=0.002):
-        super().__init__(x, y, sprite, dx, dy, g)
+    def __init__(self, x, y, sprite, hitbox, dx=0, dy=0, g=0.002):
+        super().__init__(x, y, sprite, hitbox, dx, dy, g)
         self.hp = 1000
-        self.hitbox = Hitbox(self, 200, 200)
         self.weapon = Gun(self, x, y)
         self.coyote = 0
         self.prev_jump_pressed = False
@@ -25,7 +24,7 @@ class Player(InteractableObject):
             x, y = pygame.mouse.get_pos()
             self.weapon.attack(x, y)
         if keys[pygame.K_w] and not self.prev_jump_pressed and self.coyote > 0:
-            self.dy = -0.5
+            self.dy = -0.8
         else:
             self.dy += self.g * GameManager.time_elapsed
 

@@ -3,11 +3,9 @@ from Scripts.BaseClasses import *
 import math
 import time
 
-
 class Bullet(Attack):
-    def __init__(self, x, y, sprite, parent, dx=0, dy=0):
-        super().__init__(x, y, sprite, parent, dx, dy)
-        self.hitbox = Hitbox(self, 4, 4)
+    def __init__(self, x, y, sprite, hitbox, parent, dx=0, dy=0):
+        super().__init__(x, y, sprite, hitbox, parent, dx, dy)
         self.damage = 1
 
     def do(self, to_x, to_y):
@@ -22,21 +20,22 @@ class Bullet(Attack):
                     (self.x + self.dx * GameManager.time_elapsed, self.y + self.dy * GameManager.time_elapsed))
 
         for i in self.hitbox.check_intersections(movement):
-            # print(i.parent)
             if i.parent == self.parent:
                 pass
-            elif type(i.parent) == Ground:
-                movement, dx_mul, dy_mul = i.modify_movement(movement, self.hitbox, mode="bounce")
-                self.dx *= dx_mul
-                self.dy *= dy_mul
+            # funny bouncing bullets
+            # elif type(i.parent) == Ground:
+            #     movement, dx_mul, dy_mul = i.modify_movement(movement, self.hitbox, mode="bounce")
+            #     self.dx *= dx_mul
+            #     self.dy *= dy_mul
             else:
                 GameManager.toRemove.append(self)
-
         self.x = movement[1][0]
         self.y = movement[1][1]
 
-        if (0 < self.x < 700) and (0 < self.y < 200):
-            GameManager.toRemove.append(self)
+        if not 0 < self.x < 960 or not 0 < self.y < 720:
+            if self not in GameManager.toRemove:
+                GameManager.toRemove.append(self)
+
 
 
 class Bomb(Attack):

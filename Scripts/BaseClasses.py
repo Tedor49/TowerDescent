@@ -19,12 +19,13 @@ class GameObject:
 
 
 class Hitbox(GameObject):
-    def __init__(self, parent, x_size, y_size, x=0, y=0):
+    def __init__(self, x_size, y_size, x=0, y=0, parent=None):
         super().__init__(x, y)
+        self.parent = parent
         self.x_size = x_size
         self.y_size = y_size
-        self.parent = parent
         self.ray_quality = 1
+        self.epsilon = 0.000001
 
     def getx(self):
         return self.parent.getx() + self.x
@@ -100,10 +101,14 @@ class Hitbox(GameObject):
             for s in selsides:
                 if intersect_segments(sides[s], segment):
                     intersections.append([s, intersect_segments(sides[s], segment)])
-                    if s in ["TOP", "BOTTOM"]:
-                        intersections[-1][1][1] = sides[s][0][1]
+                    if s == "TOP":
+                        intersections[-1][1][1] = sides[s][0][1] - self.epsilon
+                    elif s == "BOTTOM":
+                        intersections[-1][1][1] = sides[s][0][1] + self.epsilon
+                    elif s == "LEFT":
+                        intersections[-1][1][0] = sides[s][0][0] - self.epsilon
                     else:
-                        intersections[-1][1][0] = sides[s][0][0]
+                        intersections[-1][1][0] = sides[s][0][0] + self.epsilon
 
             if not intersections:
                 return None
@@ -185,9 +190,10 @@ class Hitbox(GameObject):
 
 
 class Sprite(GameObject):
-    def __init__(self, image, stretch_x=1, stretch_y=1, x=0, y=0, parent=None):
+    def __init__(self, image, stretch_x=1, stretch_y=1, z=1, x=0, y=0, parent=None):
         super().__init__(x, y)
         self.parent = parent
+        self.z = z
         picture = pygame.image.load(image)
         self.image = pygame.transform.scale(picture, (int(picture.get_size()[0] * stretch_x),
                                                       int(picture.get_size()[1] * stretch_y)))
@@ -203,14 +209,18 @@ class Sprite(GameObject):
 
 
 class InteractableObject(GameObject):
-    def __init__(self, x, y, sprite, dx=0, dy=0, g=5):
+    def __init__(self, x, y, sprite=None, hitbox=None, dx=0, dy=0, g=5):
         super().__init__(x, y)
         self.dx = dx
         self.dy = dy
         self.g = g
         self.sprite = sprite
-        sprite.parent = self
-        self.hitbox = None
+        if sprite:
+            self.sprite.parent = self
+        self.hitbox = hitbox
+        if hitbox:
+            self.hitbox.parent = self
+        GameManager.toAdd.append(self)
 
     def tick(self):
         self.x += self.dx * GameManager.time_elapsed
@@ -228,13 +238,20 @@ class InteractableObject(GameObject):
     def gety(self):
         return self.y
 
+    def add_to_manager(self):
+        GameManager.all_Objects.add(self)
+        if self.hitbox:
+            GameManager.all_Hitboxes.add(self.hitbox)
+        if self.sprite:
+            GameManager.all_Sprites.add(self.sprite)
+
     def delete(self):
         GameManager.all_Objects.remove(self)
-        GameManager.all_Sprites.remove(self.sprite)
-        GameManager.all_Hitboxes.remove(self.hitbox)
-        GameManager.currentRoom.filling.remove(self)
-
-
+        if self.hitbox:
+            GameManager.all_Hitboxes.remove(self.hitbox)
+        if self.sprite:
+            GameManager.all_Sprites.remove(self.sprite)
+            
 class Attack(InteractableObject):
     def __init__(self, x, y, sprite, parent, dx=0, dy=0):
         super().__init__(x, y, sprite, dx, dy)
@@ -248,7 +265,6 @@ class Attack(InteractableObject):
 
     def tick(self):
         pass
-
 
 
 class Camera(GameObject):
@@ -276,8 +292,9 @@ class GameManager:
 
     def __init__(self, StartingRoom):
         pygame.init()
-        size = [700, 700]
+        size = [960, 720]
         GameManager.screen = pygame.display.set_mode(size)
+        pygame.display.set_caption('Tower Descent')
         GameManager.clock = pygame.time.Clock()
         GameManager.currentRoom = StartingRoom
         self.update()
@@ -295,12 +312,11 @@ class GameManager:
             GameManager.screen.fill((255, 255, 255))
             for i in GameManager.all_Objects:
                 i.tick()
-            for i in GameManager.all_Sprites:
+            for i in sorted(GameManager.all_Sprites, key=lambda x: x.z):
                 i.draw()
             pygame.display.flip()
             GameManager.time_elapsed = 0
             self.update()
-
 
     @staticmethod
     def update():
@@ -352,8 +368,6 @@ class Door(InteractableObject):
             self.toDoor.timer = time.time()
 
 
-
 class Ground(InteractableObject):
-    def __init__(self, x, y, sprite, dx=0, dy=0, g=5):
-        super().__init__(x, y, sprite, dx, dy, g)
-        self.hitbox = Hitbox(self, 400, 200)
+    def __init__(self, x, y, x_size, y_size, sprite=None, dx=0, dy=0, g=5):
+        super().__init__(x, y, sprite, Hitbox(x_size, y_size), dx, dy, g)
