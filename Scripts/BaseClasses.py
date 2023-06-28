@@ -410,7 +410,6 @@ class LevelGenerator:
                 if self.map[y][x] != None:
                     self.connect(x, y)
 
-
     def generateLevel(self, x, y):
         if 0 <= x <= 6 and 0 <= y <= 6 and self.map[x][y] == None and self.id < self.maxLVL:
             self.map[x][y] = self.id
