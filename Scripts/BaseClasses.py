@@ -1,5 +1,5 @@
 import time
-
+import random
 import pygame
 
 
@@ -220,7 +220,6 @@ class InteractableObject(GameObject):
         self.hitbox = hitbox
         if hitbox:
             self.hitbox.parent = self
-        GameManager.toAdd.append(self)
 
     def tick(self):
         self.x += self.dx * GameManager.time_elapsed
@@ -246,11 +245,12 @@ class InteractableObject(GameObject):
             GameManager.all_Sprites.add(self.sprite)
 
     def delete(self):
-        GameManager.all_Objects.remove(self)
-        if self.hitbox:
-            GameManager.all_Hitboxes.remove(self.hitbox)
-        if self.sprite:
-            GameManager.all_Sprites.remove(self.sprite)
+        if self in GameManager.all_Objects:
+            GameManager.all_Objects.remove(self)
+            if self.hitbox:
+                GameManager.all_Hitboxes.remove(self.hitbox)
+            if self.sprite:
+                GameManager.all_Sprites.remove(self.sprite)
 
 
 class Attack(InteractableObject):
@@ -290,7 +290,7 @@ class GameManager:
     all_Hitboxes = set()
     all_Objects = set()
     all_Sprites = set()
-
+    Rooms = []
     def __init__(self, StartingRoom):
         pygame.init()
         size = [960, 720]
@@ -312,7 +312,6 @@ class GameManager:
                 continue
             GameManager.screen.fill((255, 255, 255))
             for i in GameManager.all_Objects:
-                print(i)
                 i.tick()
             for i in sorted(GameManager.all_Sprites, key=lambda x: x.z):
                 i.draw()
@@ -330,14 +329,33 @@ class GameManager:
             GameManager.currentRoom.filling.append(i)
         GameManager.toAdd = []
 
+    @staticmethod
+    def searchByID(RoomID):
+        for room in GameManager.Rooms:
+            if room.id == RoomID:
+                return room
+        return None
+
 
 class Room:
-    def __init__(self, filling):
+    def __init__(self, filling, id):
         self.filling = filling
+        self.id = id
+        self.leftDoor = None
+        self.rightDoor = None
+        self.upDoor = None
+        self.downDoor = None
+        self.checked = False
+        self.leftChecked = False
+        self.rightChecked = False
+        self.upChecked = False
+        self.downChecked = False
+        self.filling.append(InteractableObject(0, 0, Sprite("Sprites/test_room.png", z=-2)))
 
     def enter(self, x, y):
         GameManager.player.x = x
         GameManager.player.y = y
+        GameManager.currentRoom = self
         self.filling.append(GameManager.player)
         for i in self.filling:
             GameManager.toAdd.append(i)
@@ -359,12 +377,127 @@ class Door(InteractableObject):
         self.timer = time.time() - 3
 
     def use(self):
+        print('Есть пробитие')
         if time.time() - self.timer > 3:
             self.from1.quit()
             self.to1.enter(self.toDoor.x, self.toDoor.y)
             self.toDoor.timer = time.time()
+            self.timer = time.time()
+            return True
+        return False
 
 
 class Ground(InteractableObject):
     def __init__(self, x, y, x_size, y_size, sprite=None, dx=0, dy=0, g=5):
         super().__init__(x, y, sprite, Hitbox(x_size, y_size), dx, dy, g)
+
+
+class LevelGenerator:
+    def __init__(self):
+        self.id = 0
+        self.map = [[None for i in range(7)] for i2 in range(7)]
+        random.seed(7)
+        self.maxLVL = 10
+        self.generateLevel(0, 0)
+        for i in self.map:
+            print(i)
+        for y in range(7):
+            for x in range(7):
+                if self.map[y][x] != None:
+                    self.addWallsAndDoors(x, y)
+        for y in range(7):
+            for x in range(7):
+                if self.map[y][x] != None:
+                    self.connect(x, y)
+
+
+    def generateLevel(self, x, y):
+        if 0 <= x <= 6 and 0 <= y <= 6 and self.map[x][y] == None and self.id < self.maxLVL:
+            self.map[x][y] = self.id
+            self.id += 1
+            for i in range(-1, 2):
+                for j in range(-1, 2):
+                    if random.choice([True, False]) and (i == 0 or j == 0):
+                        self.generateLevel(x + i, y + j)
+
+    def combineLeftRight(self, roomL, roomR):
+        roomL.rightDoor.toDoor = roomR.leftDoor
+        roomR.leftDoor.toDoor = roomL.rightDoor
+        roomR.leftDoor.to1 = roomL
+        roomL.rightDoor.to1 = roomR
+
+    def combineUpDown(self, roomU, roomD):
+        roomU.downDoor.toDoor = roomD.upDoor
+        roomD.upDoor.toDoor = roomU.downDoor
+        roomU.downDoor.to1 = roomD
+        roomD.upDoor.to1 = roomU
+
+    def getRoomID(self, x, y):
+        return self.map[y][x]
+
+    def addWallsAndDoors(self, x=0, y=0):
+        walls = []
+        platforms = [Ground(270, 150, 14*30, 30),
+                     Ground(270, 450, 14*30, 30),
+                     Ground(90, 300, 8*30, 30),
+                     Ground(90, 570, 8*30, 30),
+                     Ground(620, 300, 8*30, 30),
+                     Ground(620, 570, 8*30, 30)]
+        room = Room([], self.getRoomID(x, y))
+        GameManager.Rooms.append(room)
+        if self.checkRoomExistence(x - 1, y):
+            walls.append(Ground(0, 0, 30, 330))
+            walls.append(Ground(0, 390, 30, 330))
+            room.leftDoor = Door(0, 330, Sprite('Sprites/door.png', z=-1), Hitbox(60, 60), room, None, None)
+            room.filling.append(room.leftDoor)
+        else:
+            walls.append(Ground(0, 0, 30, 720))
+
+        if self.checkRoomExistence(x + 1, y):
+            walls.append(Ground(930, 0, 30, 330))
+            walls.append(Ground(930, 390, 30, 330))
+            room.rightDoor = Door(930, 330, Sprite('Sprites/door.png', z=-1), Hitbox(60, 60), room, None, None)
+            room.filling.append(room.rightDoor)
+        else:
+            walls.append(Ground(930, 0, 30, 720))
+
+        if self.checkRoomExistence(x, y - 1):
+            walls.append(Ground(0, 0, 450, 30))
+            walls.append(Ground(510, 0, 450, 30))
+            room.upDoor = Door(510, 0, Sprite('Sprites/door.png', z=-1), Hitbox(60, 60), room, None, None)
+            room.filling.append(room.upDoor)
+        else:
+            walls.append(Ground(0, 0, 960, 30))
+
+        if self.checkRoomExistence(x, y + 1):
+            walls.append(Ground(0, 690, 450, 30))
+            walls.append(Ground(510, 690, 450, 30))
+            room.downDoor = Door(510, 690, Sprite('Sprites/door.png', z=-1), Hitbox(60, 60), room, None, None)
+            room.filling.append(room.downDoor)
+        else:
+            walls.append(Ground(0, 690, 960, 30))
+        for i in walls:
+            room.filling.append(i)
+        for i in platforms:
+            room.filling.append(i)
+        return room
+
+
+    def connect(self, x=0, y=0):
+        room = GameManager.searchByID(self.getRoomID(x, y))
+        if self.checkRoomExistence(x - 1, y):
+            self.combineLeftRight(GameManager.searchByID(self.getRoomID(x - 1, y)), room)
+        if self.checkRoomExistence(x + 1, y):
+            self.combineLeftRight(room, GameManager.searchByID(self.getRoomID(x + 1, y)))
+        if self.checkRoomExistence(x, y - 1):
+            self.combineUpDown(GameManager.searchByID(self.getRoomID(x, y-1)), room)
+        if self.checkRoomExistence(x, y + 1):
+            self.combineUpDown(room, GameManager.searchByID(self.getRoomID(x, y + 1)))
+
+
+    def checkRoomExistence(self, x, y):
+        if 0 <= x <= 6 and 0 <= y <= 6:
+            if self.map[y][x] != None:
+                return True
+        return False
+
