@@ -251,10 +251,11 @@ class InteractableObject(GameObject):
             GameManager.all_Hitboxes.remove(self.hitbox)
         if self.sprite:
             GameManager.all_Sprites.remove(self.sprite)
-            
+
+
 class Attack(InteractableObject):
-    def __init__(self, x, y, sprite, parent, dx=0, dy=0):
-        super().__init__(x, y, sprite, dx, dy)
+    def __init__(self, x, y, sprite, hitbox, parent, dx=0, dy=0):
+        super().__init__(x, y, sprite, hitbox, dx, dy)
         self.parent = parent
         self.angle = 0
         GameManager.toAdd.append(self)
@@ -311,6 +312,7 @@ class GameManager:
                 continue
             GameManager.screen.fill((255, 255, 255))
             for i in GameManager.all_Objects:
+                print(i)
                 i.tick()
             for i in sorted(GameManager.all_Sprites, key=lambda x: x.z):
                 i.draw()
@@ -324,12 +326,8 @@ class GameManager:
             i.delete()
         GameManager.toRemove = []
         for i in GameManager.toAdd:
-            GameManager.all_Sprites.add(i.sprite)
-            GameManager.all_Hitboxes.add(i.hitbox)
-            GameManager.all_Objects.add(i)
+            i.add_to_manager()
             GameManager.currentRoom.filling.append(i)
-        if len(GameManager.toAdd) > 0:
-            print(GameManager.all_Objects)
         GameManager.toAdd = []
 
 
@@ -353,9 +351,8 @@ class Room:
 
 
 class Door(InteractableObject):
-    def __init__(self, x, y, sprite, from1, to1, toDoor, dx=0, dy=0, g=5):
-        super().__init__(x, y, sprite, dx, dy, g)
-        self.hitbox = Hitbox(self, 200, 200)
+    def __init__(self, x, y, sprite, hitbox, from1, to1, toDoor, dx=0, dy=0, g=5):
+        super().__init__(x, y, sprite, hitbox, dx, dy, g)
         self.from1 = from1
         self.toDoor = toDoor
         self.to1 = to1

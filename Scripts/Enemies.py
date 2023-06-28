@@ -9,7 +9,6 @@ class Enemy(InteractableObject):
     def __init__(self, x, y, sprite, hitbox, player_enemy, dx=0, dy=0, g=0.000):
         super().__init__(x, y, sprite, hitbox, dx, dy, g)
         self.hp = 5
-        self.touching_ground = False
         self.player_enemy = player_enemy
 
 
@@ -49,10 +48,9 @@ class FlyingGuy(Enemy):
 
 
 class SpecialFlyingGuy(Enemy):
-    def __init__(self, x, y, sprite, player_enemy, dx=0, dy=0, g=0.000):
-        super().__init__(x, y, sprite, player_enemy, dx, dy, g)
+    def __init__(self, x, y, sprite, hitbox, player_enemy, dx=0, dy=0, g=0.000):
+        super().__init__(x, y, sprite, hitbox, player_enemy, dx, dy, g)
         self.weapon = Bomber(self, x, y)
-        self.hitbox = Hitbox(self, 100, 100)
         self.last_attack = time.time() - 1
 
     def tick(self):

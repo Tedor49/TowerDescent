@@ -4,8 +4,8 @@ import math
 import time
 
 class Bullet(Attack):
-    def __init__(self, x, y, sprite, hitbox, parent, dx=0, dy=0):
-        super().__init__(x, y, sprite, hitbox, parent, dx, dy)
+    def __init__(self, x, y, sprite, parent, dx=0, dy=0):
+        super().__init__(x, y, sprite, Hitbox(4, 4), parent, dx, dy)
         self.damage = 1
 
     def do(self, to_x, to_y):
@@ -40,8 +40,7 @@ class Bullet(Attack):
 
 class Bomb(Attack):
     def __init__(self, x, y, sprite, parent, dx=0, dy=0):
-        super().__init__(x, y, sprite, dx, dy)
-        self.hitbox = Hitbox(self, 4, 4)
+        super().__init__(x, y, sprite, Hitbox(4, 4), dx, dy)
         self.landed = False
         self.timer = time.time()
         self.g = 1
