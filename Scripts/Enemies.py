@@ -1,48 +1,141 @@
 from Scripts.BaseClasses import *
 from Scripts.Weapons import Gun, Bomber
-from Scripts.Attacks import Bullet
-from Scripts.Weapons import CQWeapon
 import time
+import random
 
 
-class Enemy(InteractableObject):
+class Enemy(InteractableObject, Damageable):
     def __init__(self, x, y, sprite, hitbox, player_enemy, dx=0, dy=0, g=0.000):
         super().__init__(x, y, sprite, hitbox, dx, dy, g)
-        self.hp = 5
         self.player_enemy = player_enemy
+        self.hitbox.ray_quality = 2
 
 
-class FlyingGuy(Enemy):
-    def __init__(self, x, y, sprite, hitbox, player_enemy, dx=0, dy=0, g=0.000):
+class FollowFlyingMotion(InteractableObject):
+    def move(self, target):
+        if target != 0:
+            x = target.hitbox.getx() + target.hitbox.x_size / 2
+            y = target.hitbox.gety() + target.hitbox.y_size / 2
+            our_x = self.hitbox.getx() + self.hitbox.x_size / 2
+            our_y = self.hitbox.gety() + self.hitbox.y_size / 2
+            length = ((x - our_x) ** 2 + (y - our_y) ** 2) ** (1 / 2)
+            vector = ((x - our_x) / length, (y - our_y) / length)
+
+            self.dx += vector[0] / 900 * GameManager.time_elapsed
+            self.dy += vector[1] / 900 * GameManager.time_elapsed
+            self.dx *= 0.98
+            self.dy *= 0.98
+            self.x += self.dx * GameManager.time_elapsed
+            self.y += self.dy * GameManager.time_elapsed
+
+
+class FollowFlyingWallsMotion(InteractableObject):
+    def move(self, target):
+        if target != 0:
+            x = target.hitbox.getx() + target.hitbox.x_size / 2
+            y = target.hitbox.gety() + target.hitbox.y_size / 2
+            our_x = self.hitbox.getx() + self.hitbox.x_size / 2
+            our_y = self.hitbox.gety() + self.hitbox.y_size / 2
+            length = ((x - our_x) ** 2 + (y - our_y) ** 2) ** (1 / 2)
+            vector = ((x - our_x) / length, (y - our_y) / length)
+
+            self.dx += vector[0] / 500 * GameManager.time_elapsed
+            self.dy += vector[1] / 500 * GameManager.time_elapsed
+            self.dx *= 0.97
+            self.dy *= 0.97
+            movement = [[self.x, self.y],
+                        [self.x + self.dx * GameManager.time_elapsed,
+                         self.y + self.dy * GameManager.time_elapsed]]
+
+            for i in self.hitbox.check_intersections(movement):
+                if type(i.parent) == Ground:
+                    movement, dx_mul, dy_mul = i.modify_movement(movement, self.hitbox, mode="slide")
+                    self.dx *= dx_mul
+                    self.dy *= dy_mul
+
+            self.x = movement[1][0]
+            self.y = movement[1][1]
+
+def sign(x):
+    if x > 0:
+        return 1
+    elif x == 0:
+        return 0
+    return -1
+
+class FollowWalkingMotion(InteractableObject):
+    def move(self, target):
+        if target != 0:
+            x = target.hitbox.getx() + target.hitbox.x_size / 2
+            our_x = self.hitbox.getx() + self.hitbox.x_size / 2
+
+            self.dx += sign(x - our_x) / 500 * GameManager.time_elapsed
+            self.dx *= 0.9
+            self.dy += self.g * GameManager.time_elapsed
+            movement = [[self.x, self.y],
+                        [self.x + self.dx * GameManager.time_elapsed,
+                         self.y + self.dy * GameManager.time_elapsed]]
+
+            for i in self.hitbox.check_intersections(movement):
+                if type(i.parent) == Ground:
+                    movement, dx_mul, dy_mul = i.modify_movement(movement, self.hitbox, mode="slide")
+                    self.dx *= dx_mul
+                    self.dy *= dy_mul
+
+            self.x = movement[1][0]
+            self.y = movement[1][1]
+
+
+class RandomWalkingMotion(InteractableObject):
+    cooldown = 2
+    walkTime = 0
+
+    def move(self, target):
+        if self.cooldown < 0:
+            self.cooldown = 0
+            self.dx = random.choice([1, -1]) / 10
+            self.walkTime = random.randint(500, 2000)
+            movement = [[self.x, self.y],
+                        [self.x,
+                         self.y + self.dy * GameManager.time_elapsed]]
+        elif self.cooldown > 0:
+            self.cooldown -= GameManager.time_elapsed
+            movement = [[self.x, self.y],
+                        [self.x,
+                         self.y + self.dy * GameManager.time_elapsed]]
+        else:
+            self.dy += self.g * GameManager.time_elapsed
+            movement = [[self.x, self.y],
+                        [self.x + self.dx * GameManager.time_elapsed,
+                         self.y + self.dy * GameManager.time_elapsed]]
+
+            self.walkTime -= GameManager.time_elapsed
+            if self.walkTime < 0:
+                self.cooldown = random.randint(1000, 3000)
+
+        for i in self.hitbox.check_intersections(movement):
+            if type(i.parent) == Ground:
+                movement, dx_mul, dy_mul = i.modify_movement(movement, self.hitbox, mode="slide")
+                self.dx *= dx_mul
+                self.dy *= dy_mul
+
+        self.x = movement[1][0]
+        self.y = movement[1][1]
+
+
+class FlyingGuy(Enemy, RandomWalkingMotion):
+    def __init__(self, x, y, sprite, hitbox, player_enemy, dx=0, dy=0, g=0.002):
         super().__init__(x, y, sprite, hitbox, player_enemy, dx, dy, g)
-        self.weapon = Gun(self, x, y)
-        self.last_attack = time.time() - 1
+        self.weapon = Gun(self, downtime=500)
+        self.iframes = 0.1
+        self.damage = 1
 
     def tick(self):
         if self.hp > 0:
             x = self.player_enemy.hitbox.getx() + self.player_enemy.hitbox.x_size / 2
             y = self.player_enemy.hitbox.gety() + self.player_enemy.hitbox.y_size / 2
-            our_x = self.hitbox.getx() + self.hitbox.x_size / 2
-            our_y = self.hitbox.gety() + self.hitbox.y_size / 2
-            length = ((x - our_x) ** 2 + (y - our_y) ** 2) ** (1 / 2)
-            if length < 500 and self.player_enemy.hp != 0:
-                vector = ((x - our_x) / length, (y - our_y) / length)
-                self.dx = vector[0] / 3
-                self.dy = vector[1] / 3
-                self.x += self.dx * GameManager.time_elapsed
-                self.y += self.dy * GameManager.time_elapsed
-                self.weapon.attack(x, y)
-                for i in self.hitbox.check_intersections():
-                    if type(i.parent) == Bullet and i.parent.parent != self and time.time() - self.last_attack > 0.6:
-                        self.last_attack = time.time()
-                        self.x -= 50
-                        self.hp -= 1
-                    if type(i.parent) == CQWeapon and i.parent.parent != self and \
-                            i.parent.ongoing and time.time() - self.last_attack > 0.6:
-                        self.last_attack = time.time()
-                        self.x += i.parent.parent.hitbox.x_size * \
-                            (self.x - i.parent.parent.getx()) / abs(self.x - i.parent.parent.getx())
-                        self.hp -= 1
+            self.weapon.attack(x, y)
+            self.move(self.player_enemy)
         else:
             GameManager.toRemove.append(self)
 
@@ -50,7 +143,7 @@ class FlyingGuy(Enemy):
 class SpecialFlyingGuy(Enemy):
     def __init__(self, x, y, sprite, hitbox, player_enemy, dx=0, dy=0, g=0.000):
         super().__init__(x, y, sprite, hitbox, player_enemy, dx, dy, g)
-        self.weapon = Bomber(self, x, y)
+        self.weapon = Bomber(self)
         self.last_attack = time.time() - 1
 
     def tick(self):

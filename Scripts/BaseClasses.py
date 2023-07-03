@@ -209,7 +209,7 @@ class Sprite(GameObject):
 
 
 class InteractableObject(GameObject):
-    def __init__(self, x, y, sprite=None, hitbox=None, dx=0, dy=0, g=5):
+    def __init__(self, x, y, sprite=None, hitbox=None, dx=0, dy=0, g=0.002):
         super().__init__(x, y)
         self.dx = dx
         self.dy = dy
@@ -220,7 +220,6 @@ class InteractableObject(GameObject):
         self.hitbox = hitbox
         if hitbox:
             self.hitbox.parent = self
-        GameManager.toAdd.append(self)
 
     def tick(self):
         self.x += self.dx * GameManager.time_elapsed
@@ -246,10 +245,11 @@ class InteractableObject(GameObject):
             GameManager.all_Sprites.add(self.sprite)
 
     def delete(self):
-        GameManager.all_Objects.remove(self)
-        if self.hitbox:
+        if self in GameManager.all_Objects:
+            GameManager.all_Objects.remove(self)
+        if self.hitbox and self.hitbox in GameManager.all_Hitboxes:
             GameManager.all_Hitboxes.remove(self.hitbox)
-        if self.sprite:
+        if self.sprite and self.sprite in GameManager.all_Sprites:
             GameManager.all_Sprites.remove(self.sprite)
 
 
@@ -312,7 +312,6 @@ class GameManager:
                 continue
             GameManager.screen.fill((255, 255, 255))
             for i in GameManager.all_Objects:
-                print(i)
                 i.tick()
             for i in sorted(GameManager.all_Sprites, key=lambda x: x.z):
                 i.draw()
@@ -363,6 +362,17 @@ class Door(InteractableObject):
             self.from1.quit()
             self.to1.enter(self.toDoor.x, self.toDoor.y)
             self.toDoor.timer = time.time()
+
+
+class Damageable:
+    hp = 5
+    last_attack = 0
+    iframes = 0.6
+
+    def hurt(self, proj, value):
+        if proj.parent != self and time.time() - self.last_attack > self.iframes:
+            self.hp -= value
+            self.last_attack = time.time()
 
 
 class Ground(InteractableObject):

@@ -1,30 +1,30 @@
-from Scripts.BaseClasses import *
 from Scripts.Weapons import *
 from Scripts.TestObjects import Ground
-from Scripts.Attacks import Bullet, Bomb
-import time
 
 
-class Player(InteractableObject):
+class Player(InteractableObject, Damageable):
     def __init__(self, x, y, sprite, hitbox, dx=0, dy=0, g=0.002):
         super().__init__(x, y, sprite, hitbox, dx, dy, g)
         self.hp = 1000
-        self.weapon = Gun(self, x, y)
+        self.weapon = Gun(self, downtime=300)
         self.coyote = 0
         self.prev_jump_pressed = False
-        self.climb_height = 7
-        self.last_attack = time.time() - 1
-        self.hitbox.ray_quality = 5
+        self.hitbox.ray_quality = 2
         self.x_speed = 1
+        self.jump_height = 1
 
     def tick(self):
+        if self.hp == 0:
+            GameManager.toRemove.append(self)
+            return
+
         keys = pygame.key.get_pressed()
 
         if pygame.mouse.get_pressed()[0]:
             x, y = pygame.mouse.get_pos()
             self.weapon.attack(x, y)
         if keys[pygame.K_w] and not self.prev_jump_pressed and self.coyote > 0:
-            self.dy = -0.8
+            self.dy = -0.8 * self.jump_height
         else:
             self.dy += self.g * GameManager.time_elapsed
 
@@ -46,15 +46,6 @@ class Player(InteractableObject):
                     self.coyote = 100
                 self.dx *= dx_mul
                 self.dy *= dy_mul
-            if type(i.parent) == Bullet and time.time() - self.last_attack >= 1:
-                self.hp -= i.parent.damage
-                self.last_attack = time.time()
-                if self.hp == 0:
-                    GameManager.toRemove.append(self)     
-            if type(i.parent) == Bomb:
-                if time.time() - i.parent.timer == 3:
-                    GameManager.toRemove.append(i)
-                    self.hp -= 5
             if type(i.parent) == Door:
                 i.parent.use()
 
