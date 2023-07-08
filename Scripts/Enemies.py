@@ -1,5 +1,6 @@
 from Scripts.BaseClasses import *
-from Scripts.Weapons import Gun, Bomber
+from Scripts.Weapons import *
+from Scripts.Attacks import *
 import time
 import random
 
@@ -56,12 +57,14 @@ class FollowFlyingWallsMotion(InteractableObject):
             self.x = movement[1][0]
             self.y = movement[1][1]
 
+
 def sign(x):
     if x > 0:
         return 1
     elif x == 0:
         return 0
     return -1
+
 
 class FollowWalkingMotion(InteractableObject):
     def move(self, target):
@@ -126,7 +129,7 @@ class RandomWalkingMotion(InteractableObject):
 class FlyingGuy(Enemy, RandomWalkingMotion):
     def __init__(self, x, y, sprite, hitbox, player_enemy, dx=0, dy=0, g=0.002):
         super().__init__(x, y, sprite, hitbox, player_enemy, dx, dy, g)
-        self.weapon = Gun(self, downtime=500)
+        self.weapon = Weapon(self, Bullet, downtime=500)
         self.iframes = 0.1
         self.damage = 1
 
@@ -134,7 +137,8 @@ class FlyingGuy(Enemy, RandomWalkingMotion):
         if self.hp > 0:
             x = self.player_enemy.hitbox.getx() + self.player_enemy.hitbox.x_size / 2
             y = self.player_enemy.hitbox.gety() + self.player_enemy.hitbox.y_size / 2
-            self.weapon.attack(x, y)
+            if self.weapon.attackType:
+                self.weapon.attack(x, y)
             self.move(self.player_enemy)
         else:
             GameManager.toRemove.append(self)

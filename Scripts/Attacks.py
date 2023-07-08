@@ -5,16 +5,17 @@ import time
 
 
 class Bullet(Attack):
-    def __init__(self, x, y, sprite, parent, dx=0, dy=0):
-        super().__init__(x, y, sprite, Hitbox(4, 4), parent, dx, dy)
+    def __init__(self, x, y, to_x, to_y, parent, dx=0, dy=0, proj_speed=1):
+        super().__init__(x, y, Sprite('Sprites/bullet1.png'), Hitbox(4, 4), parent, dx, dy)
         self.damage = 1
-
-    def do(self, to_x, to_y, proj_speed=5):
         length = ((to_x - self.getx()) ** 2 + (to_y - self.gety()) ** 2) ** (1 / 2)
         vector = ((to_x - self.getx()) / length * proj_speed, (to_y - self.gety()) / length * proj_speed)
         self.dx, self.dy = vector
         self.angle = math.atan2(self.dy, self.dx)
         self.sprite.image = pygame.transform.rotate(self.sprite.image, 180 - self.angle * 180 / math.pi)
+
+    def __call__(self):
+        return None
 
     def tick(self):
 
@@ -42,6 +43,31 @@ class Bullet(Attack):
                 GameManager.toRemove.append(self)
 
 
+class SwordSwing(Attack):
+    def __init__(self, x, y, target_x, target_y, parent, dx=0, dy=0):
+        hitbox = Hitbox(parent.hitbox.x_size * 1.75, parent.hitbox.y_size * 1.75, y=-parent.hitbox.y_size * .75)
+        if target_x < x:
+            hitbox.x = -parent.hitbox.x_size * .75
+        super().__init__(0, 0, Sprite('Sprites/sword.png'), hitbox, parent, dx, dy)
+        self.timer = 300
+        self.damage = 1
+
+    def getx(self):
+        return self.parent.getx() + self.x
+
+    def gety(self):
+        return self.parent.gety() + self.y
+
+    def tick(self):
+        self.timer -= GameManager.time_elapsed
+        if self.timer < 0:
+            GameManager.toRemove.append(self)
+
+        for i in self.hitbox.check_intersections():
+            if isinstance(i.parent, Damageable) and i.parent != self.parent:
+                i.parent.hurt(self, self.damage)
+
+
 class Bomb(Attack):
     def __init__(self, x, y, sprite, parent, dx=0, dy=0):
         super().__init__(x, y, sprite, Hitbox(4, 4), dx, dy)
@@ -66,3 +92,31 @@ class Bomb(Attack):
                 self.hitbox.y -= self.hitbox.y_size
         if time.time() - self.timer > 2:
             GameManager.toRemove.append(self)
+
+
+class Fist(Attack):
+    def __init__(self, x, y, target_x, target_y, parent, dx=0, dy=0):
+        hitbox = Hitbox(parent.hitbox.x_size * 1.75, parent.hitbox.y_size * .75, y=parent.hitbox.y_size * .125)
+        if target_x < x:
+            hitbox.x = -parent.hitbox.x_size * .75
+        super().__init__(0, 0, Sprite('Sprites/sword.png'), hitbox, parent, dx, dy)
+        self.damage = 1
+
+    def __call__(self):
+        GameManager.toRemove.append(self)
+        for i in self.hitbox.check_intersections():
+            if isinstance(i.parent, Damageable) and i.parent != self.parent:
+                i.parent.hurt(self, self.damage)
+                if not isinstance(i.parent.weapon.attackType, Fist):
+                    stolen = i.parent.weapon.attackType
+                    i.parent.weapon.attackType = None
+                    return stolen
+
+
+
+    def getx(self):
+        return self.parent.getx() + self.x
+
+    def gety(self):
+        return self.parent.gety() + self.y
+

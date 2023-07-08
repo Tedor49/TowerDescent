@@ -1,4 +1,5 @@
 from Scripts.Weapons import *
+from Scripts.Attacks import *
 from Scripts.TestObjects import Ground
 
 
@@ -6,7 +7,7 @@ class Player(InteractableObject, Damageable):
     def __init__(self, x, y, sprite, hitbox, dx=0, dy=0, g=0.002):
         super().__init__(x, y, sprite, hitbox, dx, dy, g)
         self.hp = 1000
-        self.weapon = Gun(self, downtime=300)
+        self.weapon = Weapon(self, Fist, downtime=300)
         self.coyote = 0
         self.prev_jump_pressed = False
         self.hitbox.ray_quality = 2
