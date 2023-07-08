@@ -396,8 +396,9 @@ class Room:
             GameManager.toRemove.append(i)
 
 class Door(InteractableObject):
-    def __init__(self, x, y, sprite, hitbox, from1, to1, toDoor, dx=0, dy=0, g=5):
+    def __init__(self, x, y, sprite, hitbox, from1, to1, toDoor, dx=0, dy=0, g=5, upwards=False):
         super().__init__(x, y, sprite, hitbox, dx, dy, g)
+        self.upwards = upwards
         self.from1 = from1
         self.toDoor = toDoor
         self.to1 = to1
@@ -490,6 +491,7 @@ class LevelGenerator:
             walls.append(Ground(0, 0, 450, 30))
             walls.append(Ground(510, 0, 450, 30))
             room.upDoor = Door(510, 0, Sprite('Sprites/door.png', z=-1), Hitbox(60, 60), room, None, None)
+            room.upDoor.upwards = True
             room.filling.append(room.upDoor)
         else:
             walls.append(Ground(0, 0, 960, 30))

@@ -57,7 +57,7 @@ class Player(InteractableObject):
             if type(i.parent) == Door:
                 if i.parent.use():
                     movement = (movement[0], (self.x, self.y))
-                    break
-
+                    if i.parent.upwards == True:
+                        movement = (movement[0], (self.x, self.y-20))
         self.x = movement[1][0]
         self.y = movement[1][1]
