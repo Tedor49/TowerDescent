@@ -19,7 +19,6 @@ class Player(InteractableObject):
 
     def tick(self):
         keys = pygame.key.get_pressed()
-        print(GameManager.currentRoom.id)
         if pygame.mouse.get_pressed()[0]:
             x, y = pygame.mouse.get_pos()
             self.weapon.attack(x, y)

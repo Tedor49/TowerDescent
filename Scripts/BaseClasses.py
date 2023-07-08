@@ -395,7 +395,6 @@ class Room:
                 i.despawn()
             GameManager.toRemove.append(i)
 
-
 class Door(InteractableObject):
     def __init__(self, x, y, sprite, hitbox, from1, to1, toDoor, dx=0, dy=0, g=5):
         super().__init__(x, y, sprite, hitbox, dx, dy, g)
@@ -405,7 +404,6 @@ class Door(InteractableObject):
         self.timer = time.time() - 3
 
     def use(self):
-        print('Есть пробитие')
         if time.time() - self.timer > 3:
             self.from1.quit()
             self.to1.enter(self.toDoor.x, self.toDoor.y)
@@ -427,8 +425,6 @@ class LevelGenerator:
         random.seed(7)
         self.maxLVL = 10
         self.generateLevel(0, 0)
-        for i in self.map:
-            print(i)
         for y in range(7):
             for x in range(7):
                 if self.map[y][x] != None:
@@ -473,7 +469,6 @@ class LevelGenerator:
         room = Room([], self.getRoomID(x, y))
         import Scripts.Enemies
         spawner = Spawner(220, 130, Scripts.Enemies.FlyingGuy, room)
-        room.filling.append(spawner)
         GameManager.Rooms.append(room)
         if self.checkRoomExistence(x - 1, y):
             walls.append(Ground(0, 0, 30, 330))
