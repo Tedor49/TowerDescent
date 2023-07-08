@@ -67,3 +67,4 @@ class SpecialFlyingGuy(Enemy):
                     self.x += (x - our_x) / abs(x - our_x) * GameManager.time_elapsed / 3
         else:
             GameManager.toRemove.append(self)
+

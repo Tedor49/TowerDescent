@@ -2,7 +2,6 @@ import time
 import random
 import pygame
 
-
 class GameObject:
     def __init__(self, x=0, y=0):
         self.x = x
@@ -16,6 +15,23 @@ class GameObject:
 
     def gety(self):
         return self.y
+
+
+class Spawner(GameObject):
+    def __init__(self, x, y, enemy, room1):
+        super().__init__(x, y)
+        self.enemy = enemy
+        self.room = room1
+        self.room.filling.append(self)
+
+    def spawn(self):
+        self.enemyInstance = self.enemy(self.x, self.y, Sprite('Sprites/playernew.png'), Hitbox(50, 50),
+                                        GameManager.player)
+        self.room.filling.append(self.enemyInstance)
+
+    def despawn(self):
+        self.enemyInstance.delete()
+        self.room.filling.remove(self.enemyInstance)
 
 
 class Hitbox(GameObject):
@@ -188,7 +204,6 @@ class Hitbox(GameObject):
                     intersecting.append(i)
         return intersecting
 
-
 class Sprite(GameObject):
     def __init__(self, image, stretch_x=1, stretch_y=1, z=1, x=0, y=0, parent=None):
         super().__init__(x, y)
@@ -251,6 +266,7 @@ class InteractableObject(GameObject):
                 GameManager.all_Hitboxes.remove(self.hitbox)
             if self.sprite:
                 GameManager.all_Sprites.remove(self.sprite)
+
 
 
 class Attack(InteractableObject):
@@ -358,6 +374,8 @@ class Room:
         GameManager.currentRoom = self
         self.filling.append(GameManager.player)
         for i in self.filling:
+            if isinstance(i, Spawner):
+                i.spawn()
             GameManager.toAdd.append(i)
 
     def quit(self):
@@ -365,6 +383,8 @@ class Room:
             if isinstance(i, Attack):
                 if i in self.filling:
                     self.filling.remove(i)
+            if isinstance(i, Spawner):
+                i.despawn()
             GameManager.toRemove.append(i)
 
 
@@ -499,4 +519,3 @@ class LevelGenerator:
             if self.map[y][x] != None:
                 return True
         return False
-
