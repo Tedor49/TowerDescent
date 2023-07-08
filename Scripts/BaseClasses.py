@@ -2,6 +2,7 @@ import time
 import random
 import pygame
 
+
 class GameObject:
     def __init__(self, x=0, y=0):
         self.x = x
@@ -15,6 +16,13 @@ class GameObject:
 
     def gety(self):
         return self.y
+
+    def add_to_manager(self):
+        GameManager.all_Objects.add(self)
+
+    def delete(self):
+        if self in GameManager.all_Objects:
+            GameManager.all_Objects.remove(self)
 
 
 class Spawner(GameObject):
@@ -30,7 +38,7 @@ class Spawner(GameObject):
         self.room.filling.append(self.enemyInstance)
 
     def despawn(self):
-        self.enemyInstance.delete()
+        GameManager.toRemove.append(self)
         self.room.filling.remove(self.enemyInstance)
 
 
@@ -463,6 +471,9 @@ class LevelGenerator:
                      Ground(620, 300, 8*30, 30),
                      Ground(620, 570, 8*30, 30)]
         room = Room([], self.getRoomID(x, y))
+        import Scripts.Enemies
+        spawner = Spawner(220, 130, Scripts.Enemies.FlyingGuy, room)
+        room.filling.append(spawner)
         GameManager.Rooms.append(room)
         if self.checkRoomExistence(x - 1, y):
             walls.append(Ground(0, 0, 30, 330))
