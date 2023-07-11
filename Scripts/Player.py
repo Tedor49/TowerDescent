@@ -24,7 +24,7 @@ class Player(InteractableObject, Damageable):
             return
 
         keys = pygame.key.get_pressed()
-
+        print(GameManager.currentRoom.id)
         if pygame.mouse.get_pressed()[0]:
             x, y = pygame.mouse.get_pos()
             self.weapon.attack(x, y)
@@ -57,7 +57,9 @@ class Player(InteractableObject, Damageable):
                 self.dx *= dx_mul
                 self.dy *= dy_mul
             if type(i.parent) == Door:
-                i.parent.use()
+                if i.parent.use():
+                    movement = (movement[0], (self.x, self.y))
+                    break
 
         self.x = movement[1][0]
         self.y = movement[1][1]
