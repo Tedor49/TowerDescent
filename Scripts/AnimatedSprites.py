@@ -11,6 +11,13 @@ class AnimatedSprite(Sprite):
     def tick(self):
         pass
 
+    def delete(self):
+        if self.parent.parent != GameManager.player:
+            if self in GameManager.all_Objects:
+                GameManager.all_Objects.remove(self)
+            if self in GameManager.all_Sprites:
+                GameManager.all_Sprites.remove(self)
+
 
 class AnimatedGun(AnimatedSprite):
     def __init__(self):

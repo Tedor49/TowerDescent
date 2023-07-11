@@ -390,7 +390,8 @@ class Room:
                     self.filling.remove(i)
             if isinstance(i, Spawner):
                 i.despawn()
-            GameManager.toRemove.append(i)
+            if i != GameManager.player:
+                GameManager.toRemove.append(i)
 
 
 class Door(InteractableObject):
@@ -483,7 +484,7 @@ class LevelGenerator:
         if self.checkRoomExistence(x - 1, y):
             walls.append(Ground(0, 0, 30, 330))
             walls.append(Ground(0, 390, 30, 330))
-            room.leftDoor = Door(0, 330, Sprite('Sprites/door.png', z=-1), Hitbox(60, 60), room, None, None)
+            room.leftDoor = Door(0, 330, None, Hitbox(60, 60), room, None, None)
             room.filling.append(room.leftDoor)
         else:
             walls.append(Ground(0, 0, 30, 720))
@@ -491,7 +492,7 @@ class LevelGenerator:
         if self.checkRoomExistence(x + 1, y):
             walls.append(Ground(930, 0, 30, 330))
             walls.append(Ground(930, 390, 30, 330))
-            room.rightDoor = Door(930, 330, Sprite('Sprites/door.png', z=-1), Hitbox(60, 60), room, None, None)
+            room.rightDoor = Door(930, 330, None, Hitbox(60, 60), room, None, None)
             room.filling.append(room.rightDoor)
         else:
             walls.append(Ground(930, 0, 30, 720))
@@ -499,7 +500,7 @@ class LevelGenerator:
         if self.checkRoomExistence(x, y - 1):
             walls.append(Ground(0, 0, 450, 30))
             walls.append(Ground(510, 0, 450, 30))
-            room.upDoor = Door(510, 0, Sprite('Sprites/door.png', z=-1), Hitbox(60, 60), room, None, None)
+            room.upDoor = Door(510, 0, None, Hitbox(60, 60), room, None, None)
             room.filling.append(room.upDoor)
         else:
             walls.append(Ground(0, 0, 960, 30))
@@ -507,7 +508,7 @@ class LevelGenerator:
         if self.checkRoomExistence(x, y + 1):
             walls.append(Ground(0, 690, 450, 30))
             walls.append(Ground(510, 690, 450, 30))
-            room.downDoor = Door(510, 690, Sprite('Sprites/door.png', z=-1), Hitbox(60, 60), room, None, None)
+            room.downDoor = Door(510, 690, None, Hitbox(60, 60), room, None, None)
             room.filling.append(room.downDoor)
         else:
             walls.append(Ground(0, 690, 960, 30))
