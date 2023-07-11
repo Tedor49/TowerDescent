@@ -1,7 +1,7 @@
 from Scripts.BaseClasses import *
 from Scripts.Player import Player
 from Scripts.TestObjects import TargetObject
-from Scripts.Enemies import FlyingGuy, SpecialFlyingGuy
+from Scripts.Enemies import FlyingGuy
 
 # bg
 background = InteractableObject(0, 0, Sprite("Sprites/test_room.png", z=-2))

@@ -129,7 +129,7 @@ class RandomWalkingMotion(InteractableObject):
 class FlyingGuy(Enemy, RandomWalkingMotion):
     def __init__(self, x, y, sprite, hitbox, player_enemy, dx=0, dy=0, g=0.002):
         super().__init__(x, y, sprite, hitbox, player_enemy, dx, dy, g)
-        self.weapon = Weapon(self, Bullet, downtime=500)
+        self.weapon = Weapon(self, SwordSwing, AnimatedSword(), downtime=500)
         self.iframes = 0.1
         self.damage = 1
 
@@ -137,30 +137,25 @@ class FlyingGuy(Enemy, RandomWalkingMotion):
         if self.hp > 0:
             x = self.player_enemy.hitbox.getx() + self.player_enemy.hitbox.x_size / 2
             y = self.player_enemy.hitbox.gety() + self.player_enemy.hitbox.y_size / 2
-            if self.weapon.attackType:
+            if self.weapon:
                 self.weapon.attack(x, y)
             self.move(self.player_enemy)
         else:
             GameManager.toRemove.append(self)
 
+    def add_to_manager(self):
+        GameManager.all_Objects.add(self)
+        self.weapon.add_to_manager()
+        if self.hitbox:
+            GameManager.all_Hitboxes.add(self.hitbox)
+        if self.sprite:
+            GameManager.all_Sprites.add(self.sprite)
 
-class SpecialFlyingGuy(Enemy):
-    def __init__(self, x, y, sprite, hitbox, player_enemy, dx=0, dy=0, g=0.000):
-        super().__init__(x, y, sprite, hitbox, player_enemy, dx, dy, g)
-        self.weapon = Bomber(self)
-        self.last_attack = time.time() - 1
-
-    def tick(self):
-        if self.hp > 0:
-            x = self.player_enemy.hitbox.getx() + self.player_enemy.hitbox.x_size / 2
-            y = self.player_enemy.hitbox.gety() + self.player_enemy.hitbox.y_size / 2
-            our_x = self.hitbox.getx() + self.hitbox.x_size / 2
-            our_y = self.hitbox.gety() + self.hitbox.y_size / 2
-            length = ((x - our_x) ** 2 + (y - our_y) ** 2) ** (1 / 2)
-            if length < 500 and self.player_enemy.hp != 0:
-                if abs(our_x - x) < 5 and our_y < y:
-                    self.weapon.attack(x, y)
-                else:
-                    self.x += (x - our_x) / abs(x - our_x) * GameManager.time_elapsed / 3
-        else:
-            GameManager.toRemove.append(self)
+    def delete(self):
+        GameManager.all_Objects.remove(self)
+        if self.weapon:
+            self.weapon.delete()
+        if self.hitbox:
+            GameManager.all_Hitboxes.remove(self.hitbox)
+        if self.sprite:
+            GameManager.all_Sprites.remove(self.sprite)

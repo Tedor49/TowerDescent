@@ -1,5 +1,8 @@
+import random
+
 from Scripts.BaseClasses import *
 from Scripts.Attacks import *
+from Scripts.AnimatedSprites import *
 
 
 class Gun(GameObject):
@@ -59,21 +62,44 @@ class Sword(InteractableObject):
 
 
 class Weapon(InteractableObject):
-    def __init__(self, parent, attack_type, downtime=10, proj_speed=1):
-        super().__init__(0, 0)
+    def __init__(self, parent, attack_type, animation, downtime=10, proj_speed=1):
+        super().__init__(0, 0, animation)
         self.parent = parent
         self.coolDown = 0
         self.attackType = attack_type
         self.downTime = downtime
         self.projSpeed = proj_speed
+        self.ammo = -1
 
     def attack(self, x, y):
         if self.coolDown <= 0:
+            self.ammo -= 1
             self.coolDown = self.downTime
             starting_x = self.parent.x + self.parent.hitbox.x_size / 2
             starting_y = self.parent.y + self.parent.hitbox.y_size / 2
-            new_weapon = self.attackType(starting_x, starting_y, x, y, self.parent)()
-            if new_weapon:
-                self.parent.weapon.attackType = new_weapon
+            self.attackType(starting_x, starting_y, x, y, self.parent)
+            if self.ammo == 0:
+                GameManager.toRemove.append(self)
+                self.parent.weapon = self.parent.base
+                GameManager.toAdd.append(self.parent.base)
         else:
             self.coolDown -= GameManager.time_elapsed
+
+    def add_to_manager(self):
+        if isinstance(self.sprite, AnimatedSprite):
+            GameManager.all_Objects.add(self.sprite)
+        if self.sprite:
+            GameManager.all_Sprites.add(self.sprite)
+
+    def delete(self):
+        if isinstance(self.sprite, AnimatedSprite):
+            GameManager.all_Objects.remove(self.sprite)
+        if self.sprite:
+            GameManager.all_Sprites.remove(self.sprite)
+
+    def getx(self):
+        return self.parent.getx() + self.x
+
+
+    def gety(self):
+        return self.parent.gety() + self.y

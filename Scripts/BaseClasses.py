@@ -188,6 +188,12 @@ class Hitbox(GameObject):
                     intersecting.append(i)
         return intersecting
 
+    def show(self):
+        sprite = Sprite("Sprites/hitbox.png", z=0)
+        sprite.image = pygame.transform.scale(sprite.image, (self.x_size, self.y_size))
+        sprite.parent = self
+        GameManager.all_Sprites.add(sprite)
+
 
 class Sprite(GameObject):
     def __init__(self, image, stretch_x=1, stretch_y=1, z=1, x=0, y=0, parent=None):
@@ -206,7 +212,6 @@ class Sprite(GameObject):
 
     def draw(self):
         GameManager.screen.blit(self.image, (self.getx(), self.gety()))
-
 
 class InteractableObject(GameObject):
     def __init__(self, x, y, sprite=None, hitbox=None, dx=0, dy=0, g=0.002):
@@ -321,13 +326,13 @@ class GameManager:
 
     @staticmethod
     def update():
-        for i in GameManager.toRemove:
-            i.delete()
-        GameManager.toRemove = []
         for i in GameManager.toAdd:
             i.add_to_manager()
             GameManager.currentRoom.filling.append(i)
         GameManager.toAdd = []
+        for i in GameManager.toRemove:
+            i.delete()
+        GameManager.toRemove = []
 
 
 class Room:
