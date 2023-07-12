@@ -212,6 +212,12 @@ class Hitbox(GameObject):
                     intersecting.append(i)
         return intersecting
 
+    def show(self):
+        sprite = Sprite("Sprites/hitbox.png", z=0)
+        sprite.image = pygame.transform.scale(sprite.image, (self.x_size, self.y_size))
+        sprite.parent = self
+        GameManager.all_Sprites.add(sprite)
+
 class Sprite(GameObject):
     def __init__(self, image, stretch_x=1, stretch_y=1, z=1, x=0, y=0, parent=None):
         super().__init__(x, y)
@@ -230,9 +236,8 @@ class Sprite(GameObject):
     def draw(self):
         GameManager.screen.blit(self.image, (self.getx(), self.gety()))
 
-
 class InteractableObject(GameObject):
-    def __init__(self, x, y, sprite=None, hitbox=None, dx=0, dy=0, g=5):
+    def __init__(self, x, y, sprite=None, hitbox=None, dx=0, dy=0, g=0.002):
         super().__init__(x, y)
         self.dx = dx
         self.dy = dy
@@ -270,10 +275,10 @@ class InteractableObject(GameObject):
     def delete(self):
         if self in GameManager.all_Objects:
             GameManager.all_Objects.remove(self)
-            if self.hitbox:
-                GameManager.all_Hitboxes.remove(self.hitbox)
-            if self.sprite:
-                GameManager.all_Sprites.remove(self.sprite)
+        if self.hitbox and self.hitbox in GameManager.all_Hitboxes:
+            GameManager.all_Hitboxes.remove(self.hitbox)
+        if self.sprite and self.sprite in GameManager.all_Sprites:
+            GameManager.all_Sprites.remove(self.sprite)
 
 
 
@@ -345,13 +350,13 @@ class GameManager:
 
     @staticmethod
     def update():
-        for i in GameManager.toRemove:
-            i.delete()
-        GameManager.toRemove = []
         for i in GameManager.toAdd:
             i.add_to_manager()
             GameManager.currentRoom.filling.append(i)
         GameManager.toAdd = []
+        for i in GameManager.toRemove:
+            i.delete()
+        GameManager.toRemove = []
 
     @staticmethod
     def searchByID(RoomID):
@@ -412,6 +417,17 @@ class Door(InteractableObject):
             self.timer = time.time()
             return True
         return False
+
+
+class Damageable:
+    hp = 5
+    last_attack = 0
+    iframes = 0.6
+
+    def hurt(self, proj, value):
+        if proj.parent != self and time.time() - self.last_attack > self.iframes:
+            self.hp -= value
+            self.last_attack = time.time()
 
 
 class Ground(InteractableObject):
