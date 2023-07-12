@@ -1,3 +1,4 @@
+import sys
 import time
 import random
 import pygame
@@ -328,7 +329,7 @@ class GameManager:
         GameManager.clock = pygame.time.Clock()
         GameManager.currentRoom = StartingRoom
         self.update()
-
+        GameManager.toAdd.append(GameManager.player)
         running = True
         StartingRoom.enter(GameManager.player.x, GameManager.player.y)
         while running:
@@ -339,8 +340,10 @@ class GameManager:
             GameManager.time_elapsed += GameManager.clock.get_time()
             if GameManager.time_elapsed < 1000 / GameManager.tps:
                 continue
-            GameManager.screen.fill((255, 255, 255))
             for i in GameManager.all_Objects:
+                from Scripts.Player import Player
+                if isinstance(i, Player):
+                    print(1)
                 i.tick()
             for i in sorted(GameManager.all_Sprites, key=lambda x: x.z):
                 i.draw()
@@ -382,6 +385,7 @@ class Room:
         self.filling.append(InteractableObject(0, 0, Sprite("Sprites/test_room.png", z=-2)))
 
     def enter(self, x, y):
+        from Scripts.Player import Player
         GameManager.player.x = x
         GameManager.player.y = y
         GameManager.currentRoom = self
@@ -389,16 +393,19 @@ class Room:
         for i in self.filling:
             if isinstance(i, Spawner):
                 i.spawn()
-            GameManager.toAdd.append(i)
+            if not isinstance(i, Player):
+                GameManager.toAdd.append(i)
 
     def quit(self):
+        from Scripts.Player import Player
         for i in GameManager.all_Objects:
             if isinstance(i, Attack):
                 if i in self.filling:
                     self.filling.remove(i)
             if isinstance(i, Spawner):
                 i.despawn()
-            GameManager.toRemove.append(i)
+            if not isinstance(i, Player):
+                GameManager.toRemove.append(i)
 
 class Door(InteractableObject):
     def __init__(self, x, y, sprite, hitbox, from1, to1, toDoor, dx=0, dy=0, g=5, upwards=False):
