@@ -341,9 +341,6 @@ class GameManager:
             if GameManager.time_elapsed < 1000 / GameManager.tps:
                 continue
             for i in GameManager.all_Objects:
-                from Scripts.Player import Player
-                if isinstance(i, Player):
-                    print(1)
                 i.tick()
             for i in sorted(GameManager.all_Sprites, key=lambda x: x.z):
                 i.draw()
@@ -355,7 +352,8 @@ class GameManager:
     def update():
         for i in GameManager.toAdd:
             i.add_to_manager()
-            GameManager.currentRoom.filling.append(i)
+            if i not in GameManager.currentRoom.filling:
+                GameManager.currentRoom.filling.append(i)
         GameManager.toAdd = []
         for i in GameManager.toRemove:
             i.delete()
