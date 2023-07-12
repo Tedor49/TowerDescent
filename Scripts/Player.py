@@ -56,10 +56,10 @@ class Player(InteractableObject, Damageable):
                 self.dx *= dx_mul
                 self.dy *= dy_mul
             if type(i.parent) == Door:
-                if i.parent.use():
-                    movement = (movement[0], (self.x, self.y))
-                    if i.parent.upwards:
-                        movement = (movement[0], (self.x, self.y-30))
+                i.parent.use()
+                movement = (movement[0], (self.x, self.y))
+                if i.parent.type=='up':
+                    movement = (movement[0], (self.x, self.y-30))
         self.x = movement[1][0]
         self.y = movement[1][1]
 
