@@ -1,6 +1,8 @@
+import sys
 import time
 import random
 import pygame
+
 
 class GameObject:
     def __init__(self, x=0, y=0):
@@ -16,6 +18,13 @@ class GameObject:
     def gety(self):
         return self.y
 
+    def add_to_manager(self):
+        GameManager.all_Objects.add(self)
+
+    def delete(self):
+        if self in GameManager.all_Objects:
+            GameManager.all_Objects.remove(self)
+
 
 class Spawner(GameObject):
     def __init__(self, x, y, enemy, room1):
@@ -30,7 +39,7 @@ class Spawner(GameObject):
         self.room.filling.append(self.enemyInstance)
 
     def despawn(self):
-        self.enemyInstance.delete()
+        GameManager.toRemove.append(self)
         self.room.filling.remove(self.enemyInstance)
 
 
@@ -320,7 +329,7 @@ class GameManager:
         GameManager.clock = pygame.time.Clock()
         GameManager.currentRoom = StartingRoom
         self.update()
-
+        GameManager.toAdd.append(GameManager.player)
         running = True
         StartingRoom.enter(GameManager.player.x, GameManager.player.y)
         while running:
@@ -331,7 +340,6 @@ class GameManager:
             GameManager.time_elapsed += GameManager.clock.get_time()
             if GameManager.time_elapsed < 1000 / GameManager.tps:
                 continue
-            GameManager.screen.fill((255, 255, 255))
             for i in GameManager.all_Objects:
                 i.tick()
             for i in sorted(GameManager.all_Sprites, key=lambda x: x.z):
@@ -344,7 +352,8 @@ class GameManager:
     def update():
         for i in GameManager.toAdd:
             i.add_to_manager()
-            GameManager.currentRoom.filling.append(i)
+            if i not in GameManager.currentRoom.filling:
+                GameManager.currentRoom.filling.append(i)
         GameManager.toAdd = []
         for i in GameManager.toRemove:
             i.delete()
@@ -374,6 +383,7 @@ class Room:
         self.filling.append(InteractableObject(0, 0, Sprite("Sprites/test_room.png", z=-2)))
 
     def enter(self, x, y):
+        from Scripts.Player import Player
         GameManager.player.x = x
         GameManager.player.y = y
         GameManager.currentRoom = self
@@ -381,29 +391,30 @@ class Room:
         for i in self.filling:
             if isinstance(i, Spawner):
                 i.spawn()
-            GameManager.toAdd.append(i)
+            if not isinstance(i, Player):
+                GameManager.toAdd.append(i)
 
     def quit(self):
+        from Scripts.Player import Player
         for i in GameManager.all_Objects:
             if isinstance(i, Attack):
                 if i in self.filling:
                     self.filling.remove(i)
             if isinstance(i, Spawner):
                 i.despawn()
-            if i != GameManager.player:
+            if not isinstance(i, Player):
                 GameManager.toRemove.append(i)
 
-
 class Door(InteractableObject):
-    def __init__(self, x, y, sprite, hitbox, from1, to1, toDoor, dx=0, dy=0, g=5):
+    def __init__(self, x, y, sprite, hitbox, from1, to1, toDoor, dx=0, dy=0, g=5, upwards=False):
         super().__init__(x, y, sprite, hitbox, dx, dy, g)
+        self.upwards = upwards
         self.from1 = from1
         self.toDoor = toDoor
         self.to1 = to1
         self.timer = time.time() - 3
 
     def use(self):
-        print('Есть пробитие')
         if time.time() - self.timer > 3:
             self.from1.quit()
             self.to1.enter(self.toDoor.x, self.toDoor.y)
@@ -436,8 +447,6 @@ class LevelGenerator:
         random.seed(7)
         self.maxLVL = 10
         self.generateLevel(0, 0)
-        for i in self.map:
-            print(i)
         for y in range(7):
             for x in range(7):
                 if self.map[y][x] != None:
@@ -480,11 +489,13 @@ class LevelGenerator:
                      Ground(620, 300, 8*30, 30),
                      Ground(620, 570, 8*30, 30)]
         room = Room([], self.getRoomID(x, y))
+        import Scripts.Enemies
+        spawner = Spawner(220, 130, Scripts.Enemies.FlyingGuy, room)
         GameManager.Rooms.append(room)
         if self.checkRoomExistence(x - 1, y):
             walls.append(Ground(0, 0, 30, 330))
             walls.append(Ground(0, 390, 30, 330))
-            room.leftDoor = Door(0, 330, None, Hitbox(60, 60), room, None, None)
+            room.leftDoor = Door(0, 330, Sprite('Sprites/door.png', z=-1), Hitbox(60, 60), room, None, None)
             room.filling.append(room.leftDoor)
         else:
             walls.append(Ground(0, 0, 30, 720))
@@ -492,7 +503,7 @@ class LevelGenerator:
         if self.checkRoomExistence(x + 1, y):
             walls.append(Ground(930, 0, 30, 330))
             walls.append(Ground(930, 390, 30, 330))
-            room.rightDoor = Door(930, 330, None, Hitbox(60, 60), room, None, None)
+            room.rightDoor = Door(930, 330, Sprite('Sprites/door.png', z=-1), Hitbox(60, 60), room, None, None)
             room.filling.append(room.rightDoor)
         else:
             walls.append(Ground(930, 0, 30, 720))
@@ -500,7 +511,8 @@ class LevelGenerator:
         if self.checkRoomExistence(x, y - 1):
             walls.append(Ground(0, 0, 450, 30))
             walls.append(Ground(510, 0, 450, 30))
-            room.upDoor = Door(510, 0, None, Hitbox(60, 60), room, None, None)
+            room.upDoor = Door(510, 0, Sprite('Sprites/door.png', z=-1), Hitbox(60, 60), room, None, None)
+            room.upDoor.upwards = True
             room.filling.append(room.upDoor)
         else:
             walls.append(Ground(0, 0, 960, 30))
@@ -508,7 +520,7 @@ class LevelGenerator:
         if self.checkRoomExistence(x, y + 1):
             walls.append(Ground(0, 690, 450, 30))
             walls.append(Ground(510, 690, 450, 30))
-            room.downDoor = Door(510, 690, None, Hitbox(60, 60), room, None, None)
+            room.downDoor = Door(510, 690, Sprite('Sprites/door.png', z=-1), Hitbox(60, 60), room, None, None)
             room.filling.append(room.downDoor)
         else:
             walls.append(Ground(0, 690, 960, 30))

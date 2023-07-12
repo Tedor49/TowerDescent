@@ -92,9 +92,9 @@ class Weapon(InteractableObject):
             GameManager.all_Sprites.add(self.sprite)
 
     def delete(self):
-        if isinstance(self.sprite, AnimatedSprite):
+        if isinstance(self.sprite, AnimatedSprite) and self.sprite in GameManager.all_Objects:
             GameManager.all_Objects.remove(self.sprite)
-        if self.sprite:
+        if self.sprite and self.sprite in GameManager.all_Sprites:
             GameManager.all_Sprites.remove(self.sprite)
 
     def getx(self):
