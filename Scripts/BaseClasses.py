@@ -2,6 +2,7 @@ import sys
 import time
 import random
 import pygame
+import json
 
 
 class GameObject:
@@ -361,6 +362,7 @@ class GameManager:
     all_Objects = set()
     all_Sprites = set()
     Rooms = []
+    not_cleared_rooms = 0
 
     def __init__(self):
         from Scripts.Player import Player
@@ -370,6 +372,7 @@ class GameManager:
         print(lev.map, sep='\n')
         GameManager.player = Player(60, 100, Sprite('Sprites/playernew.png'), Hitbox(50, 50))
         GameManager.screen = pygame.display.set_mode(size)
+        GameManager.not_cleared_rooms = len(GameManager.Rooms)
         pygame.display.set_caption('Tower Descent')
         GameManager.clock = pygame.time.Clock()
         GameManager.currentRoom = GameManager.searchByID(0)
@@ -446,8 +449,8 @@ class Room:
         self.rightChecked = False
         self.upChecked = False
         self.downChecked = False
-        self.filling.append(InteractableObject(0, 0, Sprite("Sprites/Levels/map_0_BW.png", z=-2)))
         self.cleaned = False
+        self.type = ''
 
     def enter(self, type='left'):
         from Scripts.Player import Player
@@ -460,7 +463,6 @@ class Room:
         GameManager.player.x = coordinates[type][0]
         GameManager.player.y = coordinates[type][1]
         GameManager.currentRoom = self
-        self.filling.append(GameManager.player)
         for i in self.filling:
             if isinstance(i, Spawner):
                 i.spawn()
@@ -468,7 +470,6 @@ class Room:
                 GameManager.toAdd.append(i)
 
     def quit(self):
-        from Scripts.Player import Player
         for i in GameManager.all_Objects:
             if isinstance(i, Attack):
                 if i in self.filling:
@@ -481,22 +482,29 @@ class Room:
     def check_cleaned(self):
         for i in self.filling:
             if isinstance(i, Spawner):
-                self.cleaned = False
-                return
+                return False
         self.cleaned = True
+        return True
 
 
 class Door(InteractableObject):
-    def __init__(self, x, y, sprite, hitbox, from1, to1, toDoor, dx=0, dy=0, g=5, type=None):
+    def __init__(self, x, y, sprite, hitbox, from1, to1, toDoor, dx=0, dy=0, g=5, type=None, usable=True):
         super().__init__(x, y, sprite, hitbox, dx, dy, g)
         self.type = type
         self.from1 = from1
         self.toDoor = toDoor
         self.to1 = to1
+        self.usable = usable
 
     def use(self):
         self.from1.quit()
-        self.from1.check_cleaned()
+        if self.from1.cleaned is False:
+            print(1, self.from1.check_cleaned())
+            if self.from1.check_cleaned():
+                GameManager.not_cleared_rooms -= 1
+                print(GameManager.not_cleared_rooms)
+                if GameManager.not_cleared_rooms == 1:
+                    GameManager.searchByID(0).leftDoor.usable = True
         self.to1.enter(self.toDoor.type)
         self.toDoor.timer = time.time()
         self.timer = time.time()
@@ -519,11 +527,16 @@ class Ground(InteractableObject):
 
 
 class LevelGenerator:
-    def __init__(self):
+    def __init__(self, minLVL=6):
         self.id = 0
         self.map = [[None for i in range(7)] for i2 in range(7)]
         self.maxLVL = 10
+        self.minLVL = minLVL
         self.generateLevel(0, 1)
+        while not self.id >= 5:
+            self.id = 0
+            self.map = [[None for i in range(7)] for i2 in range(7)]
+            self.generateLevel(0, 1)
         for y in range(7):
             for x in range(7):
                 if self.map[y][x] != None:
@@ -546,7 +559,6 @@ class LevelGenerator:
                     if random.choice([True, False, True]) and (i == 0 or j == 0) and (x + j, y + i) not in forbidden:
                         self.generateLevel(y + i, x + j)
 
-
     def combineLeftRight(self, roomL, roomR):
         roomL.rightDoor.toDoor = roomR.leftDoor
         roomR.leftDoor.toDoor = roomL.rightDoor
@@ -563,60 +575,60 @@ class LevelGenerator:
         return self.map[y][x]
 
     def addWallsAndDoors(self, x=0, y=0):
-        walls = []
-        platforms = [Ground(270, 150, 14 * 30, 30),
-                     Ground(270, 450, 14 * 30, 30),
-                     Ground(90, 300, 8 * 30, 30),
-                     Ground(90, 570, 8 * 30, 30),
-                     Ground(620, 300, 8 * 30, 30),
-                     Ground(620, 570, 8 * 30, 30)]
-        room = Room([], self.getRoomID(x, y))
         import Scripts.Enemies
-        Spawner(220, 130, Scripts.Enemies.FlyingGuy, room)
+        if (x == 0 or x == 1) and y == 0:
+            room_type = 'start'
+        else:
+            room_type = 'map_' + str(random.choice([0, 1]))
+        walls = []
+        map_data = json.load(open('Sprites\Levels\map_data.json', 'r'))
+        room = Room([], self.getRoomID(x, y))
+        room.type = room_type
+        room.filling.append(InteractableObject(0, 0, Sprite("Sprites/Levels/"+room.type + "_BW.png", z=-3)))
+        for i in map_data[room_type]['platforms']:
+            room.filling.append(Ground(i['x'], i['y'], i['x_size']*30, i['y_size']*30))
+        for i in map_data[room_type]['spawners']:
+            Spawner(i['x'], i['y'], Scripts.Enemies.FlyingGuy, room)
         GameManager.Rooms.append(room)
         if self.checkRoomExistence(x - 1, y):
-            walls.append(Ground(0, 0, 30, 305))
-            walls.append(Ground(0, 415, 30, 330))
-            room.leftDoor = Door(-80, 305, Sprite('Sprites/door.png', z=-1), Hitbox(110, 110), room, None, None,
+            walls.append(Ground(0, 0, 30, 300))
+            walls.append(Ground(0, 420, 30, 330))
+            room.leftDoor = Door(-90, 305, Sprite('Sprites/door.png', z=-1), Hitbox(120, 120), room, None, None,
                                  type='left')
+            if x-1 == 0 and y == 0:
+                room.leftDoor.usable = False
             room.filling.append(room.leftDoor)
-            room.leftDoor.hitbox.show()
         else:
             walls.append(Ground(0, 0, 30, 720))
 
         if self.checkRoomExistence(x + 1, y):
-            walls.append(Ground(930, 0, 30, 305))
-            walls.append(Ground(930, 415, 30, 330))
-            room.rightDoor = Door(930, 305, Sprite('Sprites/door.png', z=-1), Hitbox(110, 110), room, None, None,
+            walls.append(Ground(930, 0, 30, 300))
+            walls.append(Ground(930, 420, 30, 330))
+            room.rightDoor = Door(930, 300, Sprite('Sprites/door.png', z=-1), Hitbox(120, 120), room, None, None,
                                   type='right')
             room.filling.append(room.rightDoor)
-            room.rightDoor.hitbox.show()
         else:
             walls.append(Ground(930, 0, 30, 720))
 
         if self.checkRoomExistence(x, y - 1):
-            walls.append(Ground(0, 0, 425, 30))
-            walls.append(Ground(535, 0, 450, 30))
-            room.upDoor = Door(425, -80, Sprite('Sprites/door.png', z=-1), Hitbox(110, 110), room, None, None,
+            walls.append(Ground(0, 0, 420, 30))
+            walls.append(Ground(540, 0, 450, 30))
+            room.upDoor = Door(420, -80, Sprite('Sprites/door.png', z=-1), Hitbox(110, 110), room, None, None,
                                type='up')
             room.upDoor.upwards = True
             room.filling.append(room.upDoor)
-            room.upDoor.hitbox.show()
         else:
             walls.append(Ground(0, 0, 960, 30))
 
         if self.checkRoomExistence(x, y + 1):
-            walls.append(Ground(0, 690, 425, 30))
-            walls.append(Ground(535, 690, 450, 30))
-            room.downDoor = Door(425, 690, Sprite('Sprites/door.png', z=-1), Hitbox(110, 110), room, None, None,
+            walls.append(Ground(0, 690, 420, 30))
+            walls.append(Ground(540, 690, 450, 30))
+            room.downDoor = Door(420, 690, Sprite('Sprites/door.png', z=-1), Hitbox(110, 110), room, None, None,
                                  type='down')
             room.filling.append(room.downDoor)
-            room.downDoor.hitbox.show()
         else:
             walls.append(Ground(0, 690, 960, 30))
         for i in walls:
-            room.filling.append(i)
-        for i in platforms:
             room.filling.append(i)
         return room
 
