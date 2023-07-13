@@ -1,3 +1,5 @@
+import pygame
+
 from Scripts.Weapons import *
 from Scripts.Attacks import *
 from Scripts.AnimatedSprites import *
@@ -62,6 +64,9 @@ class Player(InteractableObject, Damageable, Persistent):
                 movement = (movement[0], (self.x, self.y))
                 if i.parent.type=='up':
                     movement = (movement[0], (self.x, self.y-30))
+            if type(i.parent) == Lift:
+                if keys[pygame.K_w]:
+                    i.parent.use()
         self.x = movement[1][0]
         self.y = movement[1][1]
 
