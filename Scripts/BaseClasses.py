@@ -554,7 +554,7 @@ class LevelGenerator:
             if x == 1 and y == 0:
                 self.generateLevel(y, x - 1)
                 self.generateLevel(y, x + 1)
-            for i in range(-1, 2):
+            for i in range(0, 2):
                 for j in range(-1, 2):
                     if random.choice([True, False, True]) and (i == 0 or j == 0) and (x + j, y + i) not in forbidden:
                         self.generateLevel(y + i, x + j)
@@ -651,6 +651,10 @@ class LevelGenerator:
                 return True
         return False
 
+
+class Lift:
+    def __init__(self, x, y, sprite, hitbox, dx=0, dy=0, g=5, direction='to', usable=True):
+        super().__init__(x, y, sprite, hitbox, dx, dy, g)
 
 class Persistent:
     pass
