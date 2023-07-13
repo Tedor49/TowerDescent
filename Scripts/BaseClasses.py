@@ -445,7 +445,7 @@ class Room:
         self.rightChecked = False
         self.upChecked = False
         self.downChecked = False
-        self.filling.append(InteractableObject(0, 0, Sprite("Sprites/test_room.png", z=-2)))
+        self.filling.append(InteractableObject(0, 0, Sprite("Sprites/Levels/map_0_BW.png", z=-2)))
         self.cleaned = False
 
     def enter(self, type='left'):
