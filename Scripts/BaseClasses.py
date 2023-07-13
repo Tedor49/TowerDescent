@@ -389,6 +389,7 @@ class GameManager:
                 continue
             for i in GameManager.all_Objects:
                 i.tick()
+            GameManager.screen.fill((255, 255, 255))
             for i in sorted(GameManager.all_Sprites, key=lambda x: x.z):
                 i.draw()
             GameManager.draw_map(lev.map)
