@@ -6,7 +6,7 @@ from Scripts.TestObjects import Ground
 
 class Player(InteractableObject, Damageable, Persistent):
     sprites = [pygame.image.load("Sprites/playernew.png"), pygame.transform.flip(pygame.image.load("Sprites/playernew.png"), True, False)]
-    hp = 10000
+    hp = 100
     coyote = 0
     x_speed = 1
     jump_height = 1
@@ -18,7 +18,7 @@ class Player(InteractableObject, Damageable, Persistent):
         self.weapon = Weapon(self, FistKit, downtime=350)
         self.base = self.weapon
 
-        self.gui = [WeaponGUI(self)]
+        self.gui = [WeaponGUI(self), HealthGUI(self)]
 
     def tick(self):
         if self.hp == 0:
@@ -83,15 +83,17 @@ class Player(InteractableObject, Damageable, Persistent):
             GameManager.all_Sprites.add(self.sprite)
 
 
-class WeaponGUI(InteractableObject, Persistent, Sprite):
+class WeaponGUI(Sprite, Persistent):
     def __init__(self, parent):
-        InteractableObject.__init__(self, 760, 520, Sprite("Sprites/selectedWeapon.png"), None)
+        Sprite.__init__(self, "Sprites/selectedWeapon.png")
+        self.x = 760
+        self.y = 520
         self.parent = parent
         self.z = 10
         self.font = pygame.font.Font('Sprites/vinque rg.otf', 70)
 
     def draw(self):
-        self.sprite.draw()
+        Sprite.draw(self)
         self.parent.weapon.guiIcon.x = 35
         self.parent.weapon.guiIcon.y = 50
         self.parent.weapon.guiIcon.parent = self
@@ -102,7 +104,62 @@ class WeaponGUI(InteractableObject, Persistent, Sprite):
         else:
             amount = "∞"
 
-        ammo = self.font.render(amount, True, (255, 215, 0))
-        textRect = ammo.get_rect()
-        textRect.center = (self.getx() + 145, self.gety() + 135)
-        GameManager.screen.blit(ammo, textRect)
+        ammo = self.font.render(amount, True, (0, 0, 0))
+        text_position = ammo.get_rect()
+        text_position.center = (self.x + 145, self.y + 135)
+        GameManager.screen.blit(ammo, text_position)
+
+    def getx(self):
+        return self.x
+
+    def gety(self):
+        return self.y
+
+
+class HealthGUI(Sprite, Persistent):
+    def __init__(self, parent):
+        Sprite.__init__(self, "Sprites/heart.png")
+        self.baseImage = pygame.image.load("Sprites/heart.png")
+        self.x = 50
+        self.y = 50
+        self.parent = parent
+        self.z = 10
+        self.time = 0
+        self.font = pygame.font.Font('Sprites/vinque rg.otf', 20)
+
+    def draw(self):
+        self.time += GameManager.time_elapsed
+        size_fraction = math.sin(10*((self.time / 200) % 5)) * math.e ** (4 * (1 - (self.time / 200 % 5))) / 100 + 0.9
+        hp_fraction = (self.parent.hp + 100) / 200
+        size_fraction *= hp_fraction
+
+        base_size = self.baseImage.get_size()
+        new_size = (base_size[0] * size_fraction, base_size[1] * size_fraction)
+        self.image = pygame.transform.scale(self.baseImage, new_size)
+
+        brown = (139, 69, 19)
+
+        hp_fraction = 1 - hp_fraction
+        self.image.fill(tuple([255 - int((255 - i) * hp_fraction) for i in brown]),
+                                     special_flags=pygame.BLEND_MULT)
+        self.x = 75 - new_size[0] // 2
+        self.y = 75 - new_size[1] // 2
+
+        Sprite.draw(self)
+
+        # if self.parent.weapon.ammo >= 0:
+        #     amount = str(self.parent.weapon.ammo)
+        # else:
+        #     amount = "∞"
+
+
+        ammo = self.font.render(str(self.parent.hp), True, (255, 0, 0))
+        text_position = ammo.get_rect()
+        text_position.center = (self.x + 70, self.y + 80)
+        GameManager.screen.blit(ammo, text_position)
+
+    def getx(self):
+        return self.x
+
+    def gety(self):
+        return self.y

@@ -32,6 +32,8 @@ class AnimatedGun(AnimatedSprite):
         else:
             x, y = GameManager.player.getx(), GameManager.player.gety()
         length = ((x - self.parent.parent.getx()) ** 2 + (y - self.parent.parent.gety()) ** 2) ** (1 / 2)
+        if length == 0:
+            length = 0.001
         vector = ((x - self.parent.parent.getx()) / length * 30, (y - self.parent.parent.gety()) / length * 30)
         angle = math.atan2(vector[1], vector[0])
         angle = - angle * 180 / math.pi
@@ -61,6 +63,8 @@ class AnimatedFist(AnimatedSprite):
     def tick(self):
         x, y = pygame.mouse.get_pos()
         length = ((x - self.parent.parent.getx()) ** 2 + (y - self.parent.parent.gety()) ** 2) ** (1 / 2)
+        if length == 0:
+            length = 0.001
         vector = ((x - self.parent.parent.getx()) / length * 30, (y - self.parent.parent.gety()) / length * 30)
         angle = math.atan2(vector[1], vector[0])
         angle = - angle * 180 / math.pi
@@ -112,6 +116,8 @@ class AnimatedSword(AnimatedSprite):
             else:
                 x, y = GameManager.player.getx(), GameManager.player.gety()
             length = ((x - self.parent.parent.getx()) ** 2 + (y - self.parent.parent.gety()) ** 2) ** (1 / 2)
+            if length == 0:
+                length = 0.001
             vector = ((x - self.parent.parent.getx()) / length * 30, (y - self.parent.parent.gety()) / length * 30)
             angle = math.atan2(vector[1], vector[0])
             angle = - angle * 180 / math.pi
