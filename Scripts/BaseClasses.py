@@ -596,7 +596,7 @@ class LevelGenerator:
             room.leftDoor = Door(-90, 305, Sprite('Sprites/door.png', z=-1), Hitbox(120, 120), room, None, None,
                                  type='left')
             if x-1 == 0 and y == 0:
-                room.leftDoor.usable = False
+                room.leftDoor.usable = True
             room.filling.append(room.leftDoor)
         else:
             walls.append(Ground(0, 0, 30, 720))
