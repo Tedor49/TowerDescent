@@ -129,7 +129,7 @@ class RandomWalkingMotion(InteractableObject):
 class FlyingGuy(Enemy, RandomWalkingMotion):
     def __init__(self, x, y, sprite, hitbox, player_enemy, dx=0, dy=0, g=0.002):
         super().__init__(x, y, sprite, hitbox, player_enemy, dx, dy, g)
-        self.weapon = Weapon(self, SwordKit, downtime=500)
+        self.weapon = Weapon(self, GunKit, downtime=500)
         self.iframes = 0.1
         self.damage = 1
 
@@ -143,6 +143,64 @@ class FlyingGuy(Enemy, RandomWalkingMotion):
         else:
             GameManager.toRemove.append(self)
             GameManager.currentRoom.filling.remove(self)
+
+    def add_to_manager(self):
+        GameManager.all_Objects.add(self)
+        if self.weapon:
+            self.weapon.add_to_manager()
+        if self.hitbox:
+            GameManager.all_Hitboxes.add(self.hitbox)
+        if self.sprite:
+            GameManager.all_Sprites.add(self.sprite)
+
+    def delete(self):
+        GameManager.all_Objects.remove(self)
+        if self.weapon:
+            self.weapon.delete()
+        if self.hitbox:
+            GameManager.all_Hitboxes.remove(self.hitbox)
+        if self.sprite:
+            GameManager.all_Sprites.remove(self.sprite)
+
+
+class Boss0(Enemy):
+    def __init__(self, player_enemy):
+        super().__init__(384, 260, Sprite("Sprites/boss0.png", z=4), Hitbox(200, 200, x=-4), player_enemy)
+        self.iframes = 0.1
+        self.damage = 1
+        self.hp = 50
+        self.weapon = None
+
+    def tick(self):
+        if self.hp <= 0:
+            GameManager.toRemove.append(self)
+            GameManager.currentRoom.filling.remove(self)
+
+    def add_to_manager(self):
+        GameManager.all_Objects.add(self)
+        if self.hitbox:
+            GameManager.all_Hitboxes.add(self.hitbox)
+        if self.sprite:
+            GameManager.all_Sprites.add(self.sprite)
+
+    def delete(self):
+        GameManager.all_Objects.remove(self)
+        if self.hitbox:
+            GameManager.all_Hitboxes.remove(self.hitbox)
+        if self.sprite:
+            GameManager.all_Sprites.remove(self.sprite)
+
+
+class GunArm(Enemy):
+    def __init__(self, player_enemy):
+        super().__init__(750, 40, Sprite("Sprites/boss0Arm.png", z=4), Hitbox(126, 57, x=-4), player_enemy)
+        self.iframes = 0.1
+        self.weapon = Weapon(self, GunKit, damage=10, downtime=500)
+
+    def tick(self):
+        if not self.weapon:
+            self.weapon = Weapon(self, GunKit, damage=10, downtime=500)
+            GameManager.toAdd.append(self.weapon)
 
     def add_to_manager(self):
         GameManager.all_Objects.add(self)

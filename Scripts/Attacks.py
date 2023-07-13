@@ -5,9 +5,9 @@ import time
 
 
 class Bullet(Attack):
-    def __init__(self, x, y, to_x, to_y, parent, dx=0, dy=0, proj_speed=1):
+    def __init__(self, x, y, to_x, to_y, parent, damage=1, dx=0, dy=0, proj_speed=1):
         super().__init__(x, y, Sprite('Sprites/bullet1.png'), Hitbox(4, 4), parent, dx, dy)
-        self.damage = 1
+        self.damage = damage
         length = ((to_x - self.getx()) ** 2 + (to_y - self.gety()) ** 2) ** (1 / 2)
         vector = ((to_x - self.getx()) / length * proj_speed, (to_y - self.gety()) / length * proj_speed)
         self.dx, self.dy = vector
@@ -42,13 +42,13 @@ class Bullet(Attack):
 
 
 class SwordSwing(Attack):
-    def __init__(self, x, y, target_x, target_y, parent, dx=0, dy=0):
+    def __init__(self, x, y, target_x, target_y, parent, damage=1, dx=0, dy=0):
         hitbox = Hitbox(parent.hitbox.x_size * 2.5, parent.hitbox.y_size * 1.75, y=-parent.hitbox.y_size * .75)
         if target_x < x:
             hitbox.x = -parent.hitbox.x_size * 1.5
         super().__init__(0, 0, None, hitbox, parent, dx, dy)
         self.timer = 300
-        self.damage = 1
+        self.damage = damage
         self.parent.weapon.sprite.play(self.timer)
 
     def getx(self):
@@ -68,11 +68,12 @@ class SwordSwing(Attack):
 
 
 class Bomb(Attack):
-    def __init__(self, x, y, sprite, parent, dx=0, dy=0):
+    def __init__(self, x, y, sprite, parent, damage=1, dx=0, dy=0):
         super().__init__(x, y, sprite, Hitbox(4, 4), dx, dy)
         self.landed = False
         self.timer = time.time()
         self.g = 1
+        self.damage = damage
 
     def do(self, to_x, to_y):
         pass
@@ -94,13 +95,13 @@ class Bomb(Attack):
 
 
 class Fist(Attack):
-    def __init__(self, x, y, target_x, target_y, parent, dx=0, dy=0):
+    def __init__(self, x, y, target_x, target_y, parent, damage=1, dx=0, dy=0):
         hitbox = Hitbox(parent.hitbox.x_size * 2.25, parent.hitbox.y_size * .75, y=parent.hitbox.y_size * .125)
         if target_x < x:
             hitbox.x = -parent.hitbox.x_size * 1.25
         super().__init__(0, 0, None, hitbox, parent, dx, dy)
         self.timer = 100
-        self.damage = 1
+        self.damage = damage
         self.parent.weapon.sprite.play(self.timer)
 
     def tick(self):
