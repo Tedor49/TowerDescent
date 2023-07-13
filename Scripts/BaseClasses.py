@@ -576,7 +576,9 @@ class LevelGenerator:
 
     def addWallsAndDoors(self, x=0, y=0):
         import Scripts.Enemies
-        if (x == 0 or x == 1) and y == 0:
+        if x == 0 and y == 0:
+            room_type = 'boss_0'
+        elif x == 1 and y == 0:
             room_type = 'start'
         else:
             room_type = 'map_' + str(random.choice([0, 1]))
