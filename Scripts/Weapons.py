@@ -4,6 +4,8 @@ from Scripts.BaseClasses import *
 from Scripts.Attacks import *
 from Scripts.AnimatedSprites import *
 
+from typing import Type
+
 
 class Gun(GameObject):
     def __init__(self, parent, downtime=150, proj_speed=1):
@@ -61,12 +63,37 @@ class Sword(InteractableObject):
             self.coolDown -= GameManager.time_elapsed
 
 
+class WeaponKit:
+    attack_type: Attack = None
+    animation: AnimatedSprite = None
+    gui_icon: Sprite = None
+
+
+class GunKit(WeaponKit):
+    attack_type = Bullet
+    animation = AnimatedGun
+    gui_icon = Sprite("Sprites/gunIcon.png")
+
+
+class FistKit(WeaponKit):
+    attack_type = Fist
+    animation = AnimatedFist
+    gui_icon = Sprite("Sprites/fistIcon.png")
+
+
+class SwordKit(WeaponKit):
+    attack_type = SwordSwing
+    animation = AnimatedSword
+    gui_icon = Sprite("Sprites/swordIcon.png")
+
+
 class Weapon(InteractableObject):
-    def __init__(self, parent, attack_type, animation, downtime=10, proj_speed=1):
-        super().__init__(0, 0, animation)
+    def __init__(self, parent, weapon_kit: Type[WeaponKit], downtime=10, proj_speed=1):
+        super().__init__(0, 0, weapon_kit.animation())
         self.parent = parent
         self.coolDown = 0
-        self.attackType = attack_type
+        self.attackType = weapon_kit.attack_type
+        self.guiIcon = weapon_kit.gui_icon
         self.downTime = downtime
         self.projSpeed = proj_speed
         self.ammo = -1

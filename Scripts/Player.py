@@ -4,7 +4,7 @@ from Scripts.AnimatedSprites import *
 from Scripts.TestObjects import Ground
 
 
-class Player(InteractableObject, Damageable):
+class Player(InteractableObject, Damageable, Persistent):
     sprites = [pygame.image.load("Sprites/playernew.png"), pygame.transform.flip(pygame.image.load("Sprites/playernew.png"), True, False)]
     hp = 10000
     coyote = 0
@@ -13,10 +13,12 @@ class Player(InteractableObject, Damageable):
     prev_jump_pressed = False
 
     def __init__(self, x, y, sprite, hitbox, dx=0, dy=0, g=0.002):
-        super().__init__(x, y, sprite, hitbox, dx, dy, g)
+        InteractableObject.__init__(self, x, y, sprite, hitbox, dx, dy, g)
         self.hitbox.ray_quality = 2
-        self.weapon = Weapon(self, Fist, AnimatedFist(), downtime=350)
+        self.weapon = Weapon(self, FistKit, downtime=350)
         self.base = self.weapon
+
+        self.gui = [WeaponGUI(self)]
 
     def tick(self):
         if self.hp == 0:
@@ -67,12 +69,40 @@ class Player(InteractableObject, Damageable):
         GameManager.toRemove.append(self.weapon)
         self.weapon = new_weapon
         new_weapon.parent = self
-        new_weapon.ammo = random.randint(5, 10)
+        new_weapon.ammo = random.randint(5, 9)
 
     def add_to_manager(self):
         GameManager.all_Objects.add(self)
-        self.weapon.add_to_manager()
+        for i in self.gui:
+            GameManager.all_Sprites.add(i)
+        if self.weapon:
+            self.weapon.add_to_manager()
         if self.hitbox:
             GameManager.all_Hitboxes.add(self.hitbox)
         if self.sprite:
             GameManager.all_Sprites.add(self.sprite)
+
+
+class WeaponGUI(InteractableObject, Persistent, Sprite):
+    def __init__(self, parent):
+        InteractableObject.__init__(self, 760, 520, Sprite("Sprites/selectedWeapon.png"), None)
+        self.parent = parent
+        self.z = 10
+        self.font = pygame.font.Font('Sprites/vinque rg.otf', 70)
+
+    def draw(self):
+        self.sprite.draw()
+        self.parent.weapon.guiIcon.x = 35
+        self.parent.weapon.guiIcon.y = 50
+        self.parent.weapon.guiIcon.parent = self
+        self.parent.weapon.guiIcon.draw()
+
+        if self.parent.weapon.ammo >= 0:
+            amount = str(self.parent.weapon.ammo)
+        else:
+            amount = "∞"
+
+        ammo = self.font.render(amount, True, (255, 215, 0))
+        textRect = ammo.get_rect()
+        textRect.center = (self.getx() + 145, self.gety() + 135)
+        GameManager.screen.blit(ammo, textRect)

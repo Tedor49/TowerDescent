@@ -129,7 +129,7 @@ class RandomWalkingMotion(InteractableObject):
 class FlyingGuy(Enemy, RandomWalkingMotion):
     def __init__(self, x, y, sprite, hitbox, player_enemy, dx=0, dy=0, g=0.002):
         super().__init__(x, y, sprite, hitbox, player_enemy, dx, dy, g)
-        self.weapon = Weapon(self, SwordSwing, AnimatedSword(), downtime=500)
+        self.weapon = Weapon(self, SwordKit, downtime=500)
         self.iframes = 0.1
         self.damage = 1
 
@@ -146,7 +146,8 @@ class FlyingGuy(Enemy, RandomWalkingMotion):
 
     def add_to_manager(self):
         GameManager.all_Objects.add(self)
-        self.weapon.add_to_manager()
+        if self.weapon:
+            self.weapon.add_to_manager()
         if self.hitbox:
             GameManager.all_Hitboxes.add(self.hitbox)
         if self.sprite:

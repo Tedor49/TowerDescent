@@ -246,7 +246,7 @@ class Sprite(GameObject):
 
 class InteractableObject(GameObject):
     def __init__(self, x, y, sprite=None, hitbox=None, dx=0, dy=0, g=0.002):
-        super().__init__(x, y)
+        GameObject.__init__(self, x, y)
         self.dx = dx
         self.dy = dy
         self.g = g
@@ -403,8 +403,7 @@ class GameManager:
                 GameManager.currentRoom.filling.append(i)
         GameManager.toAdd = []
         for i in GameManager.toRemove:
-            if isinstance(i, Enemy):
-                i.delete()
+            i.delete()
         GameManager.toRemove = []
 
     @staticmethod
@@ -458,7 +457,7 @@ class Room:
                     self.filling.remove(i)
             if isinstance(i, Spawner):
                 i.despawn()
-            if not isinstance(i, Player):
+            if not isinstance(i, Persistent):
                 GameManager.toRemove.append(i)
 
 
@@ -607,3 +606,7 @@ class LevelGenerator:
             if self.map[y][x] != None:
                 return True
         return False
+
+
+class Persistent:
+    pass
