@@ -141,6 +141,7 @@ class FlyingGuy(Enemy, RandomWalkingMotion):
                 self.weapon.attack(x, y)
             self.move(self.player_enemy)
         else:
+            GameManager.counter-=1
             GameManager.toRemove.append(self)
 
     def add_to_manager(self):
