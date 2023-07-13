@@ -420,8 +420,6 @@ class GameManager:
     def update():
         for i in GameManager.toAdd:
             i.add_to_manager()
-            if i not in GameManager.currentRoom.filling:
-                GameManager.currentRoom.filling.append(i)
         GameManager.toAdd = []
         for i in set(GameManager.toRemove):
             i.delete()
@@ -593,8 +591,14 @@ class LevelGenerator:
 
     def addWallsAndDoors(self, x=0, y=0):
         import Scripts.Enemies
+
+        room = Room([], self.getRoomID(x, y))
+
         if x == 0 and y == 0:
             room_type = 'boss_0'
+
+            room.filling.append(Scripts.Enemies.Boss0(GameManager.player))
+            room.filling.append(Scripts.Enemies.GunArm(GameManager.player))
         elif x == 1 and y == 0:
             room_type = 'start'
         else:
@@ -607,7 +611,6 @@ class LevelGenerator:
         }
         walls = []
         map_data = json.load(open('Sprites\Levels\map_data.json', 'r'))
-        room = Room([], self.getRoomID(x, y))
         room.type = room_type
         if room_type == 'boss_0':
             room.filling.append(InteractableObject(0, 0,

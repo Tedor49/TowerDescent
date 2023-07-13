@@ -88,7 +88,7 @@ class SwordKit(WeaponKit):
 
 
 class Weapon(InteractableObject):
-    def __init__(self, parent, weapon_kit: Type[WeaponKit], downtime=10, proj_speed=1):
+    def __init__(self, parent, weapon_kit: Type[WeaponKit], damage=1, downtime=10, proj_speed=1):
         super().__init__(0, 0, weapon_kit.animation())
         self.parent = parent
         self.coolDown = 0
@@ -97,6 +97,7 @@ class Weapon(InteractableObject):
         self.downTime = downtime
         self.projSpeed = proj_speed
         self.ammo = -1
+        self.damage = damage
 
     def attack(self, x, y):
         if self.coolDown <= 0:
@@ -104,7 +105,7 @@ class Weapon(InteractableObject):
             self.coolDown = self.downTime
             starting_x = self.parent.x + self.parent.hitbox.x_size / 2
             starting_y = self.parent.y + self.parent.hitbox.y_size / 2
-            self.attackType(starting_x, starting_y, x, y, self.parent)
+            self.attackType(starting_x, starting_y, x, y, self.parent, self.damage)
             if self.ammo == 0:
                 GameManager.toRemove.append(self)
                 self.parent.weapon = self.parent.base
