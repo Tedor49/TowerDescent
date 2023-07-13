@@ -43,8 +43,10 @@ class Spawner(GameObject):
     def despawn(self):
         if self.enemyInstance.hp <= 0:
             self.inactive = True
-        if not self.inactive:
             GameManager.toRemove.append(self)
+            self.room.filling.remove(self)
+        else:
+            GameManager.toRemove.append(self.enemyInstance)
             self.room.filling.remove(self.enemyInstance)
 
 
@@ -327,7 +329,7 @@ class Menu:
         text_y = 300
         screen.blit(text, (text_x, text_y))
         text = font.render('Multiplayer',
-                          True, (0, 0, 0))
+                           True, (0, 0, 0))
         text_x = 230
         text_y = 380
         screen.blit(text, (text_x, text_y))
@@ -359,14 +361,13 @@ class GameManager:
     all_Objects = set()
     all_Sprites = set()
     Rooms = []
-    counter = 0
 
     def __init__(self):
         from Scripts.Player import Player
         pygame.init()
         size = [960, 720]
         lev = LevelGenerator()
-        GameManager.counter = len(GameManager.Rooms)
+        print(lev.map, sep='\n')
         GameManager.player = Player(60, 100, Sprite('Sprites/playernew.png'), Hitbox(50, 50))
         GameManager.screen = pygame.display.set_mode(size)
         pygame.display.set_caption('Tower Descent')
@@ -390,9 +391,26 @@ class GameManager:
                 i.tick()
             for i in sorted(GameManager.all_Sprites, key=lambda x: x.z):
                 i.draw()
+            GameManager.draw_map(lev.map)
             pygame.display.flip()
             GameManager.time_elapsed = 0
             self.update()
+
+    @staticmethod
+    def draw_map(matrix):
+        pygame.draw.rect(GameManager.screen, (255, 255, 255), pygame.Rect(845, 0, 115, 110))
+        pygame.draw.rect(GameManager.screen, (0, 0, 0), pygame.Rect(845, 0, 115, 110), 2)
+        for y in range(7):
+            for x in range(7):
+                if matrix[y][x] is not None:
+                    if GameManager.currentRoom.id == matrix[y][x]:
+                        pygame.draw.rect(GameManager.screen, (255, 0, 0), pygame.Rect(855 + x * 15, 10 + y * 15,
+                                                                                      15, 15))
+                    elif GameManager.searchByID(matrix[y][x]).cleaned:
+                        pygame.draw.rect(GameManager.screen, (55, 253, 18), pygame.Rect(855 + x * 15, 10 + y * 15,
+                                                                                        15, 15))
+                    pygame.draw.rect(GameManager.screen, (0, 0, 0), pygame.Rect(855 + x * 15, 10 + y * 15,
+                                                                                15, 15), 2)
 
     @staticmethod
     def update():
@@ -402,7 +420,7 @@ class GameManager:
             if i not in GameManager.currentRoom.filling:
                 GameManager.currentRoom.filling.append(i)
         GameManager.toAdd = []
-        for i in GameManager.toRemove:
+        for i in set(GameManager.toRemove):
             i.delete()
         GameManager.toRemove = []
 
@@ -428,19 +446,18 @@ class Room:
         self.upChecked = False
         self.downChecked = False
         self.filling.append(InteractableObject(0, 0, Sprite("Sprites/test_room.png", z=-2)))
+        self.cleaned = False
 
     def enter(self, type='left'):
         from Scripts.Player import Player
         coordinates = {
             'up': (450, 40),
-            'down':(450, 630),
-            'left':(30, 350),
-            'right':(880, 350)
+            'down': (450, 630),
+            'left': (30, 350),
+            'right': (880, 350)
         }
-        print(type)
         GameManager.player.x = coordinates[type][0]
         GameManager.player.y = coordinates[type][1]
-        print(coordinates[type])
         GameManager.currentRoom = self
         self.filling.append(GameManager.player)
         for i in self.filling:
@@ -460,6 +477,13 @@ class Room:
             if not isinstance(i, Persistent):
                 GameManager.toRemove.append(i)
 
+    def check_cleaned(self):
+        for i in self.filling:
+            if isinstance(i, Spawner):
+                self.cleaned = False
+                return
+        self.cleaned = True
+
 
 class Door(InteractableObject):
     def __init__(self, x, y, sprite, hitbox, from1, to1, toDoor, dx=0, dy=0, g=5, type=None):
@@ -471,6 +495,7 @@ class Door(InteractableObject):
 
     def use(self):
         self.from1.quit()
+        self.from1.check_cleaned()
         self.to1.enter(self.toDoor.type)
         self.toDoor.timer = time.time()
         self.timer = time.time()
@@ -496,9 +521,8 @@ class LevelGenerator:
     def __init__(self):
         self.id = 0
         self.map = [[None for i in range(7)] for i2 in range(7)]
-        random.seed(7)
         self.maxLVL = 10
-        self.generateLevel(0, 0)
+        self.generateLevel(0, 1)
         for y in range(7):
             for x in range(7):
                 if self.map[y][x] != None:
@@ -508,14 +532,19 @@ class LevelGenerator:
                 if self.map[y][x] != None:
                     self.connect(x, y)
 
-    def generateLevel(self, x, y):
-        if 0 <= x <= 6 and 0 <= y <= 6 and self.map[x][y] == None and self.id < self.maxLVL:
-            self.map[x][y] = self.id
+    def generateLevel(self, y, x):
+        forbidden = [(0, 1), (1, 1)]
+        if 0 <= x <= 6 and 0 <= y <= 6 and self.map[y][x] == None and self.id < self.maxLVL:
+            self.map[y][x] = self.id
             self.id += 1
+            if x == 1 and y == 0:
+                self.generateLevel(y, x - 1)
+                self.generateLevel(y, x + 1)
             for i in range(-1, 2):
                 for j in range(-1, 2):
-                    if random.choice([True, False]) and (i == 0 or j == 0):
-                        self.generateLevel(x + i, y + j)
+                    if random.choice([True, False, True]) and (i == 0 or j == 0) and (x + j, y + i) not in forbidden:
+                        self.generateLevel(y + i, x + j)
+
 
     def combineLeftRight(self, roomL, roomR):
         roomL.rightDoor.toDoor = roomR.leftDoor
