@@ -43,8 +43,10 @@ class Spawner(GameObject):
     def despawn(self):
         if self.enemyInstance.hp <= 0:
             self.inactive = True
-        if not self.inactive:
             GameManager.toRemove.append(self)
+            self.room.filling.remove(self)
+        else:
+            GameManager.toRemove.append(self.enemyInstance)
             self.room.filling.remove(self.enemyInstance)
 
 
@@ -402,9 +404,8 @@ class GameManager:
             if i not in GameManager.currentRoom.filling:
                 GameManager.currentRoom.filling.append(i)
         GameManager.toAdd = []
-        for i in GameManager.toRemove:
-            if isinstance(i, Enemy):
-                i.delete()
+        for i in set(GameManager.toRemove):
+            i.delete()
         GameManager.toRemove = []
 
     @staticmethod

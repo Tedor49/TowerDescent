@@ -135,6 +135,7 @@ class FlyingGuy(Enemy, RandomWalkingMotion):
 
     def tick(self):
         if self.hp > 0:
+            print(1)
             x = self.player_enemy.hitbox.getx() + self.player_enemy.hitbox.x_size / 2
             y = self.player_enemy.hitbox.gety() + self.player_enemy.hitbox.y_size / 2
             if self.weapon:
@@ -143,6 +144,7 @@ class FlyingGuy(Enemy, RandomWalkingMotion):
         else:
             GameManager.counter-=1
             GameManager.toRemove.append(self)
+            GameManager.currentRoom.filling.remove(self)
 
     def add_to_manager(self):
         GameManager.all_Objects.add(self)
