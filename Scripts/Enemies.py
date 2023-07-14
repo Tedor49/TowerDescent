@@ -14,8 +14,8 @@ class Enemy(InteractableObject, Damageable):
         self.hitbox.ray_quality = 2
 
 
-class FollowFlyingMotion(InteractableObject):
-    def move(self, target):
+class Movement:
+    def FollowFlyingMove(self, target):
         if target != 0:
             x = target.hitbox.getx() + target.hitbox.x_size / 2
             y = target.hitbox.gety() + target.hitbox.y_size / 2
@@ -31,9 +31,7 @@ class FollowFlyingMotion(InteractableObject):
             self.x += self.dx * GameManager.time_elapsed
             self.y += self.dy * GameManager.time_elapsed
 
-
-class FollowFlyingWallsMotion(InteractableObject):
-    def move(self, target):
+    def FollowFlyingWallsMove(self, target):
         if target != 0:
             x = target.hitbox.getx() + target.hitbox.x_size / 2
             y = target.hitbox.gety() + target.hitbox.y_size / 2
@@ -59,17 +57,7 @@ class FollowFlyingWallsMotion(InteractableObject):
             self.x = movement[1][0]
             self.y = movement[1][1]
 
-
-def sign(x):
-    if x > 0:
-        return 1
-    elif x == 0:
-        return 0
-    return -1
-
-
-class FollowWalkingMotion(InteractableObject):
-    def move(self, target):
+    def FollowWalkingMove(self, target):
         if target != 0:
             x = target.hitbox.getx() + target.hitbox.x_size / 2
             our_x = self.hitbox.getx() + self.hitbox.x_size / 2
@@ -90,12 +78,7 @@ class FollowWalkingMotion(InteractableObject):
             self.x = movement[1][0]
             self.y = movement[1][1]
 
-
-class RandomWalkingMotion(InteractableObject):
-    cooldown = 2
-    walkTime = 0
-
-    def move(self, target):
+    def RandomWalkingMove(self, target):
         if self.cooldown < 0:
             self.cooldown = 0
             self.dx = random.choice([1, -1]) / 10
@@ -127,20 +110,44 @@ class RandomWalkingMotion(InteractableObject):
         self.x = movement[1][0]
         self.y = movement[1][1]
 
+    def getRandomMovement(self):
+        return random.choice([Movement.FollowFlyingMove, Movement.FollowFlyingWallsMove, Movement.FollowWalkingMove, Movement.RandomWalkingMove])
 
-class FlyingGuy(Enemy, RandomWalkingMotion):
-    def __init__(self, x, y, sprite, hitbox, player_enemy, dx=0, dy=0, g=0.002):
+
+def sign(x):
+    if x == 0:
+        return 0
+    return x/abs(x)
+
+
+class BaseEnemy(Enemy):
+    def __init__(self, x, y, sprite, hitbox, player_enemy, move, dx=0, dy=0, g=0.002):
         super().__init__(x, y, sprite, hitbox, player_enemy, dx, dy, g)
-        self.weapon = Weapon(self, GunKit, downtime=500)
+        self.weapon = Weapon(self, random.choice([SwordKit, GunKit]), downtime=500)
         self.iframes = 0.1
         self.damage = 1
+        self.cooldown = 2000
+        self.fire_time = 0
+        self.wall = 0
+        self.walk_time = 0
+        self.movement = move
+        self.attack_cooldown = GameManager.time_elapsed
 
     def tick(self):
         if self.hp > 0:
             x = self.player_enemy.hitbox.getx() + self.player_enemy.hitbox.x_size / 2
             y = self.player_enemy.hitbox.gety() + self.player_enemy.hitbox.y_size / 2
             if self.weapon:
-                self.weapon.attack(x, y)
+                if self.cooldown > 0:
+                    self.cooldown -= GameManager.time_elapsed
+                elif self.cooldown < 0:
+                    self.fire_time = random.randint(500, 2000)
+                    self.cooldown = 0
+                elif self.fire_time > 0:
+                    self.weapon.attack(x, y)
+                    self.fire_time -= GameManager.time_elapsed
+                else:
+                    self.cooldown = random.randint(500, 2000)
             self.move(self.player_enemy)
         else:
             GameManager.toRemove.append(self)
@@ -163,6 +170,9 @@ class FlyingGuy(Enemy, RandomWalkingMotion):
             GameManager.all_Hitboxes.remove(self.hitbox)
         if self.sprite:
             GameManager.all_Sprites.remove(self.sprite)
+
+    def move(self, target):
+        return self.movement(self, target)
 
 
 class Boss0(Enemy):

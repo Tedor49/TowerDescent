@@ -36,9 +36,11 @@ class Spawner(GameObject):
         self.inactive = False
 
     def spawn(self):
+        from Scripts.Enemies import Movement
+        movement = Movement()
         if not self.inactive:
             self.enemyInstance = self.enemy(self.x, self.y, Sprite('Sprites/playernew.png'), Hitbox(50, 50),
-                                            GameManager.player)
+                                            GameManager.player, move=movement.getRandomMovement())
             self.room.filling.append(self.enemyInstance)
 
     def despawn(self):
@@ -658,7 +660,7 @@ class LevelGenerator:
         for i in map_data[room_type]['platforms']:
             room.filling.append(Ground(i['x'], i['y'], i['x_size']*30, i['y_size']*30))
         for i in map_data[room_type]['spawners']:
-            Spawner(i['x'], i['y'], Scripts.Enemies.FlyingGuy, room)
+            Spawner(i['x'], i['y'], Scripts.Enemies.BaseEnemy, room)
         GameManager.Rooms.append(room)
         if self.checkRoomExistence(x - 1, y):
             walls.append(Ground(0, 0, 30, 300))
