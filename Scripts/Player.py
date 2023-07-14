@@ -12,6 +12,8 @@ class Player(InteractableObject, Damageable, Persistent):
     coyote = 0
     x_speed = 1
     jump_height = 1
+    max_extra_jumps = 0
+    extra_jumps = 0
     prev_jump_pressed = False
     active = True
 
@@ -37,8 +39,17 @@ class Player(InteractableObject, Damageable, Persistent):
         if pygame.mouse.get_pressed()[0]:
             x, y = pygame.mouse.get_pos()
             self.weapon.attack(x, y)
-        if keys[pygame.K_w] and not self.prev_jump_pressed and self.coyote > 0:
-            self.dy = -0.8 * self.jump_height
+
+        if self.coyote > 0:
+            self.extra_jumps = self.max_extra_jumps
+
+        if keys[pygame.K_w] and not self.prev_jump_pressed:
+            if self.coyote > 0:
+                self.dy = -0.8 * self.jump_height
+                self.coyote = 0
+            elif self.extra_jumps > 0:
+                self.extra_jumps -= 1
+                self.dy = -0.8 * self.jump_height
         else:
             self.dy += self.g * GameManager.time_elapsed
 
@@ -54,10 +65,7 @@ class Player(InteractableObject, Damageable, Persistent):
         elif (keys[pygame.K_d] - keys[pygame.K_a]) == 1:
             self.sprite.image = self.sprites[0]
 
-        # if keys[pygame.K_f] and self.weapon.attackType != Fist:
-        #     GameManager.toRemove.append(self.weapon)
-        #     self.weapon = self.base
-        #     GameManager.toAdd.append(self.base)
+
 
         movement = [[self.x, self.y],
                     [self.x + self.x_speed * (keys[pygame.K_d] - keys[pygame.K_a]) * GameManager.time_elapsed,
