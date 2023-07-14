@@ -51,6 +51,11 @@ class Player(InteractableObject, Damageable, Persistent):
         elif (keys[pygame.K_d] - keys[pygame.K_a]) == 1:
             self.sprite.image = self.sprites[0]
 
+        # if keys[pygame.K_f] and self.weapon.attackType != Fist:
+        #     GameManager.toRemove.append(self.weapon)
+        #     self.weapon = self.base
+        #     GameManager.toAdd.append(self.base)
+
         movement = [[self.x, self.y],
                     [self.x + self.x_speed * (keys[pygame.K_d] - keys[pygame.K_a]) * GameManager.time_elapsed,
                      self.y + self.dy * GameManager.time_elapsed]]
@@ -170,7 +175,6 @@ class HealthGUI(Sprite, Persistent):
         #     amount = str(self.parent.weapon.ammo)
         # else:
         #     amount = "∞"
-
 
         ammo = self.font.render(str(self.parent.hp), True, (255, 0, 0))
         text_position = ammo.get_rect()

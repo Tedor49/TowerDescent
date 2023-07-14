@@ -641,7 +641,7 @@ class LevelGenerator:
         if self.checkRoomExistence(x - 1, y):
             walls.append(Ground(0, 0, 30, 300))
             walls.append(Ground(0, 420, 30, 330))
-            room.leftDoor = Door(-90, 305, Sprite('Sprites/door.png', z=-1), Hitbox(120, 120), room, None, None,
+            room.leftDoor = Door(-90, 300, Sprite('Sprites/door.png', z=-1), Hitbox(120, 120), room, None, None,
                                  type='left')
             if x-1 == 0 and y == 0:
                 room.leftDoor.usable = True
