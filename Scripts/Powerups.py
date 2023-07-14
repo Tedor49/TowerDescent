@@ -14,18 +14,19 @@ class DoubleJump(PowerUp):
     def apply():
         GameManager.player.max_extra_jumps += 1
 
+
 class DoubleDamage(PowerUp):
     @staticmethod
     def apply():
         def change_damage_decorator(foo):
-            def wrapper(self):
-                foo(self)
+            def wrapper(self, *args):
+                foo(self, *args)
                 self.weapon.damage *= 2
             return wrapper
         Player.change_weapon = change_damage_decorator(Player.change_weapon)
 
 
-class BouncingBullets(PowerUp):
+class BouncyBullets(PowerUp):
     @staticmethod
     def apply():
         GameManager.player.bullets_bounce = True
@@ -34,8 +35,8 @@ class DiscardWeapon(PowerUp):
     @staticmethod
     def apply():
         def tick_decorator(foo):
-            def wrapper(self):
-                foo(self)
+            def wrapper(self, *args):
+                foo(self, *args)
                 keys = pygame.key.get_pressed()
                 if keys[pygame.K_f] and self.weapon.attackType != Fist:
                     GameManager.toRemove.append(self.weapon)
@@ -49,11 +50,17 @@ class InfiniteAmmo(PowerUp):
     @staticmethod
     def apply():
         def change_ammo_decorator(foo):
-            def wrapper(self):
-                foo(self)
+            def wrapper(self, *args):
+                foo(self, *args)
                 self.weapon.ammo = -1
             return wrapper
         Player.change_weapon = change_ammo_decorator(Player.change_weapon)
+
+
+class SwordReflect(PowerUp):
+    @staticmethod
+    def apply():
+        GameManager.sword_reflect = True
 
 
 class LowGravity(PowerUp):
@@ -62,12 +69,12 @@ class LowGravity(PowerUp):
         GameManager.player.g /= 4
 
 
-class DecreasedCooldown(PowerUp):
+class LowerCooldown(PowerUp):
     @staticmethod
     def apply():
         def change_weapon_cooldown_decorator(foo):
-            def wrapper(self):
-                foo(self)
+            def wrapper(self, *args):
+                foo(self, *args)
                 self.weapon.coolDown /= 2
 
             return wrapper
@@ -80,11 +87,12 @@ class FistPowerUp(PowerUp):
     @staticmethod
     def apply():
         def fist_powerup_decorator(foo):
-            def wrapper(self):
+            def wrapper(self, *args):
                 pass
 
             return wrapper
         GameManager.player.base.damage *= 3
+        GameManager.player.onlyFists = True
         GameManager.toRemove.append(GameManager.player.weapon)
         GameManager.player.weapon = GameManager.player.base
         GameManager.toAdd.append(GameManager.player.base)

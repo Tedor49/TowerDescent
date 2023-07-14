@@ -1,6 +1,5 @@
 import random
 
-from Scripts.BaseClasses import *
 from Scripts.Attacks import *
 from Scripts.AnimatedSprites import *
 

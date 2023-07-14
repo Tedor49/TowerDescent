@@ -16,7 +16,8 @@ class Player(InteractableObject, Damageable, Persistent):
     prev_jump_pressed = False
     active = True
     bullets_bounce = False
-
+    sword_reflect = False
+    onlyFists = False
     def __init__(self, x, y, sprite, hitbox, dx=0, dy=0, g=0.002):
         InteractableObject.__init__(self, x, y, sprite, hitbox, dx, dy, g)
         self.hitbox.ray_quality = 2
@@ -28,7 +29,14 @@ class Player(InteractableObject, Damageable, Persistent):
     def tick(self):
         keys = pygame.key.get_pressed()
         if not self.active:
-            if keys[pygame.K_SPACE] and isinstance(GameManager.currentRoom, InterDimensionalRoom):
+            if keys[pygame.K_1] and isinstance(GameManager.currentRoom, InterDimensionalRoom):
+                GameManager.currentRoom.power_ups[0][1].apply()
+                GameManager.currentRoom.quit()
+            elif keys[pygame.K_2] and isinstance(GameManager.currentRoom, InterDimensionalRoom):
+                GameManager.currentRoom.power_ups[1][1].apply()
+                GameManager.currentRoom.quit()
+            elif keys[pygame.K_3] and isinstance(GameManager.currentRoom, InterDimensionalRoom):
+                GameManager.currentRoom.power_ups[2][1].apply()
                 GameManager.currentRoom.quit()
             return
         if self.hp == 0:

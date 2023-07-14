@@ -380,6 +380,18 @@ class GameManager:
     interDimensionalRoom = None
     background = None
     def __init__(self):
+        import Scripts.Powerups
+        GameManager.power_ups = [
+            ('Sprites\Powerups\doubleJump.png', Scripts.Powerups.DoubleJump),
+            ('Sprites\Powerups\doubleDamage.png', Scripts.Powerups.DoubleDamage),
+            ('Sprites\Powerups\\bouncyBullets.png', Scripts.Powerups.BouncyBullets),
+            ('Sprites\Powerups\discardWeapon.png', Scripts.Powerups.DiscardWeapon),
+            ('Sprites\Powerups\infiniteAmmo.png', Scripts.Powerups.InfiniteAmmo),
+            ('Sprites\PowerUps\swordReflect.png', Scripts.Powerups.SwordReflect),
+            ('Sprites\PowerUps\lowGrav.png', Scripts.Powerups.LowGravity),
+            ('Sprites\PowerUps\lowerCooldown.png', Scripts.Powerups.LowerCooldown),
+            ('Sprites\PowerUps\\berserker.png', Scripts.Powerups.DoubleDamage)
+        ]
         from Scripts.Player import Player
         pygame.init()
         size = [960, 720]
@@ -525,18 +537,35 @@ class Room:
 
 class InterDimensionalRoom(Room):
     def __init__(self):
-        super().__init__([Elevator(450, -500, Sprite('Sprites\elevator.png', z=-2), Hitbox(60, 110)),
-                          GameManager.background], -1)
+        super().__init__([], -1)
+        self.filling += [Elevator(450, -500, Sprite('Sprites\elevator.png', z=-2), Hitbox(60, 110)),
+                          GameManager.background]
+
 
     def enter(self, type='elevator'):
         GameManager.player.x = 480
         GameManager.player.y = -120
+        self.getPowerUps()
         GameManager.currentRoom = self
         for i in self.filling:
+            print(i)
             GameManager.toAdd.append(i)
 
     def quit(self):
         GameManager.newLevel()
+
+    def getPowerUps(self):
+        self.power_ups = []
+        while len(self.power_ups) != 3:
+            power_up = random.choice(GameManager.power_ups)
+            if power_up in self.power_ups:
+                continue
+            else:
+                self.power_ups.append(power_up)
+                GameManager.power_ups.remove(power_up)
+        for i in range(len(self.power_ups)):
+            self.filling.append(InteractableObject(150 * (i+1) + 120 * i, 540, Sprite(self.power_ups[i][0], z=-2), None))
+
 
 class Door(InteractableObject):
     def __init__(self, x, y, sprite, hitbox, from1, to1, toDoor, dx=0, dy=0, g=5, type=None, usable=True):
@@ -652,7 +681,6 @@ class LevelGenerator:
         walls = []
         map_data = json.load(open('Sprites\Levels\map_data.json', 'r'))
         room.type = room_type
-
         room_sprite = Sprite("Sprites/Levels/"+ room.type + tags[GameManager.lvl_number % 4], z=-3)
         room.filling.append(InteractableObject(0, 0, room_sprite))
         room.filling.append(InteractableObject(0, 0,

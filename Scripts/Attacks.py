@@ -1,5 +1,4 @@
 from Scripts.BaseClasses import *
-from Scripts.Player import Player
 import math
 import time
 
@@ -18,13 +17,17 @@ class Bullet(Attack):
         self.parent.weapon.sprite.play(100)
 
     def tick(self):
-
+        from Scripts.Player import Player
         movement = ((self.x, self.y),
                     (self.x + self.dx * GameManager.time_elapsed, self.y + self.dy * GameManager.time_elapsed))
 
         for i in self.hitbox.check_intersections(movement):
             if i.parent == self.parent or isinstance(self.parent, Attack):
                 pass
+            elif isinstance(self.parent, Player):
+                if isinstance(i.parent, SwordSwing) and GameManager.player.sword_reflect:
+                    self.dx *= -1
+                    self.dy *= -1
             elif type(i.parent) == Ground and isinstance(self.parent, Player):
                 if self.parent.bullets_bounce:
                     movement, dx_mul, dy_mul = i.modify_movement(movement, self.hitbox, mode="bounce")
