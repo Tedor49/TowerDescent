@@ -9,6 +9,8 @@ class Bullet(Attack):
         super().__init__(x, y, Sprite('Sprites/bullet1.png'), Hitbox(4, 4), parent, dx, dy)
         self.damage = damage
         length = ((to_x - self.getx()) ** 2 + (to_y - self.gety()) ** 2) ** (1 / 2)
+        if length == 0:
+            length = 0.001
         vector = ((to_x - self.getx()) / length * proj_speed, (to_y - self.gety()) / length * proj_speed)
         self.dx, self.dy = vector
         self.angle = math.atan2(self.dy, self.dx)

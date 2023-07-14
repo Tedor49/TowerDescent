@@ -1,3 +1,5 @@
+import pygame.transform
+
 from Scripts.BaseClasses import *
 from Scripts.Weapons import *
 from Scripts.Attacks import *
@@ -164,17 +166,29 @@ class FlyingGuy(Enemy, RandomWalkingMotion):
 
 
 class Boss0(Enemy):
-    def __init__(self, player_enemy):
+    def __init__(self, player_enemy, elevator):
         super().__init__(384, 260, Sprite("Sprites/boss0.png", z=4), Hitbox(200, 200, x=-4), player_enemy)
         self.iframes = 0.1
+        self.baseImage = self.sprite.image.copy()
         self.damage = 1
-        self.hp = 50
+        self.hp = 1
         self.weapon = None
+        self.time = 0
+        self.elevator = elevator
 
     def tick(self):
+
+        self.time += GameManager.time_elapsed
+        sizes = self.baseImage.get_size()
+        squish_fraction = 1 - (math.e ** -(self.time / 100 % 10) + math.e ** -((10 - self.time / 100) % 10)) / 4
+
+        self.sprite.image = pygame.transform.scale(self.baseImage, (sizes[0], int(sizes[1] * squish_fraction)))
+        self.sprite.y = sizes[1] * (1 - squish_fraction)
+
         if self.hp <= 0:
             GameManager.toRemove.append(self)
             GameManager.currentRoom.filling.remove(self)
+            self.elevator.spawn()
 
     def add_to_manager(self):
         GameManager.all_Objects.add(self)

@@ -138,3 +138,55 @@ class AnimatedSword(AnimatedSprite):
         self.timer = timer
         self.total_time = timer
         self.direction = self.x + self.image.get_width() // 2 - 25 > 0
+
+
+class AnimatedExitElevator(AnimatedSprite):
+    def __init__(self):
+        super().__init__("Sprites/elevator.png", z=-1, y=-790)
+        self.timer = 0
+        self.total_time = 0
+        self.direction = 0
+        self.target_y = -500
+
+    def draw(self):
+        if self.parent.y < self.target_y:
+            self.parent.usable = False
+            self.parent.y += GameManager.time_elapsed
+        elif self.parent.y > 740:
+            GameManager.newLevel()
+        elif self.parent.y > 0:
+            self.parent.y = self.target_y
+            self.parent.usable = True
+        super().draw()
+
+    def play(self, target_y):
+        self.target_y = target_y
+
+
+class AnimatedEntryElevator(AnimatedSprite):
+    def __init__(self):
+        super().__init__("Sprites/elevator.png", z=-1, y=-790 - 480, x=455)
+        self.timer = 0
+        self.total_time = 0
+        self.direction = 0
+        self.target_y = -710 + 390 - 60
+
+    def draw(self):
+        if self.y < self.target_y:
+            self.y += GameManager.time_elapsed
+        else:
+            self.y = self.target_y
+            GameManager.player.activate()
+        super().draw()
+
+    def getx(self):
+        return self.x
+
+    def gety(self):
+        return self.y
+
+    def delete(self):
+        if self in GameManager.all_Objects:
+            GameManager.all_Objects.remove(self)
+        if self in GameManager.all_Sprites:
+            GameManager.all_Sprites.remove(self)
