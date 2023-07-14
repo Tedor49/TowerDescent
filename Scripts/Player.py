@@ -24,7 +24,10 @@ class Player(InteractableObject, Damageable, Persistent):
         self.gui = [WeaponGUI(self), HealthGUI(self)]
 
     def tick(self):
+        keys = pygame.key.get_pressed()
         if not self.active:
+            if keys[pygame.K_SPACE] and isinstance(GameManager.currentRoom, InterDimensionalRoom):
+                GameManager.currentRoom.quit()
             return
         if self.hp == 0:
             GameManager.toRemove.append(self)

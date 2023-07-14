@@ -36,9 +36,11 @@ class Spawner(GameObject):
         self.inactive = False
 
     def spawn(self):
+        from Scripts.Enemies import Movement
+        movement = Movement()
         if not self.inactive:
             self.enemyInstance = self.enemy(self.x, self.y, Sprite('Sprites/playernew.png'), Hitbox(50, 50),
-                                            GameManager.player)
+                                            GameManager.player, move=movement.getRandomMovement())
             self.room.filling.append(self.enemyInstance)
 
     def despawn(self):
@@ -357,6 +359,8 @@ class Menu:
             pygame.display.flip()
 
 
+
+
 class GameManager:
     toAdd = []
     toRemove = []
@@ -373,7 +377,8 @@ class GameManager:
     Rooms = []
     not_cleared_rooms = 0
     lvl_number = 0
-
+    interDimensionalRoom = None
+    background = None
     def __init__(self):
         from Scripts.Player import Player
         pygame.init()
@@ -518,6 +523,21 @@ class Room:
         return True
 
 
+class InterDimensionalRoom(Room):
+    def __init__(self):
+        super().__init__([Elevator(450, -500, Sprite('Sprites\elevator.png', z=-2), Hitbox(60, 110)),
+                          GameManager.background], -1)
+
+    def enter(self, type='elevator'):
+        GameManager.player.x = 480
+        GameManager.player.y = -120
+        GameManager.currentRoom = self
+        for i in self.filling:
+            GameManager.toAdd.append(i)
+
+    def quit(self):
+        GameManager.newLevel()
+
 class Door(InteractableObject):
     def __init__(self, x, y, sprite, hitbox, from1, to1, toDoor, dx=0, dy=0, g=5, type=None, usable=True):
         super().__init__(x, y, sprite, hitbox, dx, dy, g)
@@ -564,17 +584,18 @@ class LevelGenerator:
         self.maxLVL = 10
         self.minLVL = minLVL
         self.generateLevel(0, 1)
+        self.dim_room = InterDimensionalRoom()
         while not self.id >= 5:
             self.id = 0
             self.map = [[None for i in range(7)] for i2 in range(7)]
             self.generateLevel(0, 1)
         for y in range(7):
             for x in range(7):
-                if self.map[y][x] != None:
+                if self.map[y][x] is not None:
                     self.addWallsAndDoors(x, y)
         for y in range(7):
             for x in range(7):
-                if self.map[y][x] != None:
+                if self.map[y][x] is not None:
                     self.connect(x, y)
 
     def generateLevel(self, y, x):
@@ -638,11 +659,14 @@ class LevelGenerator:
                                                Sprite("Sprites/Levels/background" +
                                                       tags[GameManager.lvl_number % 4], z=-4)
                                                ))
-
+        GameManager.background = InteractableObject(0, 0,
+                                               Sprite("Sprites/Levels/background" +
+                                                      tags[GameManager.lvl_number % 4], z=-4)
+                                               )
         for i in map_data[room_type]['platforms']:
             room.filling.append(Ground(i['x'], i['y'], i['x_size']*30, i['y_size']*30))
         for i in map_data[room_type]['spawners']:
-            Spawner(i['x'], i['y'], Scripts.Enemies.FlyingGuy, room)
+            Spawner(i['x'], i['y'], Scripts.Enemies.BaseEnemy, room)
         GameManager.Rooms.append(room)
         if self.checkRoomExistence(x - 1, y):
             walls.append(Ground(0, 0, 30, 300))

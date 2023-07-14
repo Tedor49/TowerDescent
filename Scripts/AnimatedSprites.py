@@ -153,7 +153,9 @@ class AnimatedExitElevator(AnimatedSprite):
             self.parent.usable = False
             self.parent.y += GameManager.time_elapsed
         elif self.parent.y > 740:
-            GameManager.newLevel()
+            GameManager.currentRoom.quit()
+            GameManager.interDimensionalRoom = InterDimensionalRoom()
+            GameManager.interDimensionalRoom.enter()
         elif self.parent.y > 0:
             self.parent.y = self.target_y
             self.parent.usable = True
