@@ -13,6 +13,7 @@ class Player(InteractableObject, Damageable, Persistent):
     x_speed = 1
     jump_height = 1
     prev_jump_pressed = False
+    active = True
 
     def __init__(self, x, y, sprite, hitbox, dx=0, dy=0, g=0.002):
         InteractableObject.__init__(self, x, y, sprite, hitbox, dx, dy, g)
@@ -23,6 +24,8 @@ class Player(InteractableObject, Damageable, Persistent):
         self.gui = [WeaponGUI(self), HealthGUI(self)]
 
     def tick(self):
+        if not self.active:
+            return
         if self.hp == 0:
             GameManager.toRemove.append(self)
             return
@@ -64,7 +67,8 @@ class Player(InteractableObject, Damageable, Persistent):
                 movement = (movement[0], (self.x, self.y))
                 if i.parent.type=='up':
                     movement = (movement[0], (self.x, self.y-30))
-            if type(i.parent) == Lift:
+        for i in self.hitbox.check_intersections():
+            if type(i.parent) == Elevator:
                 if keys[pygame.K_w]:
                     i.parent.use()
         self.x = movement[1][0]
@@ -86,6 +90,16 @@ class Player(InteractableObject, Damageable, Persistent):
             GameManager.all_Hitboxes.add(self.hitbox)
         if self.sprite:
             GameManager.all_Sprites.add(self.sprite)
+
+    def deactivate(self):
+        self.active = False
+        self.sprite.active = False
+        self.weapon.sprite.active = False
+
+    def activate(self):
+        self.active = True
+        self.sprite.active = True
+        self.weapon.sprite.active = True
 
 
 class WeaponGUI(Sprite, Persistent):

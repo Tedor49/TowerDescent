@@ -229,6 +229,8 @@ class Hitbox(GameObject):
 
 
 class Sprite(GameObject):
+    active = True
+
     def __init__(self, image, stretch_x=1, stretch_y=1, z=1, x=0, y=0, parent=None):
         super().__init__(x, y)
         self.parent = parent
@@ -244,7 +246,8 @@ class Sprite(GameObject):
         return self.parent.gety() + self.y + GameManager.camera.gety()
 
     def draw(self):
-        GameManager.screen.blit(self.image, (self.getx(), self.gety()))
+        if self.active:
+            GameManager.screen.blit(self.image, (self.getx(), self.gety()))
 
 
 class InteractableObject(GameObject):
@@ -370,7 +373,7 @@ class GameManager:
         pygame.init()
         size = [960, 720]
         GameManager.lev = LevelGenerator()
-        GameManager.player = Player(60, 100, Sprite('Sprites/playernew.png'), Hitbox(50, 50))
+        GameManager.player = Player(455, 100, Sprite('Sprites/playernew.png'), Hitbox(50, 50))
         GameManager.screen = pygame.display.set_mode(size)
         GameManager.not_cleared_rooms = len(GameManager.Rooms)
         pygame.display.set_caption('Tower Descent')
@@ -381,7 +384,7 @@ class GameManager:
         self.update()
         GameManager.toAdd.append(GameManager.player)
         running = True
-        GameManager.currentRoom.enter()
+        GameManager.currentRoom.enter(type="up")
         while running:
             GameManager.clock.tick()
             for event in pygame.event.get():
@@ -434,6 +437,7 @@ class GameManager:
 
     @staticmethod
     def newLevel():
+        from Scripts.AnimatedSprites import AnimatedEntryElevator
         GameManager.lvl_number += 1
         GameManager.toAdd = []
         GameManager.toRemove = []
@@ -449,6 +453,11 @@ class GameManager:
         GameManager.camera = cam
         GameManager.toAdd.append(GameManager.player)
         GameManager.currentRoom.enter()
+        GameManager.player.x, GameManager.player.y = 455, 400
+        GameManager.player.dx, GameManager.player.dy = 0, 0
+        entry_elevator = AnimatedEntryElevator()
+        GameManager.all_Sprites.add(entry_elevator)
+        GameManager.all_Objects.add(entry_elevator)
 
 
 class Room:
@@ -591,14 +600,17 @@ class LevelGenerator:
 
     def addWallsAndDoors(self, x=0, y=0):
         import Scripts.Enemies
+        from Scripts.AnimatedSprites import AnimatedExitElevator
 
         room = Room([], self.getRoomID(x, y))
 
         if x == 0 and y == 0:
             room_type = 'boss_0'
 
-            room.filling.append(Scripts.Enemies.Boss0(GameManager.player))
+            exit_elevator = Elevator(450, -120, AnimatedExitElevator(), Hitbox(60, 110), usable=False, direction='to')
+            room.filling.append(Scripts.Enemies.Boss0(GameManager.player, exit_elevator))
             room.filling.append(Scripts.Enemies.GunArm(GameManager.player))
+            room.filling.append(exit_elevator)
         elif x == 1 and y == 0:
             room_type = 'start'
         else:
@@ -620,8 +632,7 @@ class LevelGenerator:
         else:
             room.filling.append(InteractableObject(0, 0,
                                                Sprite("Sprites/Levels/"+room.type + tags[GameManager.lvl_number % 4], z=-3)))
-        if x == 1 and y == 0:
-            room.filling.append(Lift(480, 360, Sprite('Sprites/door.png', z=-1), Hitbox(110, 110), usable=True, direction='to'))
+
         for i in map_data[room_type]['platforms']:
             room.filling.append(Ground(i['x'], i['y'], i['x_size']*30, i['y_size']*30))
         for i in map_data[room_type]['spawners']:
@@ -687,15 +698,19 @@ class LevelGenerator:
         return False
 
 
-class Lift(InteractableObject):
+class Elevator(InteractableObject):
     def __init__(self, x, y, sprite, hitbox, dx=0, dy=0, g=5, direction='to', usable=True):
         super().__init__(x, y, sprite, hitbox, dx, dy, g)
         self.direction = direction
         self.usable = usable
 
     def use(self):
-        if self.usable and self.direction=='to':
-            GameManager.newLevel()
+        if self.usable and self.direction == 'to':
+            GameManager.player.deactivate()
+            self.sprite.play(750)
+
+    def spawn(self):
+        self.sprite.play(340)
 
 class Persistent:
     pass

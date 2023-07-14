@@ -166,14 +166,15 @@ class FlyingGuy(Enemy, RandomWalkingMotion):
 
 
 class Boss0(Enemy):
-    def __init__(self, player_enemy):
+    def __init__(self, player_enemy, elevator):
         super().__init__(384, 260, Sprite("Sprites/boss0.png", z=4), Hitbox(200, 200, x=-4), player_enemy)
         self.iframes = 0.1
         self.baseImage = self.sprite.image.copy()
         self.damage = 1
-        self.hp = 50
+        self.hp = 1
         self.weapon = None
         self.time = 0
+        self.elevator = elevator
 
     def tick(self):
 
@@ -187,6 +188,7 @@ class Boss0(Enemy):
         if self.hp <= 0:
             GameManager.toRemove.append(self)
             GameManager.currentRoom.filling.remove(self)
+            self.elevator.spawn()
 
     def add_to_manager(self):
         GameManager.all_Objects.add(self)
