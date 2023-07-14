@@ -235,6 +235,7 @@ class Sprite(GameObject):
         super().__init__(x, y)
         self.parent = parent
         self.z = z
+        self.optimized = False
         picture = pygame.image.load(image)
         self.image = pygame.transform.scale(picture, (int(picture.get_size()[0] * stretch_x),
                                                       int(picture.get_size()[1] * stretch_y)))
@@ -248,6 +249,11 @@ class Sprite(GameObject):
     def draw(self):
         if self.active:
             GameManager.screen.blit(self.image, (self.getx(), self.gety()))
+
+    def optimize(self):
+        if not self.optimized:
+            self.optimized = True
+            self.image = self.image.convert_alpha()
 
 
 class InteractableObject(GameObject):
@@ -397,6 +403,7 @@ class GameManager:
                 i.tick()
             GameManager.screen.fill((255, 255, 255))
             for i in sorted(GameManager.all_Sprites, key=lambda x: x.z):
+                i.optimize()
                 i.draw()
             GameManager.draw_map(GameManager.lev.map)
             pygame.display.flip()
@@ -624,10 +631,9 @@ class LevelGenerator:
         walls = []
         map_data = json.load(open('Sprites\Levels\map_data.json', 'r'))
         room.type = room_type
-        room.filling.append(InteractableObject(0, 0,
-                                               Sprite("Sprites/Levels/"+room.type +
-                                                      tags[GameManager.lvl_number % 4], z=-3)
-                                               ))
+
+        room_sprite = Sprite("Sprites/Levels/"+ room.type + tags[GameManager.lvl_number % 4], z=-3)
+        room.filling.append(InteractableObject(0, 0, room_sprite))
         room.filling.append(InteractableObject(0, 0,
                                                Sprite("Sprites/Levels/background" +
                                                       tags[GameManager.lvl_number % 4], z=-4)
@@ -641,7 +647,8 @@ class LevelGenerator:
         if self.checkRoomExistence(x - 1, y):
             walls.append(Ground(0, 0, 30, 300))
             walls.append(Ground(0, 420, 30, 330))
-            room.leftDoor = Door(-90, 300, Sprite('Sprites/door.png', z=-1), Hitbox(120, 120), room, None, None,
+            room_sprite.image.fill((255, 255, 255, 0), ((0, 300), (30, 120)))
+            room.leftDoor = Door(-90, 300, None, Hitbox(120, 120), room, None, None,
                                  type='left')
             if x-1 == 0 and y == 0:
                 room.leftDoor.usable = True
@@ -652,7 +659,8 @@ class LevelGenerator:
         if self.checkRoomExistence(x + 1, y):
             walls.append(Ground(930, 0, 30, 300))
             walls.append(Ground(930, 420, 30, 330))
-            room.rightDoor = Door(930, 300, Sprite('Sprites/door.png', z=-1), Hitbox(120, 120), room, None, None,
+            room_sprite.image.fill((255, 255, 255, 0), ((930, 300), (30, 120)))
+            room.rightDoor = Door(930, 300, None, Hitbox(120, 120), room, None, None,
                                   type='right')
             room.filling.append(room.rightDoor)
         else:
@@ -661,7 +669,8 @@ class LevelGenerator:
         if self.checkRoomExistence(x, y - 1):
             walls.append(Ground(0, 0, 420, 30))
             walls.append(Ground(540, 0, 450, 30))
-            room.upDoor = Door(420, -80, Sprite('Sprites/door.png', z=-1), Hitbox(110, 110), room, None, None,
+            room_sprite.image.fill((255, 255, 255, 0), ((420, 0), (120, 30)))
+            room.upDoor = Door(420, -80, None, Hitbox(110, 110), room, None, None,
                                type='up')
             room.upDoor.upwards = True
             room.filling.append(room.upDoor)
@@ -671,7 +680,8 @@ class LevelGenerator:
         if self.checkRoomExistence(x, y + 1):
             walls.append(Ground(0, 690, 420, 30))
             walls.append(Ground(540, 690, 450, 30))
-            room.downDoor = Door(420, 690, Sprite('Sprites/door.png', z=-1), Hitbox(110, 110), room, None, None,
+            room_sprite.image.fill((255, 255, 255, 0), ((420, 690), (120, 30)))
+            room.downDoor = Door(420, 690, None, Hitbox(110, 110), room, None, None,
                                  type='down')
             room.filling.append(room.downDoor)
         else:

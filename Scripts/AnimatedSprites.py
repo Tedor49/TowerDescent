@@ -91,7 +91,7 @@ class AnimatedFist(AnimatedSprite):
 class AnimatedSword(AnimatedSprite):
     def __init__(self):
         super().__init__("Sprites/sword.png", z=2)
-        self.base = pygame.image.load("Sprites/sword.png")
+        self.base = pygame.image.load("Sprites/sword.png").convert()
         self.flipped = pygame.transform.flip(self.base, True, False)
         self.timer = 0
         self.total_time = 0
