@@ -363,13 +363,13 @@ class GameManager:
     all_Sprites = set()
     Rooms = []
     not_cleared_rooms = 0
+    lvl_number = 0
 
     def __init__(self):
         from Scripts.Player import Player
         pygame.init()
         size = [960, 720]
-        lev = LevelGenerator()
-        print(lev.map, sep='\n')
+        GameManager.lev = LevelGenerator()
         GameManager.player = Player(60, 100, Sprite('Sprites/playernew.png'), Hitbox(50, 50))
         GameManager.screen = pygame.display.set_mode(size)
         GameManager.not_cleared_rooms = len(GameManager.Rooms)
@@ -395,7 +395,7 @@ class GameManager:
             GameManager.screen.fill((255, 255, 255))
             for i in sorted(GameManager.all_Sprites, key=lambda x: x.z):
                 i.draw()
-            GameManager.draw_map(lev.map)
+            GameManager.draw_map(GameManager.lev.map)
             pygame.display.flip()
             GameManager.time_elapsed = 0
             self.update()
@@ -418,7 +418,6 @@ class GameManager:
 
     @staticmethod
     def update():
-        from Scripts.Enemies import Enemy
         for i in GameManager.toAdd:
             i.add_to_manager()
         GameManager.toAdd = []
@@ -432,6 +431,24 @@ class GameManager:
             if room.id == RoomID:
                 return room
         return None
+
+    @staticmethod
+    def newLevel():
+        GameManager.lvl_number += 1
+        GameManager.toAdd = []
+        GameManager.toRemove = []
+        GameManager.currentRoom = None
+        GameManager.all_Hitboxes = set()
+        GameManager.all_Objects = set()
+        GameManager.all_Sprites = set()
+        GameManager.Rooms = []
+        GameManager.lev = LevelGenerator()
+        GameManager.not_cleared_rooms = len(GameManager.Rooms)
+        GameManager.currentRoom = GameManager.searchByID(0)
+        cam = Camera()
+        GameManager.camera = cam
+        GameManager.toAdd.append(GameManager.player)
+        GameManager.currentRoom.enter()
 
 
 class Room:
@@ -552,7 +569,7 @@ class LevelGenerator:
             if x == 1 and y == 0:
                 self.generateLevel(y, x - 1)
                 self.generateLevel(y, x + 1)
-            for i in range(-1, 2):
+            for i in range(0, 2):
                 for j in range(-1, 2):
                     if random.choice([True, False, True]) and (i == 0 or j == 0) and (x + j, y + i) not in forbidden:
                         self.generateLevel(y + i, x + j)
@@ -586,10 +603,25 @@ class LevelGenerator:
             room_type = 'start'
         else:
             room_type = 'map_' + str(random.choice([0, 1]))
+        tags = {
+            0: '_BW.png',
+            1: '_CL.png',
+            2: '_RL.png',
+            3: '_FL.png'
+        }
         walls = []
         map_data = json.load(open('Sprites\Levels\map_data.json', 'r'))
         room.type = room_type
-        room.filling.append(InteractableObject(0, 0, Sprite("Sprites/Levels/"+room.type + "_BW.png", z=-3)))
+        if room_type == 'boss_0':
+            room.filling.append(InteractableObject(0, 0,
+                                                   Sprite(
+                                                       "Sprites/Levels/" + room.type + tags[0],
+                                                       z=-3)))
+        else:
+            room.filling.append(InteractableObject(0, 0,
+                                               Sprite("Sprites/Levels/"+room.type + tags[GameManager.lvl_number % 4], z=-3)))
+        if x == 1 and y == 0:
+            room.filling.append(Lift(480, 360, Sprite('Sprites/door.png', z=-1), Hitbox(110, 110), usable=True, direction='to'))
         for i in map_data[room_type]['platforms']:
             room.filling.append(Ground(i['x'], i['y'], i['x_size']*30, i['y_size']*30))
         for i in map_data[room_type]['spawners']:
@@ -654,6 +686,16 @@ class LevelGenerator:
                 return True
         return False
 
+
+class Lift(InteractableObject):
+    def __init__(self, x, y, sprite, hitbox, dx=0, dy=0, g=5, direction='to', usable=True):
+        super().__init__(x, y, sprite, hitbox, dx, dy, g)
+        self.direction = direction
+        self.usable = usable
+
+    def use(self):
+        if self.usable and self.direction=='to':
+            GameManager.newLevel()
 
 class Persistent:
     pass
