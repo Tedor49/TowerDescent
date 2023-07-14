@@ -91,8 +91,8 @@ class AnimatedFist(AnimatedSprite):
 class AnimatedSword(AnimatedSprite):
     def __init__(self):
         super().__init__("Sprites/sword.png", z=2)
-        self.base = pygame.image.load("Sprites/sword.png").convert()
-        self.flipped = pygame.transform.flip(self.base, True, False)
+        self.base = pygame.image.load("Sprites/sword.png")
+        self.flipped = pygame.transform.flip(self.base, False, True)
         self.timer = 0
         self.total_time = 0
         self.direction = 0
@@ -104,9 +104,11 @@ class AnimatedSword(AnimatedSprite):
             if self.direction:
                 x = 30
                 angle = 112.5 * done_fraction - 22.5 * (1 - done_fraction)
+                self.image = pygame.transform.rotate(self.base, angle)
             else:
                 x = -30
                 angle = 67.5 * done_fraction + 202.5 * (1 - done_fraction)
+                self.image = pygame.transform.rotate(self.flipped, angle)
             x -= math.cos((180 - angle) / 180 * math.pi) * 40
             y = 10 - math.sin((180 - angle) / 180 * math.pi) * 40
 
@@ -125,11 +127,12 @@ class AnimatedSword(AnimatedSprite):
                 angle = 135
                 x = -40
                 y = 0
+                self.image = pygame.transform.rotate(self.flipped, angle)
             else:
                 angle = 45
                 x = 40
                 y = 0
-        self.image = pygame.transform.rotate(self.base, angle)
+                self.image = pygame.transform.rotate(self.base, angle)
         offset_x, offset_y = self.image.get_width() // 2, self.image.get_height() // 2
 
         self.x, self.y = x - offset_x + 25, y - offset_y + 10
