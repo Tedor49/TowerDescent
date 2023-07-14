@@ -38,7 +38,10 @@ class Movement:
             our_x = self.hitbox.getx() + self.hitbox.x_size / 2
             our_y = self.hitbox.gety() + self.hitbox.y_size / 2
             length = ((x - our_x) ** 2 + (y - our_y) ** 2) ** (1 / 2)
-            vector = ((x - our_x) / length, (y - our_y) / length)
+            if length < 50:
+                vector = (0, 0)
+            else:
+                vector = ((x - our_x) / length, (y - our_y) / length)
 
             self.dx += vector[0] / 500 * GameManager.time_elapsed
             self.dy += vector[1] / 500 * GameManager.time_elapsed
@@ -129,7 +132,7 @@ class BaseEnemy(Enemy):
         self.cooldown = 2000
         self.fire_time = 0
         self.wall = 0
-        self.walk_time = 0
+        self.walkTime = 0
         self.movement = move
         self.attack_cooldown = GameManager.time_elapsed
 
