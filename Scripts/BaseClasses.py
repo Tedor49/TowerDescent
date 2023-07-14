@@ -624,14 +624,14 @@ class LevelGenerator:
         walls = []
         map_data = json.load(open('Sprites\Levels\map_data.json', 'r'))
         room.type = room_type
-        if room_type[:4] == 'boss':
-            room.filling.append(InteractableObject(0, 0,
-                                                   Sprite(
-                                                       "Sprites/Levels/" + room.type + tags[GameManager.lvl_number % 4],
-                                                       z=-3)))
-        else:
-            room.filling.append(InteractableObject(0, 0,
-                                               Sprite("Sprites/Levels/"+room.type + tags[GameManager.lvl_number % 4], z=-3)))
+        room.filling.append(InteractableObject(0, 0,
+                                               Sprite("Sprites/Levels/"+room.type +
+                                                      tags[GameManager.lvl_number % 4], z=-3)
+                                               ))
+        room.filling.append(InteractableObject(0, 0,
+                                               Sprite("Sprites/Levels/background" +
+                                                      tags[GameManager.lvl_number % 4], z=-4)
+                                               ))
 
         for i in map_data[room_type]['platforms']:
             room.filling.append(Ground(i['x'], i['y'], i['x_size']*30, i['y_size']*30))
