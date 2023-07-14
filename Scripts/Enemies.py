@@ -42,7 +42,6 @@ class Movement:
                 vector = (0, 0)
             else:
                 vector = ((x - our_x) / length, (y - our_y) / length)
-
             self.dx += vector[0] / 500 * GameManager.time_elapsed
             self.dy += vector[1] / 500 * GameManager.time_elapsed
             self.dx *= 0.97

@@ -1,5 +1,5 @@
 from Scripts.BaseClasses import *
-
+from Scripts.Player import Player
 import math
 import time
 
@@ -25,11 +25,11 @@ class Bullet(Attack):
         for i in self.hitbox.check_intersections(movement):
             if i.parent == self.parent or isinstance(self.parent, Attack):
                 pass
-            # funny bouncing bullets
-            # elif type(i.parent) == Ground:
-            #     movement, dx_mul, dy_mul = i.modify_movement(movement, self.hitbox, mode="bounce")
-            #     self.dx *= dx_mul
-            #     self.dy *= dy_mul
+            elif type(i.parent) == Ground and isinstance(self.parent, Player):
+                if self.parent.bullets_bounce:
+                    movement, dx_mul, dy_mul = i.modify_movement(movement, self.hitbox, mode="bounce")
+                    self.dx *= dx_mul
+                    self.dy *= dy_mul
             elif isinstance(i.parent, Damageable):
                 i.parent.hurt(self, self.damage)
                 GameManager.toRemove.append(self)

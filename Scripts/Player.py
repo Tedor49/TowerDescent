@@ -1,7 +1,6 @@
 import pygame
 
 from Scripts.Weapons import *
-from Scripts.Attacks import *
 from Scripts.AnimatedSprites import *
 from Scripts.TestObjects import Ground
 
@@ -16,6 +15,7 @@ class Player(InteractableObject, Damageable, Persistent):
     extra_jumps = 0
     prev_jump_pressed = False
     active = True
+    bullets_bounce = False
 
     def __init__(self, x, y, sprite, hitbox, dx=0, dy=0, g=0.002):
         InteractableObject.__init__(self, x, y, sprite, hitbox, dx, dy, g)
