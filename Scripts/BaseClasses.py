@@ -605,7 +605,7 @@ class LevelGenerator:
         room = Room([], self.getRoomID(x, y))
 
         if x == 0 and y == 0:
-            room_type = 'boss_0'
+            room_type = 'boss_' + str(GameManager.lvl_number % 4)
 
             exit_elevator = Elevator(450, -120, AnimatedExitElevator(), Hitbox(60, 110), usable=False, direction='to')
             room.filling.append(Scripts.Enemies.Boss0(GameManager.player, exit_elevator))
@@ -614,7 +614,7 @@ class LevelGenerator:
         elif x == 1 and y == 0:
             room_type = 'start'
         else:
-            room_type = 'map_' + str(random.choice([0, 1]))
+            room_type = 'map_' + str(random.randint(0, 4))
         tags = {
             0: '_BW.png',
             1: '_CL.png',
@@ -624,10 +624,10 @@ class LevelGenerator:
         walls = []
         map_data = json.load(open('Sprites\Levels\map_data.json', 'r'))
         room.type = room_type
-        if room_type == 'boss_0':
+        if room_type[:4] == 'boss':
             room.filling.append(InteractableObject(0, 0,
                                                    Sprite(
-                                                       "Sprites/Levels/" + room.type + tags[0],
+                                                       "Sprites/Levels/" + room.type + tags[GameManager.lvl_number % 4],
                                                        z=-3)))
         else:
             room.filling.append(InteractableObject(0, 0,
