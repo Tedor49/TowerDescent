@@ -123,9 +123,12 @@ def sign(x):
 
 
 class BaseEnemy(Enemy):
-    def __init__(self, x, y, sprite, hitbox, player_enemy, move, dx=0, dy=0, g=0.002):
+    def __init__(self, x, y, sprite, hitbox, player_enemy, move, dx=0, dy=0, g=0.002, weapon=None):
         super().__init__(x, y, sprite, hitbox, player_enemy, dx, dy, g)
-        self.weapon = Weapon(self, random.choice([SwordKit, GunKit]), downtime=500)
+        if weapon is None:
+            self.weapon = Weapon(self, random.choice([SwordKit, GunKit]), downtime=500)
+        else:
+            self.weapon = weapon
         self.iframes = 0.1
         self.damage = 1
         self.cooldown = 2000

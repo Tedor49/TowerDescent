@@ -34,13 +34,15 @@ class Spawner(GameObject):
         self.room = room1
         self.room.filling.append(self)
         self.inactive = False
+        self.enemyInstance = None
 
     def spawn(self):
         from Scripts.Enemies import Movement
         movement = Movement()
         if not self.inactive:
-            self.enemyInstance = self.enemy(self.x, self.y, Sprite('Sprites/playernew.png'), Hitbox(50, 50),
-                                            GameManager.player, move=movement.getRandomMovement())
+            if self.enemyInstance is None:
+                self.enemyInstance = self.enemy(self.x, self.y, Sprite('Sprites/playernew.png'), Hitbox(50, 50),
+                                                GameManager.player, move=movement.getRandomMovement())
             self.room.filling.append(self.enemyInstance)
 
     def despawn(self):
@@ -49,9 +51,27 @@ class Spawner(GameObject):
             GameManager.toRemove.append(self)
             self.room.filling.remove(self)
         else:
+            self.enemyInstance.x = self.x
+            self.enemyInstance.y = self.y
             GameManager.toRemove.append(self.enemyInstance)
             self.room.filling.remove(self.enemyInstance)
 
+
+class InfiniteSpawner(GameObject):
+    def __init__(self, x, y, room1):
+        super().__init__(x, y)
+        self.room = room1
+        self.room.filling.append(self)
+        self.cooldown = random.randint(5000, 10000)
+
+    def tick(self):
+        from Scripts.Enemies import Movement, BaseEnemy
+        if self.cooldown > 0:
+            self.cooldown -= GameManager.time_elapsed
+        else:
+            self.room.filling.append(BaseEnemy(self.x, self.y, Sprite('Sprites/playernew.png'), Hitbox(50, 50),
+                                                GameManager.player, move=Movement.FollowFlyingMove))
+            self.cooldown = random.randint(5000, 10000)
 
 class Hitbox(GameObject):
     def __init__(self, x_size, y_size, x=0, y=0, parent=None):
