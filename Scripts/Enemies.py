@@ -505,8 +505,6 @@ class Boss3(Enemy):
         self.sprite.image.fill(tuple([255 - int((255 - i) * hp_fraction) for i in brown]),
                                special_flags=pygame.BLEND_MULT)
 
-        if self.hp <= 0:
-            GameManager.toRemove.append(self)
 
     def add_to_manager(self):
         """Method that adds Boss3 instance to the GameManager"""
