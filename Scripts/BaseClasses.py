@@ -57,7 +57,7 @@ class Spawner(GameObject):
 
     def __init__(self, x, y, enemy, room1):
         """
-        Initialization function for Spawner
+        The initialization method for Spawner
         :param x: x coordinate
         :param y: y coordinate
         :param room1: room, in which Spawner is located
@@ -101,7 +101,7 @@ class InfiniteSpawner(GameObject):
 
     def __init__(self, x, y):
         """
-        Initialization function for an Infinite Spawner
+        The initialization method for an Infinite Spawner
         :param x: x coordinate
         :param y: y coordinate
         :param room1: room, in which Infinite Spawner is located
@@ -127,7 +127,7 @@ class Hitbox(GameObject):
 
     def __init__(self, x_size, y_size, x=0, y=0, parent=None):
         """
-        Initialization function for Hitbox
+        The initialization method for Hitbox
         :param x_size: size on the x axis
         :param y_size: size on the y axis
         :param x: x coordinate relative to the object that owns this hitbox
@@ -394,7 +394,7 @@ class Sprite(GameObject):
 
     def __init__(self, image, stretch_x=1, stretch_y=1, z=1, x=0, y=0, parent=None):
         """
-        The initialization function for Sprite
+        The initialization method for Sprite
         :param image: image for a Sprite
         :param stretch_x: scale on the x coordinate
         :param stretch_y: scale on the y coordinate
@@ -498,7 +498,7 @@ class InteractableObject(GameObject):
         return self.y
 
     def add_to_manager(self):
-        """Method that adds InteractableObject instance to GameManager"""
+        """Method that adds InteractableObject to GameManager"""
         GameManager.all_Objects.add(self)
         if self.hitbox:
             GameManager.all_Hitboxes.add(self.hitbox)
@@ -519,7 +519,7 @@ class Attack(InteractableObject):
     """Class that represents different attacks"""
     def __init__(self, x, y, sprite, hitbox, parent, dx=0, dy=0):
         """
-        Initialization function for Attack class
+        The initialization method for Attack class
         :param x: coordinate on the x axis
         :param y: coordinate on the y axis
         :param sprite: Sprite instance that is owned by this Attack
@@ -815,7 +815,7 @@ class DeathPlane(InteractableObject):
 
     def __init__(self, x, y, x_size, y_size):
         """
-        Initialization function of DeathPlane
+        The initialization method of DeathPlane
         :param x: coordinate on the x axis
         :param y: coordinate on the y axis
         :param x_size: size on the x axis
@@ -860,7 +860,7 @@ class Door(InteractableObject):
     """Class that represents doors between the rooms"""
     def __init__(self, x, y, sprite, hitbox, from1, to1, toDoor, type=None, usable=True):
         """
-        Initialization function of door
+        The initialization method of door
         :param x: coordinate on the x axis
         :param y: coordinate on the y axis
         :param sprite: Sprite which will be used by the Door instance
@@ -912,7 +912,7 @@ class Ground(InteractableObject):
     """Class that represents ground"""
     def __init__(self, x, y, x_size, y_size, sprite=None):
         """
-        Initialization function of Ground
+        The initialization method of Ground
         :param x: coordinate on the x axis
         :param y: coordinate on the y axis
         :param x_size: size on the x axis

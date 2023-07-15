@@ -4,7 +4,20 @@ import time
 
 
 class Bullet(Attack):
+    """Class that represents Bullet"""
     def __init__(self, x, y, to_x, to_y, parent, damage=1, dx=0, dy=0, proj_speed=1):
+        """
+        The initialization method for Bullet
+        :param x: x coordinate
+        :param y: y coordinate
+        :param to_x: x coordinate of the direction of attack
+        :param to_y: y coordinate of the direction of attack
+        :param parent: Owner of this attack
+        :param damage: Damage of this attack
+        :param dx: change in x coordinate axis
+        :param dy: change in y coordinate axis
+        :param proj_speed: speed of projectile
+        """
         super().__init__(x, y, Sprite('Sprites/bullet1.png'), Hitbox(4, 4), parent, dx, dy)
         self.damage = damage
         self.sprite.optimize()
@@ -17,6 +30,7 @@ class Bullet(Attack):
         self.parent.weapon.sprite.play(100)
 
     def tick(self):
+        """Method that simulates actions made by Bullet which occurs each tick"""
         from Scripts.Player import Player
 
         self.angle = math.atan2(self.dy, self.dx)
@@ -49,7 +63,19 @@ class Bullet(Attack):
 
 
 class SwordSwing(Attack):
+    """Class that represents SwordSwing"""
     def __init__(self, x, y, target_x, target_y, parent, damage=1, dx=0, dy=0):
+        """
+        The initialization method for SwordSwing
+        :param x: x coordinate in relation to the position of the parent
+        :param y: y coordinate in relation to the position of the parent
+        :param target_x: x coordinate of the target
+        :param target_y: y coordinate of the target
+        :param parent: Owner of this attack
+        :param damage: Damage of this attack
+        :param dx: Change in x coordinate axis
+        :param dy: Change in y coordinate axis
+        """
         hitbox = Hitbox(parent.hitbox.x_size * 2.5, parent.hitbox.y_size * 1.75, y=-parent.hitbox.y_size * .75)
         if target_x < x:
             hitbox.x = -parent.hitbox.x_size * 1.5
@@ -59,12 +85,21 @@ class SwordSwing(Attack):
         self.parent.weapon.sprite.play(self.timer)
 
     def getx(self):
+        """
+        Method that returns x coordinate of the instance
+        :return: x coordinate
+        """
         return self.parent.getx() + self.x
 
     def gety(self):
+        """
+        Method that returns y coordinate of the instance
+        :return: y coordinate
+        """
         return self.parent.gety() + self.y
 
     def tick(self):
+        """Method that simulates actions made by SwordSwing which occurs each tick"""
         self.timer -= GameManager.time_elapsed
         if self.timer < 0:
             GameManager.toRemove.append(self)
@@ -74,35 +109,20 @@ class SwordSwing(Attack):
                 i.parent.hurt(self, self.damage)
 
 
-class Bomb(Attack):
-    def __init__(self, x, y, sprite, parent, damage=1, dx=0, dy=0):
-        super().__init__(x, y, sprite, Hitbox(4, 4), dx, dy)
-        self.landed = False
-        self.timer = time.time()
-        self.g = 1
-        self.damage = damage
-
-    def do(self, to_x, to_y):
-        pass
-
-    def tick(self):
-        if not self.landed:
-            self.dy += self.g * GameManager.time_elapsed
-            self.y += self.dy
-        for i in self.hitbox.check_intersections():
-            if type(i.parent) == Ground and not self.landed:
-                self.landed = True
-                self.timer = time.time()
-                self.hitbox.x_size = 200
-                self.hitbox.y_size = 200
-                self.hitbox.x -= self.hitbox.x_size
-                self.hitbox.y -= self.hitbox.y_size
-        if time.time() - self.timer > 2:
-            GameManager.toRemove.append(self)
-
-
 class Fist(Attack):
+    """Class that represents Fist"""
     def __init__(self, x, y, target_x, target_y, parent, damage=1, dx=0, dy=0):
+        """
+        The initialization method for Fist attack
+        :param x: x coordinate in relation to the position of the parent
+        :param y: y coordinate in relation to the position of the parent
+        :param target_x: x coordinate of the target
+        :param target_y: y coordinate of the target
+        :param parent: Owner of this attack
+        :param damage: Damage of this attack
+        :param dx: Change in x coordinate axis
+        :param dy: Change in y coordinate axis
+        """
         hitbox = Hitbox(parent.hitbox.x_size * 2.25, parent.hitbox.y_size * .75, y=parent.hitbox.y_size * .125)
         if target_x < x:
             hitbox.x = -parent.hitbox.x_size * 1.25
@@ -112,6 +132,7 @@ class Fist(Attack):
         self.parent.weapon.sprite.play(self.timer)
 
     def tick(self):
+        """Method that simulates actions made by Fist which occurs each tick"""
         self.timer -= GameManager.time_elapsed
         if self.timer < 0:
             GameManager.toRemove.append(self)
@@ -123,11 +144,17 @@ class Fist(Attack):
                     i.parent.weapon = None
                     self.parent.change_weapon(stolen)
 
-
-
     def getx(self):
+        """
+        Method that returns x coordinate of the instance
+        :return: x coordinate
+        """
         return self.parent.getx() + self.x
 
     def gety(self):
+        """
+        Method that returns y coordinate of the instance
+        :return: y coordinate
+        """
         return self.parent.gety() + self.y
 

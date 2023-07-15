@@ -4,22 +4,38 @@ from Scripts.Player import Player
 
 
 class PowerUp(InteractableObject):
+    """Class that represents PowerUp"""
     @staticmethod
     def apply():
+        """Method that applies PowerUp on the Player"""
         pass
 
 
 class DoubleJump(PowerUp):
+    """Class that represents DoubleJump PowerUp"""
     @staticmethod
     def apply():
+        """Method that applies DoubleJump PowerUp on the Player"""
         GameManager.player.max_extra_jumps += 1
 
 
 class DoubleDamage(PowerUp):
+    """Class that represents DoubleDamage PowerUp"""
     @staticmethod
     def apply():
+        """Method that applies DoubleDamage PowerUp on the Player"""
         def change_damage_decorator(foo):
+            """
+            Decorator for the changed function
+            :param foo: function to be decorated
+            :return: decorated function
+            """
             def wrapper(self, *args):
+                """
+                Wrapper for PowerUp
+                :param self: object itself
+                :param args: arguments for the function
+                """
                 foo(self, *args)
                 self.weapon.damage *= 2
             return wrapper
@@ -27,15 +43,29 @@ class DoubleDamage(PowerUp):
 
 
 class BouncyBullets(PowerUp):
+    """Class that represents BouncyBullets PowerUp"""
     @staticmethod
     def apply():
+        """Method that applies BouncyBullets PowerUp on the Player"""
         GameManager.player.bullets_bounce = True
 
 class DiscardWeapon(PowerUp):
+    """Class that represents DiscardWeapon PowerUp"""
     @staticmethod
     def apply():
+        """Method that applies DiscardWeapon PowerUp on the Player"""
         def tick_decorator(foo):
+            """
+            Decorator for the changed function
+            :param foo: function to be decorated
+            :return: decorated function
+            """
             def wrapper(self, *args):
+                """
+                Wrapper for PowerUp
+                :param self: object itself
+                :param args: arguments for the function
+                """
                 foo(self, *args)
                 keys = pygame.key.get_pressed()
                 if keys[pygame.K_f] and self.weapon.attackType != Fist:
@@ -47,10 +77,22 @@ class DiscardWeapon(PowerUp):
 
 
 class InfiniteAmmo(PowerUp):
+    """Class that represents InfiniteAmmo PowerUp"""
     @staticmethod
     def apply():
+        """Method that applies InfiniteAmmo PowerUp on the Player"""
         def change_ammo_decorator(foo):
+            """
+            Decorator for the changed function
+            :param foo: function to be decorated
+            :return: decorated function
+            """
             def wrapper(self, *args):
+                """
+                Wrapper for PowerUp
+                :param self: object itself
+                :param args: arguments for the function
+                """
                 foo(self, *args)
                 self.weapon.ammo = -1
             return wrapper
@@ -58,22 +100,38 @@ class InfiniteAmmo(PowerUp):
 
 
 class SwordReflect(PowerUp):
+    """Class that represents SwordReflect PowerUp"""
     @staticmethod
     def apply():
+        """Method that applies SwordReflect PowerUp on the Player"""
         GameManager.sword_reflect = True
 
 
 class LowGravity(PowerUp):
+    """Class that represents LowGravity PowerUp"""
     @staticmethod
     def apply():
+        """Method that applies LowGravity PowerUp on the Player"""
         GameManager.player.g /= 2
 
 
 class LowerCooldown(PowerUp):
+    """Class that represents LowerCooldown PowerUp"""
     @staticmethod
     def apply():
+        """Method that applies LowerCooldown PowerUp on the Player"""
         def change_weapon_cooldown_decorator(foo):
+            """
+            Decorator for the changed function
+            :param foo: function to be decorated
+            :return: decorated function
+            """
             def wrapper(self, *args):
+                """
+                Wrapper for PowerUp
+                :param self: object itself
+                :param args: arguments for the function
+                """
                 foo(self, *args)
                 self.weapon.downTime /= 2
 
@@ -84,8 +142,10 @@ class LowerCooldown(PowerUp):
 
 
 class FistPowerUp(PowerUp):
+    """Class that represents FistPowerUp"""
     @staticmethod
     def apply():
+        """Method that applies FistPowerUp on the Player"""
         def wrapper(self, new_weapon):
             GameManager.toRemove.append(new_weapon)
         GameManager.player.base.damage *= 3

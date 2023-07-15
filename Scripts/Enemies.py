@@ -13,7 +13,7 @@ class Enemy(InteractableObject, Damageable):
     """Interface for the enemy"""
     def __init__(self, x, y, sprite, hitbox, player_enemy, dx=0, dy=0, g=0.000):
         """
-
+        The initialization method for the Enemy
         :param x: coordinate on the x axis
         :param y: coordinate on the x axis
         :param sprite: Sprite which will be used by an Enemy instance
@@ -168,7 +168,7 @@ class BaseEnemy(Enemy):
     """Class that represents BaseEnemy, which can be redacted"""
     def __init__(self, x, y, sprite, hitbox, player_enemy, move, dx=0, dy=0, g=0.002, weapon=None):
         """
-        Initialization for the BaseEnemy class
+        The initialization method for the BaseEnemy
         :param x: coordinate on the x axis
         :param y: coordinate on the y axis
         :param sprite: Sprite which will be used
@@ -243,7 +243,7 @@ class Boss0(Enemy):
     """Class that represents boss on the first level"""
     def __init__(self, player_enemy, elevator):
         """
-        Initialization for the Boss0 class
+        The initialization method for the Boss0
         :param player_enemy: target for a boss
         :param elevator: elevator which will be spawned after death of the boss
         """
@@ -291,7 +291,7 @@ class GunArm(Enemy):
     """Class that represents arm which gives player weapon in the boss0 room"""
     def __init__(self, player_enemy):
         """
-        Initialization for the GunArm class
+        The initialization method for the GunArm
         :param player_enemy:
         """
         super().__init__(750, 40, Sprite("Sprites/boss0Arm.png", z=4), Hitbox(126, 57, x=-4), player_enemy)
@@ -329,7 +329,7 @@ class Boss1(Enemy):
     """Class that represents boss on the second level"""
     def __init__(self, player_enemy, elevator):
         """
-        Initialization for the Boss1 class
+        The initialization method for the Boss1
         :param player_enemy: target for a boss
         :param elevator: elevator which will be spawned after death of the boss
         """
@@ -391,7 +391,7 @@ class Boss2(Enemy):
     """Class that represents boss on the third level"""
     def __init__(self, player_enemy):
         """
-        Initialization for the Boss2 class
+        The initialization method for the Boss2
         :param player_enemy: target for a boss
         :param elevator: elevator which will be spawned after death of the boss
         """
@@ -438,7 +438,7 @@ class Boss3(Enemy):
     """Class that represents boss on the forth level"""
     def __init__(self, player_enemy):
         """
-        Initialization for the Boss3 class
+        The initialization method for the Boss3
         :param player_enemy: target for a boss
         :param elevator: elevator which will be spawned after death of the boss
          """
