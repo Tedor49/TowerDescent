@@ -75,7 +75,7 @@ class LowerCooldown(PowerUp):
         def change_weapon_cooldown_decorator(foo):
             def wrapper(self, *args):
                 foo(self, *args)
-                self.weapon.coolDown /= 2
+                self.weapon.downTime /= 2
 
             return wrapper
 
@@ -86,9 +86,8 @@ class LowerCooldown(PowerUp):
 class FistPowerUp(PowerUp):
     @staticmethod
     def apply():
-        def wrapper(self, *args):
-            pass
-        print("berserk")
+        def wrapper(self, new_weapon):
+            GameManager.toRemove.append(new_weapon)
         GameManager.player.base.damage *= 3
         GameManager.player.onlyFists = True
         GameManager.toRemove.append(GameManager.player.weapon)

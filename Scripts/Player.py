@@ -104,7 +104,6 @@ class Player(InteractableObject, Damageable, Persistent):
         self.y = movement[1][1]
 
     def change_weapon(self, new_weapon):
-        print("COCK")
         GameManager.toRemove.append(self.weapon)
         self.weapon = new_weapon
         new_weapon.parent = self
@@ -195,11 +194,6 @@ class HealthGUI(Sprite, Persistent):
         self.y = 75 - new_size[1] // 2
 
         Sprite.draw(self)
-
-        # if self.parent.weapon.ammo >= 0:
-        #     amount = str(self.parent.weapon.ammo)
-        # else:
-        #     amount = "∞"
 
         ammo = self.font.render(str(self.parent.hp), True, (255, 0, 0))
         text_position = ammo.get_rect()
