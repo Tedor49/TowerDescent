@@ -7,27 +7,30 @@ class Bullet(Attack):
     def __init__(self, x, y, to_x, to_y, parent, damage=1, dx=0, dy=0, proj_speed=1):
         super().__init__(x, y, Sprite('Sprites/bullet1.png'), Hitbox(4, 4), parent, dx, dy)
         self.damage = damage
+        self.sprite.optimize()
+        self.base_image = self.sprite.image.copy()
         length = ((to_x - self.getx()) ** 2 + (to_y - self.gety()) ** 2) ** (1 / 2)
         if length == 0:
             length = 0.001
         vector = ((to_x - self.getx()) / length * proj_speed, (to_y - self.gety()) / length * proj_speed)
         self.dx, self.dy = vector
-        self.angle = math.atan2(self.dy, self.dx)
-        self.sprite.image = pygame.transform.rotate(self.sprite.image, 180 - self.angle * 180 / math.pi)
         self.parent.weapon.sprite.play(100)
 
     def tick(self):
         from Scripts.Player import Player
+
+        self.angle = math.atan2(self.dy, self.dx)
+        self.sprite.image = pygame.transform.rotate(self.base_image, 180 - self.angle * 180 / math.pi)
+
         movement = ((self.x, self.y),
                     (self.x + self.dx * GameManager.time_elapsed, self.y + self.dy * GameManager.time_elapsed))
 
         for i in self.hitbox.check_intersections(movement):
             if i.parent == self.parent or isinstance(self.parent, Attack):
                 continue
-            elif isinstance(i.parent, Player):
-                if isinstance(self.parent, SwordSwing) and GameManager.player.sword_reflect:
-                    self.dx *= -1
-                    self.dy *= -1
+            elif isinstance(self.parent, Player) and isinstance(i.parent, SwordSwing) and GameManager.player.sword_reflect:
+                self.dx *= -1
+                self.dy *= -1
             elif type(i.parent) == Ground and isinstance(self.parent, Player) and self.parent.bullets_bounce:
                 movement, dx_mul, dy_mul = i.modify_movement(movement, self.hitbox, mode="bounce")
                 self.dx *= dx_mul
