@@ -92,27 +92,27 @@ class Player(InteractableObject, Damageable, Persistent):
                     [self.x + self.x_speed * (keys[pygame.K_d] - keys[pygame.K_a]) * GameManager.time_elapsed,
                      self.y + self.dy * GameManager.time_elapsed]]
         if self.colliding:
-            for i in self.hitbox.check_intersections(movement):
-                if type(i.parent) == Ground or (type(i.parent) == Door and i.parent.usable is False):
-                    movement, dx_mul, dy_mul = i.modify_movement(movement, self.hitbox, mode="slide")
+            for hitbox in self.hitbox.check_intersections(movement):
+                if type(hitbox.parent) == Ground or (type(hitbox.parent) == Door and hitbox.parent.usable is False):
+                    movement, dx_mul, dy_mul = hitbox.modify_movement(movement, self.hitbox, mode="slide")
                     if dy_mul == 0:
                         self.coyote = 100
                     self.dx *= dx_mul
                     self.dy *= dy_mul
-                elif type(i.parent) == Door and i.parent.usable:
-                    i.parent.use()
+                elif type(hitbox.parent) == Door and hitbox.parent.usable:
+                    hitbox.parent.use()
                     movement = (movement[0], (self.x, self.y))
-                    if i.parent.type == 'up':
+                    if hitbox.parent.type == 'up':
                         movement = (movement[0], (self.x, self.y - 30))
-                elif isinstance(i.parent, DeathPlane):
+                elif isinstance(hitbox.parent, DeathPlane):
                     self.x = 440
                     self.y = 400
                     self.hp -= 5
                     return
-            for i in self.hitbox.check_intersections():
-                if type(i.parent) == Elevator:
+            for hitbox in self.hitbox.check_intersections():
+                if type(hitbox.parent) == Elevator:
                     if keys[pygame.K_w]:
-                        i.parent.use()
+                        hitbox.parent.use()
         self.x = movement[1][0]
         self.y = movement[1][1]
 

@@ -368,12 +368,12 @@ class Hitbox(GameObject):
         :return: array of hitboxes, with which there is an intersection
         """
         intersecting = []
-        for i in GameManager.all_Hitboxes:
-            if i != self:
-                if not movement and self.intersects(i):
-                    intersecting.append(i)
-                elif movement and i.modify_movement(movement, self)[0] != movement:
-                    intersecting.append(i)
+        for hitbox in GameManager.all_Hitboxes:
+            if hitbox != self:
+                if not movement and self.intersects(hitbox):
+                    intersecting.append(hitbox)
+                elif movement and hitbox.modify_movement(movement, self)[0] != movement:
+                    intersecting.append(hitbox)
         return intersecting
 
     def show(self):
@@ -729,24 +729,24 @@ class Room:
         GameManager.player.x = coordinates[enter_type][0]
         GameManager.player.y = coordinates[enter_type][1]
         GameManager.current_room = self
-        for i in self.filling:
-            if isinstance(i, Spawner):
-                i.spawn()
-            if not isinstance(i, Player):
-                GameManager.to_add.append(i)
+        for game_object in self.filling:
+            if isinstance(game_object, Spawner):
+                game_object.spawn()
+            if not isinstance(game_object, Player):
+                GameManager.to_add.append(game_object)
 
     def quit(self):
         """
         Method that will quit from the room and add changes to GameManager
         """
-        for i in GameManager.all_Objects:
-            if isinstance(i, Attack):
-                if i in self.filling:
-                    self.filling.remove(i)
-            if isinstance(i, Spawner):
-                i.despawn()
-            if not isinstance(i, Persistent):
-                GameManager.to_remove.append(i)
+        for game_object in GameManager.all_Objects:
+            if isinstance(game_object, Attack):
+                if game_object in self.filling:
+                    self.filling.remove(game_object)
+            if isinstance(game_object, Spawner):
+                game_object.despawn()
+            if not isinstance(game_object, Persistent):
+                GameManager.to_remove.append(game_object)
 
     def check_cleaned(self):
         """
@@ -789,17 +789,16 @@ class InterDimensionalRoom(Room):
         GameManager.player.y = -120
         self.get_power_ups()
         GameManager.current_room = self
-        for i in self.filling:
-            print(i)
-            GameManager.to_add.append(i)
+        for game_object in self.filling:
+            GameManager.to_add.append(game_object)
 
     def quit(self):
         """
         Method that will quit from the InterDimensionalRoom and create a new level for a GameManager
         """
 
-        for i in GameManager.player.gui:
-            i.active = True
+        for elements_of_interface in GameManager.player.gui:
+            elements_of_interface.active = True
         GameManager.new_level()
 
     def get_power_ups(self):
@@ -859,8 +858,8 @@ class FakeInterDimensionalRoom(Room):
         GameManager.player.x = 440
         GameManager.player.y = 400
         GameManager.current_room = self
-        for i in self.filling:
-            GameManager.to_add.append(i)
+        for game_object in self.filling:
+            GameManager.to_add.append(game_object)
 
 
 class Door(InteractableObject):
@@ -1118,8 +1117,8 @@ class LevelGenerator:
             room.filling.append(room.down_door)
         else:
             walls.append(Ground(0, 690, 960, 30))
-        for i in walls:
-            room.filling.append(i)
+        for wall in walls:
+            room.filling.append(wall)
         return room
 
     def connect(self, x=0, y=0):
