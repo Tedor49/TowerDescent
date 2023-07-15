@@ -556,7 +556,7 @@ class Menu:
         font = pygame.font.SysFont('arial', 50)
         text = font.render('Start',
                            True, (0, 0, 0))
-        text_x = 340
+        text_x = 440
         text_y = 330
         screen.blit(text, (text_x, text_y))
         screen.blit(pygame.image.load("Sprites/logo.png"), (220, 60))
@@ -564,7 +564,7 @@ class Menu:
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     x, y = event.pos
-                    if 340 < x < 540 and 330 < y < 370:
+                    if 440 < x < 540 and 330 < y < 370:
                         pygame.quit()
                         GameManager()
                 if event.type == pygame.QUIT:

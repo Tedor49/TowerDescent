@@ -56,7 +56,7 @@ class Bullet(Attack):
                 hitbox.parent.hurt(self, self.damage)
                 GameManager.to_remove.append(self)
             else:
-                GameManager.toRemove.append(self)
+                GameManager.to_remove.append(self)
         for i in self.hitbox.check_intersections():
             if self.parent != GameManager.player and \
                     isinstance(i.parent, SwordSwing) and \
