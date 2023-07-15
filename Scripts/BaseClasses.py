@@ -379,18 +379,19 @@ class GameManager:
     lvl_number = 0
     interDimensionalRoom = None
     background = None
+    elevator_broken = False
     def __init__(self):
         import Scripts.Powerups
         GameManager.power_ups = [
-            ('Sprites\Powerups\doubleJump.png', Scripts.Powerups.DoubleJump),
-            ('Sprites\Powerups\doubleDamage.png', Scripts.Powerups.DoubleDamage),
-            ('Sprites\Powerups\\bouncyBullets.png', Scripts.Powerups.BouncyBullets),
-            ('Sprites\Powerups\discardWeapon.png', Scripts.Powerups.DiscardWeapon),
-            ('Sprites\Powerups\infiniteAmmo.png', Scripts.Powerups.InfiniteAmmo),
-            ('Sprites\PowerUps\swordReflect.png', Scripts.Powerups.SwordReflect),
-            ('Sprites\PowerUps\lowGrav.png', Scripts.Powerups.LowGravity),
-            ('Sprites\PowerUps\lowerCooldown.png', Scripts.Powerups.LowerCooldown),
-            ('Sprites\PowerUps\\berserker.png', Scripts.Powerups.DoubleDamage)
+            ('Sprites\\Powerups\\doubleJump.png', Scripts.Powerups.DoubleJump),
+            ('Sprites\\Powerups\\doubleDamage.png', Scripts.Powerups.DoubleDamage),
+            ('Sprites\\Powerups\\bouncyBullets.png', Scripts.Powerups.BouncyBullets),
+            ('Sprites\\Powerups\\discardWeapon.png', Scripts.Powerups.DiscardWeapon),
+            ('Sprites\\Powerups\\infiniteAmmo.png', Scripts.Powerups.InfiniteAmmo),
+            ('Sprites\\PowerUps\\swordReflect.png', Scripts.Powerups.SwordReflect),
+            ('Sprites\\PowerUps\\lowGrav.png', Scripts.Powerups.LowGravity),
+            ('Sprites\\PowerUps\\lowerCooldown.png', Scripts.Powerups.LowerCooldown),
+            ('Sprites\\PowerUps\\berserker.png', Scripts.Powerups.FistPowerUp)
         ]
         from Scripts.Player import Player
         pygame.init()
@@ -538,9 +539,15 @@ class Room:
 class InterDimensionalRoom(Room):
     def __init__(self):
         super().__init__([], -1)
-        self.filling += [Elevator(450, -500, Sprite('Sprites\elevator.png', z=-2), Hitbox(60, 110)),
-                          GameManager.background]
 
+        if not GameManager.elevator_broken:
+            cur_sprite = "Sprites/elevator.png"
+        else:
+            cur_sprite = "Sprites/elevator_broken_player.png"
+
+        self.filling += [Elevator(450, -500, Sprite(cur_sprite, z=-2), Hitbox(60, 110)),
+                         InteractableObject(0, 0, Sprite("Sprites/Levels/background_elevator.png", z=-4))]
+        self.power_ups = []
 
     def enter(self, type='elevator'):
         GameManager.player.x = 480
@@ -555,7 +562,6 @@ class InterDimensionalRoom(Room):
         GameManager.newLevel()
 
     def getPowerUps(self):
-        self.power_ups = []
         while len(self.power_ups) != 3:
             power_up = random.choice(GameManager.power_ups)
             if power_up in self.power_ups:
@@ -565,6 +571,32 @@ class InterDimensionalRoom(Room):
                 GameManager.power_ups.remove(power_up)
         for i in range(len(self.power_ups)):
             self.filling.append(InteractableObject(150 * (i+1) + 120 * i, 540, Sprite(self.power_ups[i][0], z=-2), None))
+
+
+class DeathPlane(InteractableObject):
+    def __init__(self, x, y, x_size, y_size, sprite=None, dx=0, dy=0, g=5):
+        super().__init__(x, y, sprite, Hitbox(x_size, y_size), dx, dy, g)
+
+
+class FakeInterDimensionalRoom(Room):
+    def __init__(self):
+        from Scripts.AnimatedSprites import AnimatedTop
+        super().__init__([], -1)
+        self.cap = InteractableObject(450, 370, AnimatedTop())
+
+        self.filling += [InteractableObject(0, 0, Sprite("Sprites/Levels/background_elevator.png", z=-4)),
+                         InteractableObject(450, 420, Sprite("Sprites/elevatorBottom.png", z=4)),
+                         self.cap,
+                         InteractableObject(450, -340, Sprite("Sprites/rope.png", z=-2)),
+                         DeathPlane(-10000, 690, 20960, 30),
+                         Ground(450, 450, 60, 30)]
+
+    def enter(self, type='elevator'):
+        GameManager.player.x = 440
+        GameManager.player.y = 400
+        GameManager.currentRoom = self
+        for i in self.filling:
+            GameManager.toAdd.append(i)
 
 
 class Door(InteractableObject):
@@ -665,9 +697,17 @@ class LevelGenerator:
             room_type = 'boss_' + str(GameManager.lvl_number % 4)
 
             exit_elevator = Elevator(450, -120, AnimatedExitElevator(), Hitbox(60, 110), usable=False, direction='to')
-            room.filling.append(Scripts.Enemies.Boss0(GameManager.player, exit_elevator))
-            room.filling.append(Scripts.Enemies.GunArm(GameManager.player))
-            room.filling.append(exit_elevator)
+            if room_type == "boss_0":
+                room.filling.append(Scripts.Enemies.Boss0(GameManager.player, exit_elevator))
+                room.filling.append(Scripts.Enemies.GunArm(GameManager.player))
+                room.filling.append(exit_elevator)
+            elif room_type == "boss_2":
+                room.filling.append(exit_elevator)
+                exit_elevator.spawn(310)
+            else:
+                room.filling.append(Scripts.Enemies.Boss0(GameManager.player, exit_elevator))
+                room.filling.append(Scripts.Enemies.GunArm(GameManager.player))
+                room.filling.append(exit_elevator)
         elif x == 1 and y == 0:
             room_type = 'start'
         else:
@@ -771,8 +811,8 @@ class Elevator(InteractableObject):
             GameManager.player.deactivate()
             self.sprite.play(750)
 
-    def spawn(self):
-        self.sprite.play(340)
+    def spawn(self, y):
+        self.sprite.play(y)
 
 class Persistent:
     pass

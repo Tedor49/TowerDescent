@@ -1,3 +1,5 @@
+import random
+
 import pygame.image
 
 from Scripts.BaseClasses import *
@@ -145,7 +147,11 @@ class AnimatedSword(AnimatedSprite):
 
 class AnimatedExitElevator(AnimatedSprite):
     def __init__(self):
-        super().__init__("Sprites/elevator.png", z=-1, y=-790)
+        if not GameManager.elevator_broken:
+            cur_sprite = "Sprites/elevator.png"
+        else:
+            cur_sprite = "Sprites/elevator_broken_player.png"
+        super().__init__(cur_sprite, z=-1, y=-790)
         self.timer = 0
         self.total_time = 0
         self.direction = 0
@@ -157,7 +163,10 @@ class AnimatedExitElevator(AnimatedSprite):
             self.parent.y += GameManager.time_elapsed
         elif self.parent.y > 740:
             GameManager.currentRoom.quit()
-            GameManager.interDimensionalRoom = InterDimensionalRoom()
+            if GameManager.lvl_number == 2:
+                GameManager.interDimensionalRoom = FakeInterDimensionalRoom()
+            else:
+                GameManager.interDimensionalRoom = InterDimensionalRoom()
             GameManager.interDimensionalRoom.enter()
         elif self.parent.y > 0:
             self.parent.y = self.target_y
@@ -170,7 +179,11 @@ class AnimatedExitElevator(AnimatedSprite):
 
 class AnimatedEntryElevator(AnimatedSprite):
     def __init__(self):
-        super().__init__("Sprites/elevator.png", z=-1, y=-790 - 480, x=455)
+        if not GameManager.elevator_broken:
+            cur_sprite = "Sprites/elevator.png"
+        else:
+            cur_sprite = "Sprites/elevator_broken_player.png"
+        super().__init__(cur_sprite, z=-1, y=-790 - 480, x=455)
         self.timer = 0
         self.total_time = 0
         self.direction = 0
@@ -178,9 +191,11 @@ class AnimatedEntryElevator(AnimatedSprite):
 
     def draw(self):
         if self.y < self.target_y:
-            self.y += GameManager.time_elapsed
+            self.y += GameManager.time_elapsed / 2
         else:
             self.y = self.target_y
+            if GameManager.elevator_broken:
+                self.image = pygame.image.load("Sprites/elevator_broken_no_player.png")
             GameManager.player.activate()
         super().draw()
 
@@ -189,6 +204,42 @@ class AnimatedEntryElevator(AnimatedSprite):
 
     def gety(self):
         return self.y
+
+    def delete(self):
+        if self in GameManager.all_Objects:
+            GameManager.all_Objects.remove(self)
+        if self in GameManager.all_Sprites:
+            GameManager.all_Sprites.remove(self)
+
+
+class AnimatedTop(AnimatedSprite):
+    def __init__(self):
+        super().__init__("Sprites/elevatorTop.png", z=2)
+        self.dx = 0
+        self.dy = 0
+        self.playing = False
+        self.cooldown = 5000
+
+    def draw(self):
+        from Scripts.Enemies import Boss2
+
+        if self.playing:
+            self.dy += GameManager.time_elapsed / 40
+            self.x += self.dx * GameManager.time_elapsed / 40
+            self.y += self.dy * GameManager.time_elapsed / 40
+        else:
+            self.cooldown -= GameManager.time_elapsed
+            if self.cooldown < 0:
+                GameManager.elevator_broken = True
+                self.image = pygame.transform.rotate(self.image, 30)
+                self.dx = random.randint(-5, 5)
+                self.dy = -5
+                self.playing = True
+                GameManager.player.activate()
+
+                GameManager.toAdd.append(Boss2(GameManager.player))
+        super().draw()
+
 
     def delete(self):
         if self in GameManager.all_Objects:

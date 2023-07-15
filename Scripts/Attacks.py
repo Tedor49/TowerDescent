@@ -23,16 +23,15 @@ class Bullet(Attack):
 
         for i in self.hitbox.check_intersections(movement):
             if i.parent == self.parent or isinstance(self.parent, Attack):
-                pass
-            elif isinstance(self.parent, Player):
-                if isinstance(i.parent, SwordSwing) and GameManager.player.sword_reflect:
+                continue
+            elif isinstance(i.parent, Player):
+                if isinstance(self.parent, SwordSwing) and GameManager.player.sword_reflect:
                     self.dx *= -1
                     self.dy *= -1
-            elif type(i.parent) == Ground and isinstance(self.parent, Player):
-                if self.parent.bullets_bounce:
-                    movement, dx_mul, dy_mul = i.modify_movement(movement, self.hitbox, mode="bounce")
-                    self.dx *= dx_mul
-                    self.dy *= dy_mul
+            elif type(i.parent) == Ground and isinstance(self.parent, Player) and self.parent.bullets_bounce:
+                movement, dx_mul, dy_mul = i.modify_movement(movement, self.hitbox, mode="bounce")
+                self.dx *= dx_mul
+                self.dy *= dy_mul
             elif isinstance(i.parent, Damageable):
                 i.parent.hurt(self, self.damage)
                 GameManager.toRemove.append(self)

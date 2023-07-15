@@ -86,15 +86,13 @@ class LowerCooldown(PowerUp):
 class FistPowerUp(PowerUp):
     @staticmethod
     def apply():
-        def fist_powerup_decorator(foo):
-            def wrapper(self, *args):
-                pass
-
-            return wrapper
+        def wrapper(self, *args):
+            pass
+        print("berserk")
         GameManager.player.base.damage *= 3
         GameManager.player.onlyFists = True
         GameManager.toRemove.append(GameManager.player.weapon)
         GameManager.player.weapon = GameManager.player.base
         GameManager.toAdd.append(GameManager.player.base)
-        Player.change_weapon = fist_powerup_decorator(Player.change_weapon)
+        Player.change_weapon = wrapper
 

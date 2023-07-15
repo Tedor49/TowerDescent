@@ -200,7 +200,7 @@ class Boss0(Enemy):
         if self.hp <= 0:
             GameManager.toRemove.append(self)
             GameManager.currentRoom.filling.remove(self)
-            self.elevator.spawn()
+            self.elevator.spawn(340)
 
     def add_to_manager(self):
         GameManager.all_Objects.add(self)
@@ -245,3 +245,43 @@ class GunArm(Enemy):
             GameManager.all_Hitboxes.remove(self.hitbox)
         if self.sprite:
             GameManager.all_Sprites.remove(self.sprite)
+
+
+class Boss2(Enemy):
+    def __init__(self, player_enemy):
+        super().__init__(400, 30, Sprite("Sprites/boss2.png", z=4), Hitbox(180, 250, x=-4), player_enemy)
+        self.iframes = 0.1
+        self.baseImage = self.sprite.image.copy()
+        self.damage = 1
+        self.hp = 1
+        self.weapon = None
+        self.time = 0
+
+    def tick(self):
+
+        self.time += GameManager.time_elapsed
+
+        self.sprite.image = pygame.transform.rotate(self.baseImage, -math.cos(self.time / 500) * 30)
+        self.x = math.sin(self.time / 500) * 360 + 480 - self.sprite.image.get_width() // 2
+
+        if self.hp <= 0:
+            GameManager.toRemove.append(self)
+            GameManager.interDimensionalRoom.quit()
+            GameManager.player.deactivate()
+            GameManager.interDimensionalRoom = InterDimensionalRoom()
+            GameManager.interDimensionalRoom.enter()
+
+    def add_to_manager(self):
+        GameManager.all_Objects.add(self)
+        if self.hitbox:
+            GameManager.all_Hitboxes.add(self.hitbox)
+        if self.sprite:
+            GameManager.all_Sprites.add(self.sprite)
+
+    def delete(self):
+        GameManager.all_Objects.remove(self)
+        if self.hitbox:
+            GameManager.all_Hitboxes.remove(self.hitbox)
+        if self.sprite:
+            GameManager.all_Sprites.remove(self.sprite)
+

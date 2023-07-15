@@ -86,11 +86,16 @@ class Player(InteractableObject, Damageable, Persistent):
                     self.coyote = 100
                 self.dx *= dx_mul
                 self.dy *= dy_mul
-            if type(i.parent) == Door and i.parent.usable:
+            elif type(i.parent) == Door and i.parent.usable:
                 i.parent.use()
                 movement = (movement[0], (self.x, self.y))
                 if i.parent.type=='up':
                     movement = (movement[0], (self.x, self.y-30))
+            elif isinstance(i.parent, DeathPlane):
+                self.x = 440
+                self.y = 400
+                self.hp -= 5
+                return
         for i in self.hitbox.check_intersections():
             if type(i.parent) == Elevator:
                 if keys[pygame.K_w]:
@@ -99,6 +104,7 @@ class Player(InteractableObject, Damageable, Persistent):
         self.y = movement[1][1]
 
     def change_weapon(self, new_weapon):
+        print("COCK")
         GameManager.toRemove.append(self.weapon)
         self.weapon = new_weapon
         new_weapon.parent = self
