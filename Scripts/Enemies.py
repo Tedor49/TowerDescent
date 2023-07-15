@@ -188,7 +188,7 @@ class Boss0(Enemy):
         self.iframes = 0.1
         self.baseImage = self.sprite.image.copy()
         self.damage = 1
-        self.hp = 1
+        self.hp = 50
         self.weapon = None
         self.time = 0
         self.elevator = elevator
@@ -254,12 +254,12 @@ class GunArm(Enemy):
 
 class Boss1(Enemy):
     def __init__(self, player_enemy, elevator):
-        super().__init__(-200, 310, Sprite("Sprites/boss0.png", z=4), Hitbox(180, 250, x=-4), player_enemy)
+        super().__init__(-200, 310, Sprite("Sprites/boss1.png", z=4), Hitbox(198, 198, x=-4), player_enemy)
         self.iframes = 0.1
         self.elevator = elevator
         self.baseImage = self.sprite.image.copy()
         self.damage = 1
-        self.hp = 1
+        self.hp = 10
         self.movement = Movement.FollowFlyingMove
         self.weapon = None
         self.parent = None
@@ -274,6 +274,8 @@ class Boss1(Enemy):
         angle = math.atan2(x - self_center_x, y - self_center_y) * 180 / math.pi
 
         self.sprite.image = pygame.transform.rotate(self.baseImage, angle)
+        self.sprite.x = 99 - self.sprite.image.get_width() // 2
+        self.sprite.y = 99 - self.sprite.image.get_height() // 2
 
         self.move(self.player_enemy)
 
@@ -296,7 +298,6 @@ class Boss1(Enemy):
         if self.sprite:
             GameManager.all_Sprites.add(self.sprite)
 
-
     def delete(self):
         GameManager.all_Objects.remove(self)
         if self.hitbox:
@@ -304,13 +305,38 @@ class Boss1(Enemy):
         if self.sprite:
             GameManager.all_Sprites.remove(self.sprite)
 
+    def hurt(self, proj, value):
+        """Overwriting the Damageable method so the 2nd boss is knocked back by attacks"""
+
+        if proj.parent != self and time.time() - self.last_attack > self.iframes:
+            self.hp -= value
+            if isinstance(proj, Bullet):
+                vec = (proj.getdx(), proj.getdy())
+            else:
+                from_x = proj.parent.getx() + proj.parent.hitbox.x_size / 2
+                from_y = proj.parent.getx() + proj.parent.hitbox.x_size / 2
+
+                to_x = self.getx() + self.hitbox.x_size / 2
+                to_y = self.gety() + self.hitbox.y_size / 2
+
+                vec = (to_x - from_x, to_y, from_y)
+
+            length = (vec[0] ** 2 + vec[1] ** 2) ** 0.5
+            vec = (vec[0] / length, vec[1] / length)
+
+            self.dx = vec[0]
+            self.dy = vec[1]
+
+            self.last_attack = time.time()
+
+
 class Boss2(Enemy):
     def __init__(self, player_enemy):
         super().__init__(400, 30, Sprite("Sprites/boss2.png", z=4), Hitbox(180, 250, x=-4), player_enemy)
         self.iframes = 0.1
         self.baseImage = self.sprite.image.copy()
         self.damage = 1
-        self.hp = 1
+        self.hp = 20
         self.weapon = None
         self.time = 0
 
