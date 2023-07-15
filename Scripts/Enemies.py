@@ -40,16 +40,16 @@ class Movement:
     cooldown = 0
     walkTime = 0
 
-    def FollowFlyingMove(self, target):
+    def follow_flying_move(self, target):
         """
         Flying movement with preference to following a target and not stopping when encountering wall
         :param target: target for movement
         """
         if target != 0:
-            x = target.hitbox.getx() + target.hitbox.x_size / 2
-            y = target.hitbox.gety() + target.hitbox.y_size / 2
-            our_x = self.hitbox.getx() + self.hitbox.x_size / 2
-            our_y = self.hitbox.gety() + self.hitbox.y_size / 2
+            x = target.hitbox.get_x() + target.hitbox.x_size / 2
+            y = target.hitbox.get_y() + target.hitbox.y_size / 2
+            our_x = self.hitbox.get_x() + self.hitbox.x_size / 2
+            our_y = self.hitbox.get_y() + self.hitbox.y_size / 2
             length = ((x - our_x) ** 2 + (y - our_y) ** 2) ** (1 / 2)
             vector = ((x - our_x) / length, (y - our_y) / length)
 
@@ -60,16 +60,16 @@ class Movement:
             self.x += self.dx * GameManager.time_elapsed
             self.y += self.dy * GameManager.time_elapsed
 
-    def FollowFlyingWallsMove(self, target):
+    def follow_flying_walls_move(self, target):
         """
         Flying movement with preference to following a target and stopping when encountering wall
         :param target: target for movement
         """
         if target != 0:
-            x = target.hitbox.getx() + target.hitbox.x_size / 2
-            y = target.hitbox.gety() + target.hitbox.y_size / 2
-            our_x = self.hitbox.getx() + self.hitbox.x_size / 2
-            our_y = self.hitbox.gety() + self.hitbox.y_size / 2
+            x = target.hitbox.get_x() + target.hitbox.x_size / 2
+            y = target.hitbox.get_y() + target.hitbox.y_size / 2
+            our_x = self.hitbox.get_x() + self.hitbox.x_size / 2
+            our_y = self.hitbox.get_y() + self.hitbox.y_size / 2
             length = ((x - our_x) ** 2 + (y - our_y) ** 2) ** (1 / 2)
             if length < 50:
                 vector = (0, 0)
@@ -92,14 +92,14 @@ class Movement:
             self.x = movement[1][0]
             self.y = movement[1][1]
 
-    def FollowWalkingMove(self, target):
+    def follow_walking_move(self, target):
         """
         Walking movement with preference to following a target
         :param target: target for movement
         """
         if target != 0:
-            x = target.hitbox.getx() + target.hitbox.x_size / 2
-            our_x = self.hitbox.getx() + self.hitbox.x_size / 2
+            x = target.hitbox.get_x() + target.hitbox.x_size / 2
+            our_x = self.hitbox.get_x() + self.hitbox.x_size / 2
 
             self.dx += sign(x - our_x) / 500 * GameManager.time_elapsed
             self.dx *= 0.9
@@ -117,7 +117,7 @@ class Movement:
             self.x = movement[1][0]
             self.y = movement[1][1]
 
-    def RandomWalkingMove(self, target):
+    def random_walking_move(self, target):
         """
         Walking movement with preference to random walking
         :param target: target for movement
@@ -155,9 +155,9 @@ class Movement:
         self.x = movement[1][0]
         self.y = movement[1][1]
 
-    def getRandomMovement(self):
-        return random.choice([Movement.FollowFlyingMove, Movement.FollowFlyingWallsMove, Movement.FollowWalkingMove,
-                              Movement.RandomWalkingMove])
+    def get_random_movement(self):
+        return random.choice([Movement.follow_flying_move, Movement.follow_flying_walls_move, Movement.follow_walking_move,
+                              Movement.random_walking_move])
 
 
 def sign(x):
@@ -201,8 +201,8 @@ class BaseEnemy(Enemy):
     def tick(self):
         """Actions which Base Enemy will do each tick"""
         if self.hp > 0:
-            x = self.player_enemy.hitbox.getx() + self.player_enemy.hitbox.x_size / 2
-            y = self.player_enemy.hitbox.gety() + self.player_enemy.hitbox.y_size / 2
+            x = self.player_enemy.hitbox.get_x() + self.player_enemy.hitbox.x_size / 2
+            y = self.player_enemy.hitbox.get_y() + self.player_enemy.hitbox.y_size / 2
             if self.weapon:
                 if self.cooldown > 0:
                     self.cooldown -= GameManager.time_elapsed
@@ -216,7 +216,7 @@ class BaseEnemy(Enemy):
                     self.cooldown = random.randint(500, 2000)
             self.move(self.player_enemy)
         else:
-            GameManager.toRemove.append(self)
+            GameManager.to_remove.append(self)
 
     def add_to_manager(self):
         """Method that adds BaseEnemy instance to the GameManager"""
@@ -271,8 +271,8 @@ class Boss0(Enemy):
         self.sprite.y = sizes[1] * (1 - squish_fraction)
 
         if self.hp <= 0:
-            GameManager.toRemove.append(self)
-            GameManager.currentRoom.filling.remove(self)
+            GameManager.to_remove.append(self)
+            GameManager.current_room.filling.remove(self)
             self.elevator.spawn(340)
 
     def add_to_manager(self):
@@ -308,7 +308,7 @@ class GunArm(Enemy):
         """Actions which boss GunArm do each tick"""
         if not self.weapon:
             self.weapon = Weapon(self, GunKit, damage=10, downtime=500)
-            GameManager.toAdd.append(self.weapon)
+            GameManager.to_add.append(self.weapon)
 
     def add_to_manager(self):
         """Method that adds GunArm instance to the GameManager"""
@@ -346,17 +346,17 @@ class Boss1(Enemy):
         self.baseImage = self.sprite.image.copy()
         self.damage = 1
         self.hp = 10
-        self.movement = Movement.FollowFlyingMove
+        self.movement = Movement.follow_flying_move
         self.weapon = None
         self.parent = None
 
     def tick(self):
         """Actions which boss will do each tick"""
-        x = self.player_enemy.hitbox.getx() + self.player_enemy.hitbox.x_size / 2
-        y = self.player_enemy.hitbox.gety() + self.player_enemy.hitbox.y_size / 2
+        x = self.player_enemy.hitbox.get_x() + self.player_enemy.hitbox.x_size / 2
+        y = self.player_enemy.hitbox.get_y() + self.player_enemy.hitbox.y_size / 2
 
-        self_center_x = self.hitbox.getx() + self.hitbox.x_size / 2
-        self_center_y = self.hitbox.gety() + self.hitbox.y_size / 2
+        self_center_x = self.hitbox.get_x() + self.hitbox.x_size / 2
+        self_center_y = self.hitbox.get_y() + self.hitbox.y_size / 2
 
         angle = math.atan2(x - self_center_x, y - self_center_y) * 180 / math.pi
 
@@ -367,8 +367,8 @@ class Boss1(Enemy):
         self.move(self.player_enemy)
 
         if self.hp <= 0:
-            GameManager.toRemove.append(self)
-            GameManager.currentRoom.filling.remove(self)
+            GameManager.to_remove.append(self)
+            GameManager.current_room.filling.remove(self)
             self.elevator.spawn(585)
 
         for i in self.hitbox.check_intersections():
@@ -403,11 +403,11 @@ class Boss1(Enemy):
             if isinstance(proj, Bullet):
                 vec = (proj.getdx(), proj.getdy())
             else:
-                from_x = proj.parent.getx() + proj.parent.hitbox.x_size / 2
-                from_y = proj.parent.getx() + proj.parent.hitbox.x_size / 2
+                from_x = proj.parent.get_x() + proj.parent.hitbox.x_size / 2
+                from_y = proj.parent.get_x() + proj.parent.hitbox.x_size / 2
 
-                to_x = self.getx() + self.hitbox.x_size / 2
-                to_y = self.gety() + self.hitbox.y_size / 2
+                to_x = self.get_x() + self.hitbox.x_size / 2
+                to_y = self.get_y() + self.hitbox.y_size / 2
 
                 vec = (to_x - from_x, to_y, from_y)
 
@@ -445,11 +445,11 @@ class Boss2(Enemy):
         self.x = math.sin(self.time / 500) * 360 + 480 - self.sprite.image.get_width() // 2
 
         if self.hp <= 0:
-            GameManager.toRemove.append(self)
-            GameManager.interDimensionalRoom.quit()
+            GameManager.to_remove.append(self)
+            GameManager.interdimensional_room.quit()
             GameManager.player.deactivate()
-            GameManager.interDimensionalRoom = InterDimensionalRoom()
-            GameManager.interDimensionalRoom.enter()
+            GameManager.interdimensional_room = InterDimensionalRoom()
+            GameManager.interdimensional_room.enter()
 
     def add_to_manager(self):
         """Method that adds Boss2 instance to the GameManager"""
@@ -506,7 +506,7 @@ class Boss3(Enemy):
                                special_flags=pygame.BLEND_MULT)
 
         if self.hp <= 0:
-            GameManager.toRemove.append(self)
+            GameManager.to_remove.append(self)
 
     def add_to_manager(self):
         """Method that adds Boss3 instance to the GameManager"""

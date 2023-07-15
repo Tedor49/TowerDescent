@@ -6,36 +6,7 @@ from Scripts.BaseClasses import *
 import math
 
 
-class AnimatedSprite(Sprite):
-    """Class that represents AnimatedSprite"""
-
-    def __init__(self, image, stretch_x=1, stretch_y=1, z=1, x=0, y=0, parent=None):
-        """
-        The initialization method for the AnimatedSprite
-        :param image: image that will be used in this Sprite
-        :param stretch_x: stretch on the x axis
-        :param stretch_y: stretch on the y axis
-        :param z: coordinate on the z axis in relation to position of the parent
-        :param x: coordinate on the x axis in relation to position of the parent
-        :param y: coordinate on the y axis in relation to position of the parent
-        :param parent: Object that owns this AnimatedSprite
-        """
-        super().__init__(image, stretch_x, stretch_y, z, x, y, parent)
-
-    def tick(self):
-        """Method that stimulates what AnimatedSprite do each tick"""
-        pass
-
-    def delete(self):
-        """Method that deletes this AnimatedSprite instance from GameManager"""
-        if self.parent.parent != GameManager.player:
-            if self in GameManager.all_Objects:
-                GameManager.all_Objects.remove(self)
-            if self in GameManager.all_Sprites:
-                GameManager.all_Sprites.remove(self)
-
-
-class AnimatedGun(AnimatedSprite):
+class AnimatedGun(Sprite):
     """Class that represents AnimatedGun sprite"""
 
     def __init__(self):
@@ -47,16 +18,16 @@ class AnimatedGun(AnimatedSprite):
         self.flipped = pygame.transform.flip(self.base, False, True)
         self.timer = 0
 
-    def tick(self):
+    def draw(self):
         """Method that stimulates what AnimatedGun do each tick"""
         if self.parent.parent == GameManager.player:
             x, y = pygame.mouse.get_pos()
         else:
-            x, y = GameManager.player.getx(), GameManager.player.gety()
-        length = ((x - self.parent.parent.getx()) ** 2 + (y - self.parent.parent.gety()) ** 2) ** (1 / 2)
+            x, y = GameManager.player.get_x(), GameManager.player.get_y()
+        length = ((x - self.parent.parent.get_x()) ** 2 + (y - self.parent.parent.get_y()) ** 2) ** (1 / 2)
         if length == 0:
             length = 0.001
-        vector = ((x - self.parent.parent.getx()) / length * 30, (y - self.parent.parent.gety()) / length * 30)
+        vector = ((x - self.parent.parent.get_x()) / length * 30, (y - self.parent.parent.get_y()) / length * 30)
         angle = math.atan2(vector[1], vector[0])
         angle = - angle * 180 / math.pi
         if abs(angle) > 90:
@@ -70,12 +41,13 @@ class AnimatedGun(AnimatedSprite):
             vector = (vector[0] * 0.75, vector[1] * 0.75)
 
         self.x, self.y = vector[0] - offset_x + 25, vector[1] - offset_y + 25
+        super().draw()
 
     def play(self, timer):
         self.timer = timer
 
 
-class AnimatedFist(AnimatedSprite):
+class AnimatedFist(Sprite):
     """Class that represents AnimatedFist sprite"""
 
     def __init__(self):
@@ -87,13 +59,13 @@ class AnimatedFist(AnimatedSprite):
         self.flipped = pygame.transform.flip(self.base, False, True)
         self.timer = 0
 
-    def tick(self):
+    def draw(self):
         """Method that stimulates what AnimatedFist do each tick"""
         x, y = pygame.mouse.get_pos()
-        length = ((x - self.parent.parent.getx()) ** 2 + (y - self.parent.parent.gety()) ** 2) ** (1 / 2)
+        length = ((x - self.parent.parent.get_x()) ** 2 + (y - self.parent.parent.get_y()) ** 2) ** (1 / 2)
         if length == 0:
             length = 0.001
-        vector = ((x - self.parent.parent.getx()) / length * 30, (y - self.parent.parent.gety()) / length * 30)
+        vector = ((x - self.parent.parent.get_x()) / length * 30, (y - self.parent.parent.get_y()) / length * 30)
         angle = math.atan2(vector[1], vector[0])
         angle = - angle * 180 / math.pi
         if abs(angle) > 90:
@@ -111,12 +83,13 @@ class AnimatedFist(AnimatedSprite):
             x *= 1.5
 
         self.x, self.y = x - offset_x + 25, - offset_y + 25
+        super().draw()
 
     def play(self, timer):
         self.timer = timer
 
 
-class AnimatedSword(AnimatedSprite):
+class AnimatedSword(Sprite):
     """Class that represents AnimatedSword sprite"""
 
     def __init__(self):
@@ -130,8 +103,8 @@ class AnimatedSword(AnimatedSprite):
         self.total_time = 0
         self.direction = 0
 
-    def tick(self):
-        """Method that stimulates what AnimatedSword do each tick"""
+    def draw(self):
+        """Method that draws AnimatedSword"""
         if self.timer > 0:
             self.timer -= GameManager.time_elapsed
             done_fraction = self.timer / self.total_time
@@ -150,11 +123,11 @@ class AnimatedSword(AnimatedSprite):
             if self.parent.parent == GameManager.player:
                 x, y = pygame.mouse.get_pos()
             else:
-                x, y = GameManager.player.getx(), GameManager.player.gety()
-            length = ((x - self.parent.parent.getx()) ** 2 + (y - self.parent.parent.gety()) ** 2) ** (1 / 2)
+                x, y = GameManager.player.get_x(), GameManager.player.get_y()
+            length = ((x - self.parent.parent.get_x()) ** 2 + (y - self.parent.parent.get_y()) ** 2) ** (1 / 2)
             if length == 0:
                 length = 0.001
-            vector = ((x - self.parent.parent.getx()) / length * 30, (y - self.parent.parent.gety()) / length * 30)
+            vector = ((x - self.parent.parent.get_x()) / length * 30, (y - self.parent.parent.get_y()) / length * 30)
             angle = math.atan2(vector[1], vector[0])
             angle = - angle * 180 / math.pi
             if abs(angle) > 90:
@@ -170,6 +143,7 @@ class AnimatedSword(AnimatedSprite):
         offset_x, offset_y = self.image.get_width() // 2, self.image.get_height() // 2
 
         self.x, self.y = x - offset_x + 25, y - offset_y + 10
+        super().draw()
 
     def play(self, timer):
         self.timer = timer
@@ -177,7 +151,7 @@ class AnimatedSword(AnimatedSprite):
         self.direction = self.x + self.image.get_width() // 2 - 25 > 0
 
 
-class AnimatedExitElevator(AnimatedSprite):
+class AnimatedExitElevator(Sprite):
     """Class that represents AnimatedExitElevator sprite"""
 
     def __init__(self):
@@ -200,12 +174,12 @@ class AnimatedExitElevator(AnimatedSprite):
             self.parent.usable = False
             self.parent.y += GameManager.time_elapsed
         elif self.parent.y > 740:
-            GameManager.currentRoom.quit()
+            GameManager.current_room.quit()
             if GameManager.lvl_number == 2:
-                GameManager.interDimensionalRoom = FakeInterDimensionalRoom()
+                GameManager.interdimensional_room = FakeInterDimensionalRoom()
             else:
-                GameManager.interDimensionalRoom = InterDimensionalRoom()
-            GameManager.interDimensionalRoom.enter()
+                GameManager.interdimensional_room = InterDimensionalRoom()
+            GameManager.interdimensional_room.enter()
         elif self.parent.y > 0:
             self.parent.y = self.target_y
             self.parent.usable = True
@@ -215,7 +189,7 @@ class AnimatedExitElevator(AnimatedSprite):
         self.target_y = target_y
 
 
-class AnimatedEntryElevator(AnimatedSprite):
+class AnimatedEntryElevator(Sprite):
     """Class that represents AnimatedEntryElevator sprite"""
 
     def __init__(self):
@@ -243,11 +217,11 @@ class AnimatedEntryElevator(AnimatedSprite):
             GameManager.player.activate()
         super().draw()
 
-    def getx(self):
+    def get_x(self):
         """Method that returns x coordinate of an object"""
         return self.x
 
-    def gety(self):
+    def get_y(self):
         """Method that returns y coordinate of an object"""
         return self.y
 
@@ -259,7 +233,7 @@ class AnimatedEntryElevator(AnimatedSprite):
             GameManager.all_Sprites.remove(self)
 
 
-class AnimatedTop(AnimatedSprite):
+class AnimatedTop(Sprite):
     """Class that represents AnimatedTop sprite"""
 
     def __init__(self):
@@ -295,7 +269,7 @@ class AnimatedTop(AnimatedSprite):
                 self.playing = True
                 GameManager.player.activate()
 
-                GameManager.toAdd.append(Boss2(GameManager.player))
+                GameManager.to_add.append(Boss2(GameManager.player))
         super().draw()
 
     def delete(self):
@@ -326,14 +300,14 @@ class AnimatedGameOver(Sprite):
             super().draw()
         else:
             for i in GameManager.all_Objects:
-                GameManager.toRemove.append(i)
+                GameManager.to_remove.append(i)
             GameManager.running = False
 
-    def getx(self):
+    def get_x(self):
         """Method that returns x coordinate of an object"""
         return self.x
 
-    def gety(self):
+    def get_y(self):
         """Method that returns y coordinate of an object"""
         return self.y
 

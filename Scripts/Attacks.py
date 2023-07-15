@@ -23,10 +23,10 @@ class Bullet(Attack):
         self.damage = damage
         self.sprite.optimize()
         self.base_image = self.sprite.image.copy()
-        length = ((to_x - self.getx()) ** 2 + (to_y - self.gety()) ** 2) ** (1 / 2)
+        length = ((to_x - self.get_x()) ** 2 + (to_y - self.get_y()) ** 2) ** (1 / 2)
         if length == 0:
             length = 0.001
-        vector = ((to_x - self.getx()) / length * proj_speed, (to_y - self.gety()) / length * proj_speed)
+        vector = ((to_x - self.get_x()) / length * proj_speed, (to_y - self.get_y()) / length * proj_speed)
         self.dx, self.dy = vector
         self.parent.weapon.sprite.play(100)
 
@@ -45,6 +45,7 @@ class Bullet(Attack):
                 continue
             elif isinstance(self.parent, Player) and isinstance(i.parent,
                                                                 SwordSwing) and GameManager.player.sword_reflect:
+                self.parent = GameManager.player
                 self.dx *= -1
                 self.dy *= -1
             elif type(i.parent) == Ground and isinstance(self.parent, Player) and self.parent.bullets_bounce:
@@ -53,15 +54,15 @@ class Bullet(Attack):
                 self.dy *= dy_mul
             elif isinstance(i.parent, Damageable):
                 i.parent.hurt(self, self.damage)
-                GameManager.toRemove.append(self)
+                GameManager.to_remove.append(self)
             else:
-                GameManager.toRemove.append(self)
+                GameManager.to_remove.append(self)
         self.x = movement[1][0]
         self.y = movement[1][1]
 
         if not 0 < self.x < 960 or not 0 < self.y < 720:
-            if self not in GameManager.toRemove:
-                GameManager.toRemove.append(self)
+            if self not in GameManager.to_remove:
+                GameManager.to_remove.append(self)
 
 
 class SwordSwing(Attack):
@@ -87,25 +88,25 @@ class SwordSwing(Attack):
         self.damage = damage
         self.parent.weapon.sprite.play(self.timer)
 
-    def getx(self):
+    def get_x(self):
         """
         Method that returns x coordinate of the instance
         :return: x coordinate
         """
-        return self.parent.getx() + self.x
+        return self.parent.get_x() + self.x
 
-    def gety(self):
+    def get_y(self):
         """
         Method that returns y coordinate of the instance
         :return: y coordinate
         """
-        return self.parent.gety() + self.y
+        return self.parent.get_y() + self.y
 
     def tick(self):
         """Method that simulates actions made by SwordSwing which occurs each tick"""
         self.timer -= GameManager.time_elapsed
         if self.timer < 0:
-            GameManager.toRemove.append(self)
+            GameManager.to_remove.append(self)
 
         for i in self.hitbox.check_intersections():
             if isinstance(i.parent, Damageable) and i.parent != self.parent:
@@ -139,25 +140,25 @@ class Fist(Attack):
         """Method that simulates actions made by Fist which occurs each tick"""
         self.timer -= GameManager.time_elapsed
         if self.timer < 0:
-            GameManager.toRemove.append(self)
+            GameManager.to_remove.append(self)
         for i in self.hitbox.check_intersections():
             if isinstance(i.parent, Damageable) and i.parent != self.parent:
                 i.parent.hurt(self, self.damage)
-                if i.parent.weapon and not isinstance(i.parent.weapon.attackType, Fist):
+                if i.parent.weapon and not isinstance(i.parent.weapon.attack_type, Fist):
                     stolen = i.parent.weapon
                     i.parent.weapon = None
                     self.parent.change_weapon(stolen)
 
-    def getx(self):
+    def get_x(self):
         """
         Method that returns x coordinate of the instance
         :return: x coordinate
         """
-        return self.parent.getx() + self.x
+        return self.parent.get_x() + self.x
 
-    def gety(self):
+    def get_y(self):
         """
         Method that returns y coordinate of the instance
         :return: y coordinate
         """
-        return self.parent.gety() + self.y
+        return self.parent.get_y() + self.y
