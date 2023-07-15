@@ -6,6 +6,7 @@ from Scripts.TestObjects import Ground
 
 
 class Player(InteractableObject, Damageable, Persistent):
+    """Class that represents Player"""
     sprites = [pygame.image.load("Sprites/playernew.png"),
                pygame.transform.flip(pygame.image.load("Sprites/playernew.png"), True, False)]
     hp = 100
@@ -22,6 +23,16 @@ class Player(InteractableObject, Damageable, Persistent):
     colliding = True
 
     def __init__(self, x, y, sprite, hitbox, dx=0, dy=0, g=0.002):
+        """
+        The initialization method for Player
+        :param x: x coordinate of the Player
+        :param y: y coordinate of the Player
+        :param sprite: Sprite of the Player
+        :param hitbox: Hitbox of the Player
+        :param dx: change on the x axis
+        :param dy: change on the y axis
+        :param g: acceleration of gravity
+        """
         InteractableObject.__init__(self, x, y, sprite, hitbox, dx, dy, g)
         self.hitbox.ray_quality = 2
         self.weapon = Weapon(self, FistKit, downtime=350)
@@ -30,6 +41,7 @@ class Player(InteractableObject, Damageable, Persistent):
         self.gui = [WeaponGUI(self), HealthGUI(self), MapGUI(self)]
 
     def tick(self):
+        """Actions that Player do each tick"""
         keys = pygame.key.get_pressed()
         if not self.active:
             if keys[pygame.K_1] and isinstance(GameManager.currentRoom, InterDimensionalRoom):
@@ -110,12 +122,17 @@ class Player(InteractableObject, Damageable, Persistent):
             sys.exit()
 
     def change_weapon(self, new_weapon):
+        """
+        Method that occurs when player wants to change weapon
+        :param new_weapon: new weapon
+        """
         GameManager.toRemove.append(self.weapon)
         self.weapon = new_weapon
         new_weapon.parent = self
         new_weapon.ammo = random.randint(5, 9)
 
     def add_to_manager(self):
+        """Method that adds Player instance in GameManager"""
         GameManager.all_Objects.add(self)
         for i in self.gui:
             GameManager.all_Sprites.add(i)
@@ -127,18 +144,25 @@ class Player(InteractableObject, Damageable, Persistent):
             GameManager.all_Sprites.add(self.sprite)
 
     def deactivate(self):
+        """Method that deactivates Player"""
         self.active = False
         self.sprite.active = False
         self.weapon.sprite.active = False
 
     def activate(self):
+        """Method that activates Player"""
         self.active = True
         self.sprite.active = True
         self.weapon.sprite.active = True
 
 
 class WeaponGUI(Sprite, Persistent):
+    """Class that provides Weapon GUI"""
     def __init__(self, parent):
+        """
+        The initialization method for weapon GUI
+        :param parent: Owner of the GUI
+        """
         Sprite.__init__(self, "Sprites/selectedWeapon.png", z=5)
         self.x = 760
         self.y = 520
@@ -147,6 +171,10 @@ class WeaponGUI(Sprite, Persistent):
         self.font = pygame.font.Font('Sprites/vinque rg.otf', 70)
 
     def draw(self):
+        """
+        Method that draws weapons GUI
+        :return: None
+        """
         if not self.active:
             return
 
@@ -167,14 +195,27 @@ class WeaponGUI(Sprite, Persistent):
         GameManager.screen.blit(ammo, text_position)
 
     def getx(self):
+        """
+        Method that returns x coordinate
+        :return: x coordinate
+        """
         return self.x
 
     def gety(self):
+        """
+        Method that returns y coordinate
+        :return: y coordinate
+        """
         return self.y
 
 
 class HealthGUI(Sprite, Persistent):
+    """Class that provides Health GUI"""
     def __init__(self, parent):
+        """
+        The initialization method for health GUI
+        :param parent: Owner of the GUI
+        """
         Sprite.__init__(self, "Sprites/heart.png", z=5)
         self.baseImage = pygame.image.load("Sprites/heart.png")
         self.x = 50
@@ -185,6 +226,10 @@ class HealthGUI(Sprite, Persistent):
         self.font = pygame.font.Font('Sprites/vinque rg.otf', 20)
 
     def draw(self):
+        """
+        Method that draws health GUI
+        :return: None
+        """
         if not self.active:
             return
 
@@ -213,18 +258,35 @@ class HealthGUI(Sprite, Persistent):
         GameManager.screen.blit(ammo, text_position)
 
     def getx(self):
+        """
+        Method that returns x coordinate
+        :return: x coordinate
+        """
         return self.x
 
     def gety(self):
+        """
+        Method that returns y coordinate
+        :return: y coordinate
+        """
         return self.y
 
 
 class MapGUI(Sprite, Persistent):
+    """Class that provides Map GUI"""
     def __init__(self, parent):
+        """
+        The initialization method for Map GUI
+        :param parent: Owner of the GUI
+        """
         self.parent = parent
         Sprite.__init__(self, "Sprites/hitbox.png", z=5)
 
     def draw(self):
+        """
+        Method that draws Map GUI
+        :return: None
+        """
         if not self.active:
             return
 
