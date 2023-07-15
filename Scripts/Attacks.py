@@ -5,6 +5,7 @@ import time
 
 class Bullet(Attack):
     """Class that represents Bullet"""
+
     def __init__(self, x, y, to_x, to_y, parent, damage=1, dx=0, dy=0, proj_speed=1):
         """
         The initialization method for Bullet
@@ -42,7 +43,8 @@ class Bullet(Attack):
         for i in self.hitbox.check_intersections(movement):
             if i.parent == self.parent or isinstance(self.parent, Attack):
                 continue
-            elif isinstance(self.parent, Player) and isinstance(i.parent, SwordSwing) and GameManager.player.sword_reflect:
+            elif isinstance(self.parent, Player) and isinstance(i.parent,
+                                                                SwordSwing) and GameManager.player.sword_reflect:
                 self.dx *= -1
                 self.dy *= -1
             elif type(i.parent) == Ground and isinstance(self.parent, Player) and self.parent.bullets_bounce:
@@ -64,6 +66,7 @@ class Bullet(Attack):
 
 class SwordSwing(Attack):
     """Class that represents SwordSwing"""
+
     def __init__(self, x, y, target_x, target_y, parent, damage=1, dx=0, dy=0):
         """
         The initialization method for SwordSwing
@@ -111,6 +114,7 @@ class SwordSwing(Attack):
 
 class Fist(Attack):
     """Class that represents Fist"""
+
     def __init__(self, x, y, target_x, target_y, parent, damage=1, dx=0, dy=0):
         """
         The initialization method for Fist attack
@@ -157,4 +161,3 @@ class Fist(Attack):
         :return: y coordinate
         """
         return self.parent.gety() + self.y
-

@@ -8,6 +8,7 @@ import math
 
 class AnimatedSprite(Sprite):
     """Class that represents AnimatedSprite"""
+
     def __init__(self, image, stretch_x=1, stretch_y=1, z=1, x=0, y=0, parent=None):
         """
         The initialization method for the AnimatedSprite
@@ -36,6 +37,7 @@ class AnimatedSprite(Sprite):
 
 class AnimatedGun(AnimatedSprite):
     """Class that represents AnimatedGun sprite"""
+
     def __init__(self):
         """
         The initialization method for the AnimatedGun
@@ -75,6 +77,7 @@ class AnimatedGun(AnimatedSprite):
 
 class AnimatedFist(AnimatedSprite):
     """Class that represents AnimatedFist sprite"""
+
     def __init__(self):
         """
         The initialization method for the AnimatedFist
@@ -115,6 +118,7 @@ class AnimatedFist(AnimatedSprite):
 
 class AnimatedSword(AnimatedSprite):
     """Class that represents AnimatedSword sprite"""
+
     def __init__(self):
         """
         The initialization method for the AnimatedSword
@@ -175,6 +179,7 @@ class AnimatedSword(AnimatedSprite):
 
 class AnimatedExitElevator(AnimatedSprite):
     """Class that represents AnimatedExitElevator sprite"""
+
     def __init__(self):
         """
         The initialization method for the AnimatedExitElevator
@@ -212,6 +217,7 @@ class AnimatedExitElevator(AnimatedSprite):
 
 class AnimatedEntryElevator(AnimatedSprite):
     """Class that represents AnimatedEntryElevator sprite"""
+
     def __init__(self):
         """
         The initialization method for the AnimatedEntryElevator
@@ -255,6 +261,7 @@ class AnimatedEntryElevator(AnimatedSprite):
 
 class AnimatedTop(AnimatedSprite):
     """Class that represents AnimatedTop sprite"""
+
     def __init__(self):
         """
         The initialization method for the AnimatedTop
@@ -301,6 +308,7 @@ class AnimatedTop(AnimatedSprite):
 
 class AnimatedGameOver(Sprite):
     """Class that represents AnimatedGameOver sprite"""
+
     def __init__(self):
         """
         The initialization method for the AnimatedGameOver
@@ -339,6 +347,7 @@ class AnimatedGameOver(Sprite):
 
 class AnimatedEnding(Sprite):
     """Class that represents AnimatedEnding sprite"""
+
     def __init__(self):
         """
         The initialization method for the AnimatedEnding

@@ -11,6 +11,7 @@ import random
 
 class Enemy(InteractableObject, Damageable):
     """Interface for the enemy"""
+
     def __init__(self, x, y, sprite, hitbox, player_enemy, dx=0, dy=0, g=0.000):
         """
         The initialization method for the Enemy
@@ -161,11 +162,12 @@ def sign(x):
     """Function thar return -1 when number is negative, 1 when number is positive, 0 when number equals 0"""
     if x == 0:
         return 0
-    return x/abs(x)
+    return x / abs(x)
 
 
 class BaseEnemy(Enemy):
     """Class that represents BaseEnemy, which can be redacted"""
+
     def __init__(self, x, y, sprite, hitbox, player_enemy, move, dx=0, dy=0, g=0.002, weapon=None):
         """
         The initialization method for the BaseEnemy
@@ -241,6 +243,7 @@ class BaseEnemy(Enemy):
 
 class Boss0(Enemy):
     """Class that represents boss on the first level"""
+
     def __init__(self, player_enemy, elevator):
         """
         The initialization method for the Boss0
@@ -289,6 +292,7 @@ class Boss0(Enemy):
 
 class GunArm(Enemy):
     """Class that represents arm which gives player weapon in the boss0 room"""
+
     def __init__(self, player_enemy):
         """
         The initialization method for the GunArm
@@ -327,6 +331,7 @@ class GunArm(Enemy):
 
 class Boss1(Enemy):
     """Class that represents boss on the second level"""
+
     def __init__(self, player_enemy, elevator):
         """
         The initialization method for the Boss1
@@ -378,7 +383,6 @@ class Boss1(Enemy):
         if self.sprite:
             GameManager.all_Sprites.add(self.sprite)
 
-
     def delete(self):
         """Method that removes Boss1 instance from the GameManager"""
         GameManager.all_Objects.remove(self)
@@ -387,8 +391,10 @@ class Boss1(Enemy):
         if self.sprite:
             GameManager.all_Sprites.remove(self.sprite)
 
+
 class Boss2(Enemy):
     """Class that represents boss on the third level"""
+
     def __init__(self, player_enemy):
         """
         The initialization method for the Boss2
@@ -436,6 +442,7 @@ class Boss2(Enemy):
 
 class Boss3(Enemy):
     """Class that represents boss on the forth level"""
+
     def __init__(self, player_enemy):
         """
         The initialization method for the Boss3
@@ -492,4 +499,3 @@ class Boss3(Enemy):
             GameManager.all_Hitboxes.remove(self.hitbox)
         if self.sprite:
             GameManager.all_Sprites.remove(self.sprite)
-

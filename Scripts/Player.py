@@ -6,7 +6,8 @@ from Scripts.TestObjects import Ground
 
 
 class Player(InteractableObject, Damageable, Persistent):
-    sprites = [pygame.image.load("Sprites/playernew.png"), pygame.transform.flip(pygame.image.load("Sprites/playernew.png"), True, False)]
+    sprites = [pygame.image.load("Sprites/playernew.png"),
+               pygame.transform.flip(pygame.image.load("Sprites/playernew.png"), True, False)]
     hp = 100
     coyote = 0
     x_speed = 1
