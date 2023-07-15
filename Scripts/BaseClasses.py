@@ -549,7 +549,7 @@ class Menu:
         pygame.init()
         size = [700, 700]
         screen = pygame.display.set_mode(size)
-        pygame.display.set_caption('Tower Descent menu')
+        pygame.display.set_caption('Madness Descent menu')
         running = True
         screen.fill(pygame.Color('white'))
         font = pygame.font.SysFont('arial', 50)
@@ -558,6 +558,7 @@ class Menu:
         text_x = 210
         text_y = 300
         screen.blit(text, (text_x, text_y))
+        screen.blit(pygame.image.load("Sprites/logo.png"), (100, 60))
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
@@ -889,6 +890,7 @@ class Door(InteractableObject):
                 print(GameManager.not_cleared_rooms)
                 if GameManager.not_cleared_rooms == 1:
                     GameManager.searchByID(0).leftDoor.usable = True
+                    GameManager.lev.bossWall.image.fill((255, 255, 255, 0), ((0, 300), (30, 120)))
         self.to1.enter(self.toDoor.type)
         self.toDoor.timer = time.time()
         self.timer = time.time()
@@ -898,7 +900,7 @@ class Damageable:
     """Class that represents damageable objects"""
     hp = 5
     last_attack = 0
-    iframes = 0.6
+    iframes = 0.4
 
     def hurt(self, proj, value):
         """Method that is used when Damageable object is damaged by other object"""
@@ -934,6 +936,7 @@ class LevelGenerator:
         self.maxLVL = 10
         self.minLVL = minLVL
         self.generateLevel(0, 1)
+        self.bossWall = None
         self.dim_room = InterDimensionalRoom()
         while not self.id >= 5:
             self.id = 0
@@ -1062,11 +1065,13 @@ class LevelGenerator:
         if self.checkRoomExistence(x - 1, y):
             walls.append(Ground(0, 0, 30, 300))
             walls.append(Ground(0, 420, 30, 330))
-            room_sprite.image.fill((255, 255, 255, 0), ((0, 300), (30, 120)))
             room.leftDoor = Door(-90, 300, None, Hitbox(120, 120), room, None, None,
                                  type='left')
             if x-1 == 0 and y == 0:
-                room.leftDoor.usable = True
+                room.leftDoor.usable = False
+                self.bossWall = room_sprite
+            else:
+                room_sprite.image.fill((255, 255, 255, 0), ((0, 300), (30, 120)))
             room.filling.append(room.leftDoor)
         else:
             walls.append(Ground(0, 0, 30, 720))
@@ -1074,9 +1079,12 @@ class LevelGenerator:
         if self.checkRoomExistence(x + 1, y):
             walls.append(Ground(930, 0, 30, 300))
             walls.append(Ground(930, 420, 30, 330))
-            room_sprite.image.fill((255, 255, 255, 0), ((930, 300), (30, 120)))
             room.rightDoor = Door(930, 300, None, Hitbox(120, 120), room, None, None,
                                   type='right')
+            if x == 0 and y == 0 and GameManager.lvl_number % 4 == 3:
+                room.rightDoor.usable = False
+            else:
+                room_sprite.image.fill((255, 255, 255, 0), ((930, 300), (30, 120)))
             room.filling.append(room.rightDoor)
         else:
             walls.append(Ground(930, 0, 30, 720))
