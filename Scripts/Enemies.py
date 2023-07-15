@@ -146,9 +146,9 @@ class Movement:
             if self.walkTime < 0:
                 self.cooldown = random.randint(1000, 3000)
 
-        for i in self.hitbox.check_intersections(movement):
-            if type(i.parent) == Ground:
-                movement, dx_mul, dy_mul = i.modify_movement(movement, self.hitbox, mode="slide")
+        for hitbox in self.hitbox.check_intersections(movement):
+            if type(hitbox.parent) == Ground:
+                movement, dx_mul, dy_mul = hitbox.modify_movement(movement, self.hitbox, mode="slide")
                 self.dx *= dx_mul
                 self.dy *= dy_mul
 
@@ -371,9 +371,9 @@ class Boss1(Enemy):
             GameManager.current_room.filling.remove(self)
             self.elevator.spawn(585)
 
-        for i in self.hitbox.check_intersections():
-            if isinstance(i.parent, Damageable):
-                i.parent.hurt(self, self.damage)
+        for hitbox in self.hitbox.check_intersections():
+            if isinstance(hitbox.parent, Damageable):
+                hitbox.parent.hurt(self, self.damage)
 
     def move(self, target):
         """Method that simulates movement depending on which movement was specified"""
@@ -510,8 +510,8 @@ class Boss3(Enemy):
 
     def add_to_manager(self):
         """Method that adds Boss3 instance to the GameManager"""
-        for i in GameManager.player.gui:
-            i.active = False
+        for elements_of_interface in GameManager.player.gui:
+            elements_of_interface.active = False
         GameManager.all_Objects.add(self)
         if self.hitbox:
             GameManager.all_Hitboxes.add(self.hitbox)
@@ -520,8 +520,8 @@ class Boss3(Enemy):
 
     def delete(self):
         """Method that adds Boss3 instance from the GameManager"""
-        for i in GameManager.player.gui:
-            i.active = True
+        for elements_of_interface in GameManager.player.gui:
+            elements_of_interface.active = True
         GameManager.all_Objects.remove(self)
         if self.hitbox:
             GameManager.all_Hitboxes.remove(self.hitbox)

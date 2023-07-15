@@ -260,8 +260,8 @@ class AnimatedTop(Sprite):
                 InfiniteSpawner(970, 100)
                 InfiniteSpawner(-70, 100)
 
-                for i in GameManager.player.gui:
-                    i.active = True
+                for elements_of_interface in GameManager.player.gui:
+                    elements_of_interface.active = True
                 GameManager.elevator_broken = True
                 self.image = pygame.transform.rotate(self.image, 30)
                 self.dx = random.randint(-5, 5)
@@ -299,8 +299,8 @@ class AnimatedGameOver(Sprite):
             self.timer -= GameManager.time_elapsed
             super().draw()
         else:
-            for i in GameManager.all_Objects:
-                GameManager.to_remove.append(i)
+            for game_object in GameManager.all_Objects:
+                GameManager.to_remove.append(game_object)
             GameManager.running = False
 
     def get_x(self):
@@ -332,8 +332,8 @@ class AnimatedEnding(Sprite):
         GameManager.player.colliding = False
         GameManager.player.dy = 0.25
         self.time = 0
-        for i in GameManager.player.gui:
-            i.active = False
+        for elements_of_interface in GameManager.player.gui:
+            elements_of_interface.active = False
 
     def draw(self):
         """Method that draws this animated sprite"""
