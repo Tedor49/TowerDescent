@@ -40,7 +40,7 @@ class GameObject:
 
     def add_to_manager(self):
         """
-        Method that adds object to the Game Manager
+        Method that adds object instance to the Game Manager
         """
         GameManager.all_Objects.add(self)
 
@@ -498,7 +498,7 @@ class InteractableObject(GameObject):
         return self.y
 
     def add_to_manager(self):
-        """Method that adds Interactable Object to GameManager"""
+        """Method that adds InteractableObject instance to GameManager"""
         GameManager.all_Objects.add(self)
         if self.hitbox:
             GameManager.all_Hitboxes.add(self.hitbox)
@@ -1137,7 +1137,7 @@ class LevelGenerator:
 class FinalManager(GameObject):
     """Class that changes the final room depending on the ending"""
     def add_to_manager(self):
-        """Method that adds FinalManager to the GameManager"""
+        """Method that adds FinalManager Instance to the GameManager"""
         if GameManager.player.hp >= 70:
             from Scripts.AnimatedSprites import AnimatedEnding
             GameManager.toAdd.append(InteractableObject(0, 0, AnimatedEnding()))
