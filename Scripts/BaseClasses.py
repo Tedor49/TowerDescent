@@ -549,7 +549,7 @@ class Menu:
         pygame.init()
         size = [700, 700]
         screen = pygame.display.set_mode(size)
-        pygame.display.set_caption('Tower Descent menu')
+        pygame.display.set_caption('Madness Descent menu')
         running = True
         screen.fill(pygame.Color('white'))
         font = pygame.font.SysFont('arial', 50)
@@ -558,6 +558,7 @@ class Menu:
         text_x = 210
         text_y = 300
         screen.blit(text, (text_x, text_y))
+        screen.blit(pygame.image.load("Sprites/logo.png"), (100, 60))
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
