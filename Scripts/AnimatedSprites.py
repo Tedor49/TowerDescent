@@ -230,6 +230,11 @@ class AnimatedTop(AnimatedSprite):
         else:
             self.cooldown -= GameManager.time_elapsed
             if self.cooldown < 0:
+                InfiniteSpawner(970, 100)
+                InfiniteSpawner(-70, 100)
+
+                for i in GameManager.player.gui:
+                    i.active = True
                 GameManager.elevator_broken = True
                 self.image = pygame.transform.rotate(self.image, 30)
                 self.dx = random.randint(-5, 5)
@@ -240,9 +245,66 @@ class AnimatedTop(AnimatedSprite):
                 GameManager.toAdd.append(Boss2(GameManager.player))
         super().draw()
 
+    def delete(self):
+        if self in GameManager.all_Objects:
+            GameManager.all_Objects.remove(self)
+        if self in GameManager.all_Sprites:
+            GameManager.all_Sprites.remove(self)
+
+
+class AnimatedGameOver(Sprite):
+    def __init__(self):
+        super().__init__("Sprites/Levels/game_over_screen.png", z=10)
+        self.timer = 5000
+        self.total_time = 0
+        self.direction = 0
+        self.target_y = -710 + 390 - 60
+
+    def draw(self):
+        if self.timer > 0:
+            self.timer -= GameManager.time_elapsed
+            super().draw()
+        else:
+            for i in GameManager.all_Objects:
+                GameManager.toRemove.append(i)
+            GameManager.running = False
+
+    def getx(self):
+        return self.x
+
+    def gety(self):
+        return self.y
 
     def delete(self):
         if self in GameManager.all_Objects:
             GameManager.all_Objects.remove(self)
         if self in GameManager.all_Sprites:
             GameManager.all_Sprites.remove(self)
+
+
+class AnimatedEnding(Sprite):
+    def __init__(self):
+        super().__init__("Sprites/golden_heart.png", z=10)
+        self.optimize()
+        self.baseImage = self.image.copy()
+        GameManager.player.colliding = False
+        GameManager.player.dy = 0.25
+        self.time = 0
+        for i in GameManager.player.gui:
+            i.active = False
+
+    def draw(self):
+        GameManager.player.dy -= GameManager.time_elapsed / 10000
+
+        self.time += GameManager.time_elapsed
+        size_fraction = math.sin(10 * ((self.time / 200) % 5)) * math.e ** (4 * (1 - (self.time / 200 % 5))) / 100 + 0.9
+        size_fraction *= 2
+
+        base_size = self.baseImage.get_size()
+        new_size = (base_size[0] * size_fraction, base_size[1] * size_fraction)
+        self.image = pygame.transform.scale(self.baseImage, new_size)
+
+        self.x = 480 - new_size[0] // 2
+        self.y = 360 - new_size[1] // 2
+
+        Sprite.draw(self)

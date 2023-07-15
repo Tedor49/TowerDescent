@@ -66,7 +66,7 @@ class SwordReflect(PowerUp):
 class LowGravity(PowerUp):
     @staticmethod
     def apply():
-        GameManager.player.g /= 4
+        GameManager.player.g /= 2
 
 
 class LowerCooldown(PowerUp):

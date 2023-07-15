@@ -66,28 +66,32 @@ class WeaponKit:
     attack_type: Attack = None
     animation: AnimatedSprite = None
     gui_icon: Sprite = None
+    damage: int = None
 
 
 class GunKit(WeaponKit):
     attack_type = Bullet
     animation = AnimatedGun
     gui_icon = Sprite("Sprites/gunIcon.png")
+    damage = 2
 
 
 class FistKit(WeaponKit):
     attack_type = Fist
     animation = AnimatedFist
     gui_icon = Sprite("Sprites/fistIcon.png")
+    damage = 1
 
 
 class SwordKit(WeaponKit):
     attack_type = SwordSwing
     animation = AnimatedSword
     gui_icon = Sprite("Sprites/swordIcon.png")
+    damage = 3
 
 
 class Weapon(InteractableObject):
-    def __init__(self, parent, weapon_kit: Type[WeaponKit], damage=1, downtime=10, proj_speed=1):
+    def __init__(self, parent, weapon_kit: Type[WeaponKit], damage=-1, downtime=10, proj_speed=1):
         super().__init__(0, 0, weapon_kit.animation())
         self.parent = parent
         self.coolDown = 0
@@ -96,7 +100,7 @@ class Weapon(InteractableObject):
         self.downTime = downtime
         self.projSpeed = proj_speed
         self.ammo = -1
-        self.damage = damage
+        self.damage = max(damage, weapon_kit.damage)
 
     def attack(self, x, y):
         if self.coolDown <= 0:

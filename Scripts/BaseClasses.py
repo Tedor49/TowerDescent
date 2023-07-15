@@ -58,11 +58,10 @@ class Spawner(GameObject):
 
 
 class InfiniteSpawner(GameObject):
-    def __init__(self, x, y, room1):
+    def __init__(self, x, y):
         super().__init__(x, y)
-        self.room = room1
-        self.room.filling.append(self)
-        self.cooldown = random.randint(5000, 10000)
+        GameManager.toAdd.append(self)
+        self.cooldown = 3000
 
     def tick(self):
         from Scripts.Enemies import Movement, BaseEnemy
@@ -71,7 +70,6 @@ class InfiniteSpawner(GameObject):
         else:
             enemy = BaseEnemy(self.x, self.y, Sprite('Sprites/playernew.png'), Hitbox(50, 50),
                                                 GameManager.player, move=Movement.FollowFlyingMove)
-            self.room.filling.append(enemy)
             GameManager.toAdd.append(enemy)
             self.cooldown = random.randint(5000, 10000)
 
@@ -402,6 +400,8 @@ class GameManager:
     interDimensionalRoom = None
     background = None
     elevator_broken = False
+    running = True
+
     def __init__(self):
         import Scripts.Powerups
         GameManager.power_ups = [
@@ -422,16 +422,17 @@ class GameManager:
         GameManager.player = Player(455, 100, Sprite('Sprites/playernew.png'), Hitbox(50, 50))
         GameManager.screen = pygame.display.set_mode(size)
         GameManager.not_cleared_rooms = len(GameManager.Rooms)
-        pygame.display.set_caption('Tower Descent')
+        pygame.display.set_caption('Madness Descent')
         GameManager.clock = pygame.time.Clock()
         GameManager.currentRoom = GameManager.searchByID(0)
         cam = Camera()
         GameManager.camera = cam
         self.update()
         GameManager.toAdd.append(GameManager.player)
-        running = True
         GameManager.currentRoom.enter(type="up")
-        while running:
+        GameManager.running = True
+
+        while GameManager.running:
             GameManager.clock.tick()
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -445,26 +446,10 @@ class GameManager:
             for i in sorted(GameManager.all_Sprites, key=lambda x: x.z):
                 i.optimize()
                 i.draw()
-            GameManager.draw_map(GameManager.lev.map)
             pygame.display.flip()
             GameManager.time_elapsed = 0
             self.update()
-
-    @staticmethod
-    def draw_map(matrix):
-        pygame.draw.rect(GameManager.screen, (255, 255, 255), pygame.Rect(845, 0, 115, 110))
-        pygame.draw.rect(GameManager.screen, (0, 0, 0), pygame.Rect(845, 0, 115, 110), 2)
-        for y in range(7):
-            for x in range(7):
-                if matrix[y][x] is not None:
-                    if GameManager.currentRoom.id == matrix[y][x]:
-                        pygame.draw.rect(GameManager.screen, (255, 0, 0), pygame.Rect(855 + x * 15, 10 + y * 15,
-                                                                                      15, 15))
-                    elif GameManager.searchByID(matrix[y][x]).cleaned:
-                        pygame.draw.rect(GameManager.screen, (55, 253, 18), pygame.Rect(855 + x * 15, 10 + y * 15,
-                                                                                        15, 15))
-                    pygame.draw.rect(GameManager.screen, (0, 0, 0), pygame.Rect(855 + x * 15, 10 + y * 15,
-                                                                                15, 15), 2)
+        sys.exit()
 
     @staticmethod
     def update():
@@ -572,6 +557,9 @@ class InterDimensionalRoom(Room):
         self.power_ups = []
 
     def enter(self, type='elevator'):
+
+        for i in GameManager.player.gui:
+            i.active = False
         GameManager.player.x = 480
         GameManager.player.y = -120
         self.getPowerUps()
@@ -581,6 +569,9 @@ class InterDimensionalRoom(Room):
             GameManager.toAdd.append(i)
 
     def quit(self):
+
+        for i in GameManager.player.gui:
+            i.active = True
         GameManager.newLevel()
 
     def getPowerUps(self):
@@ -614,6 +605,9 @@ class FakeInterDimensionalRoom(Room):
                          Ground(450, 450, 60, 30)]
 
     def enter(self, type='elevator'):
+
+        for i in GameManager.player.gui:
+            i.active = False
         GameManager.player.x = 440
         GameManager.player.y = 400
         GameManager.currentRoom = self
@@ -726,9 +720,10 @@ class LevelGenerator:
             elif room_type == "boss_2":
                 room.filling.append(exit_elevator)
                 exit_elevator.spawn(310)
+            elif room_type == "boss_3":
+                room.filling.append(FinalManager())
             else:
                 room.filling.append(Scripts.Enemies.Boss0(GameManager.player, exit_elevator))
-                room.filling.append(Scripts.Enemies.GunArm(GameManager.player))
                 room.filling.append(exit_elevator)
         elif x == 1 and y == 0:
             room_type = 'start'
@@ -820,6 +815,19 @@ class LevelGenerator:
             if self.map[y][x] != None:
                 return True
         return False
+
+
+class FinalManager(GameObject):
+    def add_to_manager(self):
+        if GameManager.player.hp >= 70:
+            from Scripts.AnimatedSprites import AnimatedEnding
+            GameManager.toAdd.append(InteractableObject(0, 0, AnimatedEnding()))
+            GameManager.toAdd.append(InteractableObject(0, 0, Sprite("Sprites/Levels/foreground_true_final.png", z=3)))
+        else:
+            from Scripts.Enemies import Boss3
+            GameManager.toAdd.append(InteractableObject(0, 0, Sprite("Sprites/Levels/foreground_final.png", z=3)))
+            GameManager.toAdd.append(InfiniteSpawner(480, 360))
+            GameManager.toAdd.append(Boss3(GameManager.player))
 
 
 class Elevator(InteractableObject):

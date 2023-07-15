@@ -18,13 +18,15 @@ class Player(InteractableObject, Damageable, Persistent):
     bullets_bounce = False
     sword_reflect = False
     onlyFists = False
+    colliding = True
+
     def __init__(self, x, y, sprite, hitbox, dx=0, dy=0, g=0.002):
         InteractableObject.__init__(self, x, y, sprite, hitbox, dx, dy, g)
         self.hitbox.ray_quality = 2
         self.weapon = Weapon(self, FistKit, downtime=350)
         self.base = self.weapon
 
-        self.gui = [WeaponGUI(self), HealthGUI(self)]
+        self.gui = [WeaponGUI(self), HealthGUI(self), MapGUI(self)]
 
     def tick(self):
         keys = pygame.key.get_pressed()
@@ -39,8 +41,9 @@ class Player(InteractableObject, Damageable, Persistent):
                 GameManager.currentRoom.power_ups[2][1].apply()
                 GameManager.currentRoom.quit()
             return
-        if self.hp == 0:
+        if self.hp <= 0:
             GameManager.toRemove.append(self)
+            GameManager.toAdd.append(InteractableObject(0, 0, AnimatedGameOver()))
             return
 
         keys = pygame.key.get_pressed()
@@ -51,15 +54,16 @@ class Player(InteractableObject, Damageable, Persistent):
         if self.coyote > 0:
             self.extra_jumps = self.max_extra_jumps
 
-        if keys[pygame.K_w] and not self.prev_jump_pressed:
-            if self.coyote > 0:
-                self.dy = -0.8 * self.jump_height
-                self.coyote = 0
-            elif self.extra_jumps > 0:
-                self.extra_jumps -= 1
-                self.dy = -0.8 * self.jump_height
-        else:
-            self.dy += self.g * GameManager.time_elapsed
+        if self.colliding:
+            if keys[pygame.K_w] and not self.prev_jump_pressed:
+                if self.coyote > 0:
+                    self.dy = -0.8 * self.jump_height
+                    self.coyote = 0
+                elif self.extra_jumps > 0:
+                    self.extra_jumps -= 1
+                    self.dy = -0.8 * self.jump_height
+            else:
+                self.dy += self.g * GameManager.time_elapsed
 
         if keys[pygame.K_w]:
             self.prev_jump_pressed = True
@@ -73,35 +77,36 @@ class Player(InteractableObject, Damageable, Persistent):
         elif (keys[pygame.K_d] - keys[pygame.K_a]) == 1:
             self.sprite.image = self.sprites[0]
 
-
-
         movement = [[self.x, self.y],
                     [self.x + self.x_speed * (keys[pygame.K_d] - keys[pygame.K_a]) * GameManager.time_elapsed,
                      self.y + self.dy * GameManager.time_elapsed]]
-
-        for i in self.hitbox.check_intersections(movement):
-            if type(i.parent) == Ground or (type(i.parent) == Door and i.parent.usable is False):
-                movement, dx_mul, dy_mul = i.modify_movement(movement, self.hitbox, mode="slide")
-                if dy_mul == 0:
-                    self.coyote = 100
-                self.dx *= dx_mul
-                self.dy *= dy_mul
-            elif type(i.parent) == Door and i.parent.usable:
-                i.parent.use()
-                movement = (movement[0], (self.x, self.y))
-                if i.parent.type=='up':
-                    movement = (movement[0], (self.x, self.y-30))
-            elif isinstance(i.parent, DeathPlane):
-                self.x = 440
-                self.y = 400
-                self.hp -= 5
-                return
-        for i in self.hitbox.check_intersections():
-            if type(i.parent) == Elevator:
-                if keys[pygame.K_w]:
+        if self.colliding:
+            for i in self.hitbox.check_intersections(movement):
+                if type(i.parent) == Ground or (type(i.parent) == Door and i.parent.usable is False):
+                    movement, dx_mul, dy_mul = i.modify_movement(movement, self.hitbox, mode="slide")
+                    if dy_mul == 0:
+                        self.coyote = 100
+                    self.dx *= dx_mul
+                    self.dy *= dy_mul
+                elif type(i.parent) == Door and i.parent.usable:
                     i.parent.use()
+                    movement = (movement[0], (self.x, self.y))
+                    if i.parent.type=='up':
+                        movement = (movement[0], (self.x, self.y-30))
+                elif isinstance(i.parent, DeathPlane):
+                    self.x = 440
+                    self.y = 400
+                    self.hp -= 5
+                    return
+            for i in self.hitbox.check_intersections():
+                if type(i.parent) == Elevator:
+                    if keys[pygame.K_w]:
+                        i.parent.use()
         self.x = movement[1][0]
         self.y = movement[1][1]
+
+        if self.y < -100:
+            sys.exit()
 
     def change_weapon(self, new_weapon):
         GameManager.toRemove.append(self.weapon)
@@ -133,7 +138,7 @@ class Player(InteractableObject, Damageable, Persistent):
 
 class WeaponGUI(Sprite, Persistent):
     def __init__(self, parent):
-        Sprite.__init__(self, "Sprites/selectedWeapon.png")
+        Sprite.__init__(self, "Sprites/selectedWeapon.png", z=5)
         self.x = 760
         self.y = 520
         self.parent = parent
@@ -141,6 +146,9 @@ class WeaponGUI(Sprite, Persistent):
         self.font = pygame.font.Font('Sprites/vinque rg.otf', 70)
 
     def draw(self):
+        if not self.active:
+            return
+
         Sprite.draw(self)
         self.parent.weapon.guiIcon.x = 35
         self.parent.weapon.guiIcon.y = 50
@@ -166,7 +174,7 @@ class WeaponGUI(Sprite, Persistent):
 
 class HealthGUI(Sprite, Persistent):
     def __init__(self, parent):
-        Sprite.__init__(self, "Sprites/heart.png")
+        Sprite.__init__(self, "Sprites/heart.png", z=5)
         self.baseImage = pygame.image.load("Sprites/heart.png")
         self.x = 50
         self.y = 50
@@ -176,6 +184,9 @@ class HealthGUI(Sprite, Persistent):
         self.font = pygame.font.Font('Sprites/vinque rg.otf', 20)
 
     def draw(self):
+        if not self.active:
+            return
+
         self.time += GameManager.time_elapsed
         size_fraction = math.sin(10*((self.time / 200) % 5)) * math.e ** (4 * (1 - (self.time / 200 % 5))) / 100 + 0.9
         hp_fraction = (self.parent.hp + 100) / 200
@@ -205,3 +216,27 @@ class HealthGUI(Sprite, Persistent):
 
     def gety(self):
         return self.y
+
+
+class MapGUI(Sprite, Persistent):
+    def __init__(self, parent):
+        self.parent = parent
+        Sprite.__init__(self, "Sprites/hitbox.png", z=5)
+
+    def draw(self):
+        if not self.active:
+            return
+
+        pygame.draw.rect(GameManager.screen, (255, 255, 255), pygame.Rect(845, 0, 115, 110))
+        pygame.draw.rect(GameManager.screen, (0, 0, 0), pygame.Rect(845, 0, 115, 110), 2)
+        for y in range(7):
+            for x in range(7):
+                if GameManager.lev.map[y][x] is not None:
+                    if GameManager.currentRoom.id == GameManager.lev.map[y][x]:
+                        pygame.draw.rect(GameManager.screen, (255, 0, 0), pygame.Rect(855 + x * 15, 10 + y * 15,
+                                                                                      15, 15))
+                    elif GameManager.searchByID(GameManager.lev.map[y][x]).cleaned:
+                        pygame.draw.rect(GameManager.screen, (55, 253, 18), pygame.Rect(855 + x * 15, 10 + y * 15,
+                                                                                        15, 15))
+                    pygame.draw.rect(GameManager.screen, (0, 0, 0), pygame.Rect(855 + x * 15, 10 + y * 15,
+                                                                                15, 15), 2)

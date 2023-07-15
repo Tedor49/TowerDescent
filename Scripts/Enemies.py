@@ -11,7 +11,8 @@ class Enemy(InteractableObject, Damageable):
     def __init__(self, x, y, sprite, hitbox, player_enemy, dx=0, dy=0, g=0.000):
         super().__init__(x, y, sprite, hitbox, dx, dy, g)
         self.player_enemy = player_enemy
-        self.hitbox.ray_quality = 2
+        if self.hitbox:
+            self.hitbox.ray_quality = 2
 
 
 class Movement:
@@ -156,7 +157,6 @@ class BaseEnemy(Enemy):
             self.move(self.player_enemy)
         else:
             GameManager.toRemove.append(self)
-            GameManager.currentRoom.filling.remove(self)
 
     def add_to_manager(self):
         GameManager.all_Objects.add(self)
@@ -282,6 +282,58 @@ class Boss2(Enemy):
             GameManager.all_Sprites.add(self.sprite)
 
     def delete(self):
+        GameManager.all_Objects.remove(self)
+        if self.hitbox:
+            GameManager.all_Hitboxes.remove(self.hitbox)
+        if self.sprite:
+            GameManager.all_Sprites.remove(self.sprite)
+
+
+class Boss3(Enemy):
+    def __init__(self, player_enemy):
+        super().__init__(400, 30, Sprite("Sprites/heart.png", z=4), None, player_enemy)
+        self.baseImage = self.sprite.image.copy()
+        self.hp = 1
+        self.weapon = None
+        self.time = 0
+
+    def tick(self):
+
+        self.hp = GameManager.player.hp
+
+        self.time += GameManager.time_elapsed
+        size_fraction = math.sin(10 * ((self.time / 200) % 5)) * math.e ** (4 * (1 - (self.time / 200 % 5))) / 100 + 0.9
+        hp_fraction = (self.hp + 100) / 200
+        size_fraction *= hp_fraction * 2
+
+        base_size = self.baseImage.get_size()
+        new_size = (base_size[0] * size_fraction, base_size[1] * size_fraction)
+        self.sprite.image = pygame.transform.scale(self.baseImage, new_size)
+
+        self.x = 480 - new_size[0] // 2
+        self.y = 360 - new_size[1] // 2
+
+        brown = (139, 69, 19)
+
+        hp_fraction = 1 - hp_fraction
+        self.sprite.image.fill(tuple([255 - int((255 - i) * hp_fraction) for i in brown]),
+                               special_flags=pygame.BLEND_MULT)
+
+        if self.hp <= 0:
+            GameManager.toRemove.append(self)
+
+    def add_to_manager(self):
+        for i in GameManager.player.gui:
+            i.active = False
+        GameManager.all_Objects.add(self)
+        if self.hitbox:
+            GameManager.all_Hitboxes.add(self.hitbox)
+        if self.sprite:
+            GameManager.all_Sprites.add(self.sprite)
+
+    def delete(self):
+        for i in GameManager.player.gui:
+            i.active = True
         GameManager.all_Objects.remove(self)
         if self.hitbox:
             GameManager.all_Hitboxes.remove(self.hitbox)
