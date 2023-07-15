@@ -80,10 +80,10 @@ class DiscardWeapon(PowerUp):
                 """
                 foo(self, *args)
                 keys = pygame.key.get_pressed()
-                if keys[pygame.K_f] and self.weapon.attackType != Fist:
-                    GameManager.toRemove.append(self.weapon)
+                if keys[pygame.K_f] and self.weapon.attack_type != Fist:
+                    GameManager.to_remove.append(self.weapon)
                     self.weapon = self.base
-                    GameManager.toAdd.append(self.base)
+                    GameManager.to_add.append(self.base)
 
             return wrapper
 
@@ -157,7 +157,7 @@ class LowerCooldown(PowerUp):
                 :param args: arguments for the function
                 """
                 foo(self, *args)
-                self.weapon.downTime /= 2
+                self.weapon.down_time /= 2
 
             return wrapper
 
@@ -172,11 +172,11 @@ class FistPowerUp(PowerUp):
         """Method that applies FistPowerUp on the Player"""
 
         def wrapper(self, new_weapon):
-            GameManager.toRemove.append(new_weapon)
+            GameManager.to_remove.append(new_weapon)
 
         GameManager.player.base.damage *= 3
-        GameManager.player.onlyFists = True
-        GameManager.toRemove.append(GameManager.player.weapon)
+        GameManager.player.only_fists = True
+        GameManager.to_remove.append(GameManager.player.weapon)
         GameManager.player.weapon = GameManager.player.base
-        GameManager.toAdd.append(GameManager.player.base)
+        GameManager.to_add.append(GameManager.player.base)
         Player.change_weapon = wrapper

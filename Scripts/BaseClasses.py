@@ -24,14 +24,14 @@ class GameObject:
         """
         return
 
-    def getx(self):
+    def get_x(self):
         """
         Getter for the x coordinate
         :return: x coordinate
         """
         return self.x
 
-    def gety(self):
+    def get_y(self):
         """
         Getter for the y coordinate
         :return: y coordinate
@@ -78,7 +78,7 @@ class Spawner(GameObject):
         if not self.inactive:
             if self.enemyInstance is None:
                 self.enemyInstance = self.enemy(self.x, self.y, Sprite('Sprites/playernew.png'), Hitbox(50, 50),
-                                                GameManager.player, move=movement.getRandomMovement())
+                                                GameManager.player, move=movement.get_random_movement())
             self.room.filling.append(self.enemyInstance)
 
     def despawn(self):
@@ -87,12 +87,12 @@ class Spawner(GameObject):
         """
         if self.enemyInstance.hp <= 0:
             self.inactive = True
-            GameManager.toRemove.append(self)
+            GameManager.to_remove.append(self)
             self.room.filling.remove(self)
         else:
             self.enemyInstance.x = self.x
             self.enemyInstance.y = self.y
-            GameManager.toRemove.append(self.enemyInstance)
+            GameManager.to_remove.append(self.enemyInstance)
             self.room.filling.remove(self.enemyInstance)
 
 
@@ -104,11 +104,10 @@ class InfiniteSpawner(GameObject):
         The initialization method for an Infinite Spawner
         :param x: x coordinate
         :param y: y coordinate
-        :param room1: room, in which Infinite Spawner is located
         """
 
         super().__init__(x, y)
-        GameManager.toAdd.append(self)
+        GameManager.to_add.append(self)
         self.cooldown = 3000
 
     def tick(self):
@@ -118,9 +117,10 @@ class InfiniteSpawner(GameObject):
             self.cooldown -= GameManager.time_elapsed
         else:
             enemy = BaseEnemy(self.x, self.y, Sprite('Sprites/playernew.png'), Hitbox(50, 50),
-                                                GameManager.player, move=Movement.FollowFlyingMove)
-            GameManager.toAdd.append(enemy)
+                              GameManager.player, move=Movement.follow_flying_move)
+            GameManager.to_add.append(enemy)
             self.cooldown = random.randint(5000, 10000)
+
 
 class Hitbox(GameObject):
     """Hitbox that is used to check intersections and interactions of different objects"""
@@ -141,19 +141,19 @@ class Hitbox(GameObject):
         self.ray_quality = 1
         self.epsilon = 0.000001
 
-    def getx(self):
+    def get_x(self):
         """
         Get the x coordinate of the Hitbox
         :return: x coordinate of the Hitbox
         """
-        return self.parent.getx() + self.x
+        return self.parent.get_x() + self.x
 
-    def gety(self):
+    def get_y(self):
         """
         Get the x coordinate of the Hitbox
         :return: x coordinate of the Hitbox
         """
-        return self.parent.gety() + self.y
+        return self.parent.get_y() + self.y
 
     def intersects(self, other):
         """
@@ -161,12 +161,12 @@ class Hitbox(GameObject):
         :param other: hitbox with which we check intersections
         :return: x and y coordinate of intersection
         """
-        self_x_end = self.getx() + self.x_size
-        self_y_end = self.gety() + self.y_size
-        other_x_end = other.getx() + other.x_size
-        other_y_end = other.gety() + other.y_size
-        intersect_x = (self.getx() - other_x_end) * (other.getx() - self_x_end) >= 0
-        intersect_y = (self.gety() - other_y_end) * (other.gety() - self_y_end) >= 0
+        self_x_end = self.get_x() + self.x_size
+        self_y_end = self.get_y() + self.y_size
+        other_x_end = other.get_x() + other.x_size
+        other_y_end = other.get_y() + other.y_size
+        intersect_x = (self.get_x() - other_x_end) * (other.get_x() - self_x_end) >= 0
+        intersect_y = (self.get_y() - other_y_end) * (other.get_y() - self_y_end) >= 0
         return intersect_x and intersect_y
 
     def modify_movement(self, movement, hbox, mode="stop"):
@@ -201,9 +201,7 @@ class Hitbox(GameObject):
             :param end: second point
             :return: coefficients of the line equation
             """
-            return beg[1] - end[1], \
-                   end[0] - beg[0], \
-                   beg[0] * end[1] - end[0] * beg[1]
+            return beg[1] - end[1], end[0] - beg[0], beg[0] * end[1] - end[0] * beg[1]
 
         def intersect_lines(a1, b1, c1, a2, b2, c2):
             """
@@ -245,13 +243,13 @@ class Hitbox(GameObject):
             return (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)
 
         sides = {"LEFT": (
-            (self.getx(), self.gety()), (self.getx(), self.gety() + self.y_size)),
+            (self.get_x(), self.get_y()), (self.get_x(), self.get_y() + self.y_size)),
             "TOP":
-                ((self.getx() + self.x_size, self.gety()), (self.getx(), self.gety())),
+                ((self.get_x() + self.x_size, self.get_y()), (self.get_x(), self.get_y())),
             "RIGHT": (
-                (self.getx() + self.x_size, self.gety() + self.y_size), (self.getx() + self.x_size, self.gety())),
+                (self.get_x() + self.x_size, self.get_y() + self.y_size), (self.get_x() + self.x_size, self.get_y())),
             "BOTTOM": (
-                (self.getx(), self.gety() + self.y_size), (self.getx() + self.x_size, self.gety() + self.y_size))}
+                (self.get_x(), self.get_y() + self.y_size), (self.get_x() + self.x_size, self.get_y() + self.y_size))}
 
         def ray_intersect(segment):
             """
@@ -261,38 +259,38 @@ class Hitbox(GameObject):
             """
             intersections = []
 
-            selsides = []
-            movvec_x = segment[1][0] - segment[0][0]
-            movvec_y = segment[1][1] - segment[0][1]
+            selected_sides = []
+            movement_vector_x = segment[1][0] - segment[0][0]
+            movement_vector_y = segment[1][1] - segment[0][1]
 
-            if movvec_x > 0:
-                selsides.append("LEFT")
-            elif movvec_x < 0:
-                selsides.append("RIGHT")
+            if movement_vector_x > 0:
+                selected_sides.append("LEFT")
+            elif movement_vector_x < 0:
+                selected_sides.append("RIGHT")
 
-            if movvec_y > 0:
-                selsides.append("TOP")
-            elif movvec_y < 0:
-                selsides.append("BOTTOM")
+            if movement_vector_y > 0:
+                selected_sides.append("TOP")
+            elif movement_vector_y < 0:
+                selected_sides.append("BOTTOM")
 
-            for s in selsides:
-                if intersect_segments(sides[s], segment):
-                    intersections.append([s, intersect_segments(sides[s], segment)])
-                    if s == "TOP":
-                        intersections[-1][1][1] = sides[s][0][1] - self.epsilon
-                    elif s == "BOTTOM":
-                        intersections[-1][1][1] = sides[s][0][1] + self.epsilon
-                    elif s == "LEFT":
-                        intersections[-1][1][0] = sides[s][0][0] - self.epsilon
+            for hitbox_side in selected_sides:
+                if intersect_segments(sides[hitbox_side], segment):
+                    intersections.append([hitbox_side, intersect_segments(sides[hitbox_side], segment)])
+                    if hitbox_side == "TOP":
+                        intersections[-1][1][1] = sides[hitbox_side][0][1] - self.epsilon
+                    elif hitbox_side == "BOTTOM":
+                        intersections[-1][1][1] = sides[hitbox_side][0][1] + self.epsilon
+                    elif hitbox_side == "LEFT":
+                        intersections[-1][1][0] = sides[hitbox_side][0][0] - self.epsilon
                     else:
-                        intersections[-1][1][0] = sides[s][0][0] + self.epsilon
+                        intersections[-1][1][0] = sides[hitbox_side][0][0] + self.epsilon
 
             if not intersections:
                 return None
             else:
                 return min(intersections, key=lambda x: pythagoreas(*x[1], *segment[0]))
 
-        def ratio_point(p1x, p1y, p2x, p2y, ratio):
+        def ratio_point(x1, y1, x2, y2, ratio):
             """
             Calculates a point that lies at a specific ratio between 2 points
             :param x1: x coordinate of the first point
@@ -301,25 +299,25 @@ class Hitbox(GameObject):
             :param y2: y coordinate of the first point
             :param ratio: ratio
             """
-            return p1x * ratio + p2x * (1 - ratio), p1y * ratio + p2y * (1 - ratio)
+            return x1 * ratio + x2 * (1 - ratio), y1 * ratio + y2 * (1 - ratio)
 
         rays = []
 
         moving_sides = {"LEFT": (
-            (hbox.getx(), hbox.gety()), (hbox.getx(), hbox.gety() + hbox.y_size)),
+            (hbox.get_x(), hbox.get_y()), (hbox.get_x(), hbox.get_y() + hbox.y_size)),
             "TOP":
-                ((hbox.getx() + hbox.x_size, hbox.gety()), (hbox.getx(), hbox.gety())),
+                ((hbox.get_x() + hbox.x_size, hbox.get_y()), (hbox.get_x(), hbox.get_y())),
             "RIGHT": (
-                (hbox.getx() + hbox.x_size, hbox.gety() + hbox.y_size), (hbox.getx() + hbox.x_size, hbox.gety())),
+                (hbox.get_x() + hbox.x_size, hbox.get_y() + hbox.y_size), (hbox.get_x() + hbox.x_size, hbox.get_y())),
             "BOTTOM": (
-                (hbox.getx(), hbox.gety() + hbox.y_size), (hbox.getx() + hbox.x_size, hbox.gety() + hbox.y_size))}
+                (hbox.get_x(), hbox.get_y() + hbox.y_size), (hbox.get_x() + hbox.x_size, hbox.get_y() + hbox.y_size))}
 
         for side in moving_sides:
             for j in range(hbox.ray_quality):
                 ray_start = ratio_point(*moving_sides[side][0], *moving_sides[side][1], j / hbox.ray_quality)
                 ray_end = (ray_start[0] + movement[1][0] - movement[0][0],
                            ray_start[1] + movement[1][1] - movement[0][1])
-                ray_offset = (hbox.getx() - ray_start[0], hbox.gety() - ray_start[1])
+                ray_offset = (hbox.get_x() - ray_start[0], hbox.get_y() - ray_start[1])
                 rays.append(((ray_start, ray_end), ray_offset))
 
         connected_rays = []
@@ -411,26 +409,26 @@ class Sprite(GameObject):
         self.image = pygame.transform.scale(picture, (int(picture.get_size()[0] * stretch_x),
                                                       int(picture.get_size()[1] * stretch_y)))
 
-    def getx(self):
+    def get_x(self):
         """
         Method that gets x coordinate of the sprite
         :return: x coordinate of the sprite
         """
-        return self.parent.getx() + self.x
+        return self.parent.get_x() + self.x
 
-    def gety(self):
+    def get_y(self):
         """
         Method, that gets y coordinate of the Sprite
         :return: y coordinate of the sprite
         """
-        return self.parent.gety() + self.y
+        return self.parent.get_y() + self.y
 
     def draw(self):
         """
         Method that is used to draw the Sprite
         """
         if self.active:
-            GameManager.screen.blit(self.image, (self.getx(), self.gety()))
+            GameManager.screen.blit(self.image, (self.get_x(), self.get_y()))
 
     def optimize(self):
         """Method that optimizes the Sprite image"""
@@ -441,6 +439,7 @@ class Sprite(GameObject):
 
 class InteractableObject(GameObject):
     """Class that represents an object that can have a hitbox and/or a sprite and, thus, can be interacted with"""
+
     def __init__(self, x, y, sprite=None, hitbox=None, dx=0, dy=0, g=0.002):
         """
         Initialization of an Interactable Object
@@ -483,14 +482,14 @@ class InteractableObject(GameObject):
         """
         return self.dy
 
-    def getx(self):
+    def get_x(self):
         """
         Method that gets coordinate on the x axis
         :return: x coordinate
         """
         return self.x
 
-    def gety(self):
+    def get_y(self):
         """
         Method that gets coordinate on the y axis
         :return: y coordinate
@@ -517,6 +516,7 @@ class InteractableObject(GameObject):
 
 class Attack(InteractableObject):
     """Class that represents different attacks"""
+
     def __init__(self, x, y, sprite, hitbox, parent, dx=0, dy=0):
         """
         The initialization method for Attack class
@@ -531,7 +531,7 @@ class Attack(InteractableObject):
         super().__init__(x, y, sprite, hitbox, dx, dy)
         self.parent = parent
         self.angle = 0
-        GameManager.toAdd.append(self)
+        GameManager.to_add.append(self)
 
     def do(self, to_x, to_y):
         """Method, that represent what Attack will do when triggered"""
@@ -544,6 +544,7 @@ class Attack(InteractableObject):
 
 class Menu:
     """Class that represents Menu"""
+
     def __init__(self):
         """Initialization of the Menu, where main pygame cycle for a Menu page occurs"""
         pygame.init()
@@ -553,7 +554,7 @@ class Menu:
         running = True
         screen.fill(pygame.Color('white'))
         font = pygame.font.SysFont('arial', 50)
-        text = font.render('Singleplayer',
+        text = font.render('Start',
                            True, (0, 0, 0))
         text_x = 340
         text_y = 330
@@ -573,24 +574,26 @@ class Menu:
 
 class GameManager:
     """Class that manages all events in the game"""
-    toAdd = []
-    toRemove = []
+    power_ups = None
+    to_add = []
+    to_remove = []
     screen = None
     clock = None
     player = None
     time_elapsed = 0
     tps = 120
-    currentRoom = None
+    current_room = None
     all_Hitboxes = set()
     all_Objects = set()
     all_Sprites = set()
     Rooms = []
     not_cleared_rooms = 0
     lvl_number = 0
-    interDimensionalRoom = None
+    interdimensional_room = None
     background = None
     elevator_broken = False
     running = True
+    level = None
 
     def __init__(self):
         """Initialization of a GameManager object, where the main cycle occurs"""
@@ -609,16 +612,16 @@ class GameManager:
         from Scripts.Player import Player
         pygame.init()
         size = [960, 720]
-        GameManager.lev = LevelGenerator()
+        GameManager.level = LevelGenerator()
         GameManager.player = Player(455, 100, Sprite('Sprites/playernew.png'), Hitbox(50, 50))
         GameManager.screen = pygame.display.set_mode(size)
         GameManager.not_cleared_rooms = len(GameManager.Rooms)
         pygame.display.set_caption('Madness Descent')
         GameManager.clock = pygame.time.Clock()
-        GameManager.currentRoom = GameManager.searchByID(0)
+        GameManager.current_room = GameManager.search_by_id(0)
         self.update()
-        GameManager.toAdd.append(GameManager.player)
-        GameManager.currentRoom.enter(type="up")
+        GameManager.to_add.append(GameManager.player)
+        GameManager.current_room.enter(enter_type="up")
         GameManager.running = True
 
         while GameManager.running:
@@ -629,12 +632,12 @@ class GameManager:
             GameManager.time_elapsed += GameManager.clock.get_time()
             if GameManager.time_elapsed < 1000 / GameManager.tps:
                 continue
-            for i in GameManager.all_Objects:
-                i.tick()
+            for game_object in GameManager.all_Objects:
+                game_object.tick()
             GameManager.screen.fill((255, 255, 255))
-            for i in sorted(GameManager.all_Sprites, key=lambda x: x.z):
-                i.optimize()
-                i.draw()
+            for sprite in sorted(GameManager.all_Sprites, key=lambda x: x.z):
+                sprite.optimize()
+                sprite.draw()
             pygame.display.flip()
             GameManager.time_elapsed = 0
             self.update()
@@ -643,44 +646,44 @@ class GameManager:
     @staticmethod
     def update():
         """Method that adds and deletes Objects that are scheduled to be so"""
-        for i in GameManager.toAdd:
-            i.add_to_manager()
-        GameManager.toAdd = []
-        for i in set(GameManager.toRemove):
-            i.delete()
-        GameManager.toRemove = []
+        for game_object in GameManager.to_add:
+            game_object.add_to_manager()
+        GameManager.to_add = []
+        for game_object in set(GameManager.to_remove):
+            game_object.delete()
+        GameManager.to_remove = []
 
     @staticmethod
-    def searchByID(RoomID):
+    def search_by_id(room_id):
         """
         Method that returns room by using its id
         :param room_id: id of a room
         :return: room with the required id
         """
         for room in GameManager.Rooms:
-            if room.id == RoomID:
+            if room.id == room_id:
                 return room
         return None
 
     @staticmethod
-    def newLevel():
+    def new_level():
         """
         Method that creates new level
         """
         from Scripts.AnimatedSprites import AnimatedEntryElevator
         GameManager.lvl_number += 1
-        GameManager.toAdd = []
-        GameManager.toRemove = []
-        GameManager.currentRoom = None
+        GameManager.to_add = []
+        GameManager.to_remove = []
+        GameManager.current_room = None
         GameManager.all_Hitboxes = set()
         GameManager.all_Objects = set()
         GameManager.all_Sprites = set()
         GameManager.Rooms = []
-        GameManager.lev = LevelGenerator()
+        GameManager.level = LevelGenerator()
         GameManager.not_cleared_rooms = len(GameManager.Rooms)
-        GameManager.currentRoom = GameManager.searchByID(0)
-        GameManager.toAdd.append(GameManager.player)
-        GameManager.currentRoom.enter()
+        GameManager.current_room = GameManager.search_by_id(0)
+        GameManager.to_add.append(GameManager.player)
+        GameManager.current_room.enter()
         GameManager.player.x, GameManager.player.y = 455, 400
         GameManager.player.dx, GameManager.player.dy = 0, 0
         entry_elevator = AnimatedEntryElevator()
@@ -690,27 +693,28 @@ class GameManager:
 
 class Room:
     """Class that represents Room on the level"""
-    def __init__(self, filling, id):
+
+    def __init__(self, filling, room_id):
         """
         Initialization for a Room class
         :param filling: filling of the room
         :param room_id: id of the room
         """
         self.filling = filling
-        self.id = id
-        self.leftDoor = None
-        self.rightDoor = None
-        self.upDoor = None
-        self.downDoor = None
+        self.id = room_id
+        self.left_door = None
+        self.right_door = None
+        self.up_door = None
+        self.down_door = None
         self.checked = False
-        self.leftChecked = False
-        self.rightChecked = False
-        self.upChecked = False
-        self.downChecked = False
+        self.left_checked = False
+        self.right_checked = False
+        self.up_checked = False
+        self.down_checked = False
         self.cleaned = False
         self.type = ''
 
-    def enter(self, type='left'):
+    def enter(self, enter_type='left'):
         """
         Method that add filling of the room to the GameManager
         :param enter_type: direction from which the player enters
@@ -722,14 +726,14 @@ class Room:
             'left': (30, 350),
             'right': (880, 350)
         }
-        GameManager.player.x = coordinates[type][0]
-        GameManager.player.y = coordinates[type][1]
-        GameManager.currentRoom = self
+        GameManager.player.x = coordinates[enter_type][0]
+        GameManager.player.y = coordinates[enter_type][1]
+        GameManager.current_room = self
         for i in self.filling:
             if isinstance(i, Spawner):
                 i.spawn()
             if not isinstance(i, Player):
-                GameManager.toAdd.append(i)
+                GameManager.to_add.append(i)
 
     def quit(self):
         """
@@ -742,15 +746,15 @@ class Room:
             if isinstance(i, Spawner):
                 i.despawn()
             if not isinstance(i, Persistent):
-                GameManager.toRemove.append(i)
+                GameManager.to_remove.append(i)
 
     def check_cleaned(self):
         """
         Method that checks if the room is cleared from enemies
         :return: True or False, depending on the filling of the room
         """
-        for i in self.filling:
-            if isinstance(i, Spawner):
+        for game_object in self.filling:
+            if isinstance(game_object, Spawner):
                 return False
         self.cleaned = True
         return True
@@ -758,6 +762,7 @@ class Room:
 
 class InterDimensionalRoom(Room):
     """Class that represents room between levels"""
+
     def __init__(self):
         """Initialization for an InterDimensionalRoom class, where filling and sprites are specified"""
 
@@ -772,21 +777,21 @@ class InterDimensionalRoom(Room):
                          InteractableObject(0, 0, Sprite("Sprites/Levels/background_elevator.png", z=-4))]
         self.power_ups = []
 
-    def enter(self, type='elevator'):
+    def enter(self, enter_type='elevator'):
         """
         Method that add filling of the room to the GameManager
         :param enter_type: direction from which the player enters
         """
 
-        for i in GameManager.player.gui:
-            i.active = False
+        for element_of_interface in GameManager.player.gui:
+            element_of_interface.active = False
         GameManager.player.x = 480
         GameManager.player.y = -120
-        self.getPowerUps()
-        GameManager.currentRoom = self
+        self.get_power_ups()
+        GameManager.current_room = self
         for i in self.filling:
             print(i)
-            GameManager.toAdd.append(i)
+            GameManager.to_add.append(i)
 
     def quit(self):
         """
@@ -795,9 +800,9 @@ class InterDimensionalRoom(Room):
 
         for i in GameManager.player.gui:
             i.active = True
-        GameManager.newLevel()
+        GameManager.new_level()
 
-    def getPowerUps(self):
+    def get_power_ups(self):
         """Method that creates objects representing power_ups in InterDimensionalRoom"""
 
         while len(self.power_ups) != 3:
@@ -808,7 +813,8 @@ class InterDimensionalRoom(Room):
                 self.power_ups.append(power_up)
                 GameManager.power_ups.remove(power_up)
         for i in range(len(self.power_ups)):
-            self.filling.append(InteractableObject(150 * (i+1) + 120 * i, 540, Sprite(self.power_ups[i][0], z=-2), None))
+            self.filling.append(InteractableObject(150 * (i + 1) + 120 * i, 540,
+                                                   Sprite(self.power_ups[i][0], z=-2), None))
 
 
 class DeathPlane(InteractableObject):
@@ -842,58 +848,58 @@ class FakeInterDimensionalRoom(Room):
                          DeathPlane(-10000, 690, 20960, 30),
                          Ground(450, 450, 60, 30)]
 
-    def enter(self, type='elevator'):
+    def enter(self, enter_type='elevator'):
         """
         Method that add filling of the room to the GameManager
         :param enter_type: direction from which the player enters
         """
 
-        for i in GameManager.player.gui:
-            i.active = False
+        for element_of_interface in GameManager.player.gui:
+            element_of_interface.active = False
         GameManager.player.x = 440
         GameManager.player.y = 400
-        GameManager.currentRoom = self
+        GameManager.current_room = self
         for i in self.filling:
-            GameManager.toAdd.append(i)
+            GameManager.to_add.append(i)
 
 
 class Door(InteractableObject):
     """Class that represents doors between the rooms"""
-    def __init__(self, x, y, sprite, hitbox, from1, to1, toDoor, type=None, usable=True):
+
+    def __init__(self, x, y, sprite, hitbox, from_room, to_room, to_door, enter_type=None, usable=True):
         """
         The initialization method of door
         :param x: coordinate on the x axis
         :param y: coordinate on the y axis
         :param sprite: Sprite which will be used by the Door instance
         :param hitbox: Hitbox which will be used by the Door instance
-        :param from1: from which room the door transports
-        :param to1: to which room the door transports
-        :param toDoor: door that works between both room but in the opposite way
-        :param type: the direction of the door
+        :param from_room: from which room the door transports
+        :param to_room: to which room the door transports
+        :param to_door: door that works between both room but in the opposite way
+        :param enter_type: the direction of the door
         :param usable: If the door can be passed through
         """
         super().__init__(x, y, sprite, hitbox)
-        self.type = type
-        self.from1 = from1
-        self.toDoor = toDoor
-        self.to1 = to1
+        self.type = enter_type
+        self.from_room = from_room
+        self.to_door = to_door
+        self.to_room = to_room
         self.usable = usable
 
     def use(self):
         """ Method that causes enter funtion in the next room and quit function in the currens, so the GameManager will
         change itself accordingly"""
-        self.from1.quit()
-        if self.from1.cleaned is False:
-            print(1, self.from1.check_cleaned())
-            if self.from1.check_cleaned():
+        self.from_room.quit()
+        if self.from_room.cleaned is False:
+            print(1, self.from_room.check_cleaned())
+            if self.from_room.check_cleaned():
                 GameManager.not_cleared_rooms -= 1
                 print(GameManager.not_cleared_rooms)
                 if GameManager.not_cleared_rooms == 1:
-                    GameManager.searchByID(0).leftDoor.usable = True
-                    GameManager.lev.bossWall.image.fill((255, 255, 255, 0), ((0, 300), (30, 120)))
-        self.to1.enter(self.toDoor.type)
-        self.toDoor.timer = time.time()
-        self.timer = time.time()
+                    GameManager.search_by_id(0).left_door.usable = True
+                    GameManager.level.boss_wall.image.fill((255, 255, 255, 0), ((0, 300), (30, 120)))
+        self.to_room.enter(self.to_door.type)
+        self.to_door.timer = time.time()
 
 
 class Damageable:
@@ -912,6 +918,7 @@ class Damageable:
 
 class Ground(InteractableObject):
     """Class that represents ground"""
+
     def __init__(self, x, y, x_size, y_size, sprite=None):
         """
         The initialization method of Ground
@@ -926,32 +933,33 @@ class Ground(InteractableObject):
 
 class LevelGenerator:
     """Class that is used to generate random level"""
-    def __init__(self, minLVL=6):
+
+    def __init__(self, rooms_minimum=6):
         """
         Initialization for a LevelGenerator class, which creates level and adds it to the GameManager
-        :param minLVL: minimum rooms on this level
+        :param rooms_minimum: minimum rooms on this level
         """
         self.id = 0
-        self.map = [[None for i in range(7)] for i2 in range(7)]
-        self.maxLVL = 10
-        self.minLVL = minLVL
-        self.generateLevel(0, 1)
-        self.bossWall = None
+        self.map = [[None]*7 for i in range(7)]
+        self.rooms_maximum = 10
+        self.rooms_minimum = rooms_minimum
+        self.generate_level(0, 1)
+        self.boss_wall = None
         self.dim_room = InterDimensionalRoom()
         while not self.id >= 5:
             self.id = 0
-            self.map = [[None for i in range(7)] for i2 in range(7)]
-            self.generateLevel(0, 1)
+            self.map = [[None]*7 for i2 in range(7)]
+            self.generate_level(0, 1)
         for y in range(7):
             for x in range(7):
                 if self.map[y][x] is not None:
-                    self.addWallsAndDoors(x, y)
+                    self.add_walls_and_doors(x, y)
         for y in range(7):
             for x in range(7):
                 if self.map[y][x] is not None:
                     self.connect(x, y)
 
-    def generateLevel(self, y, x):
+    def generate_level(self, y, x):
         """
         Method, where the matrix for a level is generated
         :param y: y coordinate in the matrix
@@ -959,42 +967,42 @@ class LevelGenerator:
         :return:
         """
         forbidden = [(0, 1), (1, 1)]
-        if 0 <= x <= 6 and 0 <= y <= 6 and self.map[y][x] == None and self.id < self.maxLVL:
+        if 0 <= x <= 6 and 0 <= y <= 6 and self.map[y][x] is None and self.id < self.rooms_maximum:
             self.map[y][x] = self.id
             self.id += 1
             if x == 1 and y == 0:
-                self.generateLevel(y, x - 1)
-                self.generateLevel(y, x + 1)
+                self.generate_level(y, x - 1)
+                self.generate_level(y, x + 1)
             for i in range(0, 2):
                 for j in range(-1, 2):
                     if random.choice([True, False, True]) and (i == 0 or j == 0) and (x + j, y + i) not in forbidden:
-                        self.generateLevel(y + i, x + j)
+                        self.generate_level(y + i, x + j)
 
-    def combineLeftRight(self, roomL, roomR):
+    def combine_left_right(self, room_left, room_right):
         """
         Method that connects two rooms on the x axis
-        :param roomL: Door in the left room
-        :param roomR: Door in the right room
+        :param room_left: Door in the left room
+        :param room_right: Door in the right room
         :return:
         """
-        roomL.rightDoor.toDoor = roomR.leftDoor
-        roomR.leftDoor.toDoor = roomL.rightDoor
-        roomR.leftDoor.to1 = roomL
-        roomL.rightDoor.to1 = roomR
+        room_left.right_door.to_door = room_right.left_door
+        room_right.left_door.to_door = room_left.right_door
+        room_right.left_door.to_room = room_left
+        room_left.right_door.to_room = room_right
 
-    def combineUpDown(self, roomU, roomD):
+    def combine_up_down(self, room_up, room_down):
         """
         Method that connects two rooms on the y axis
-        :param roomU: Door in the upper room
-        :param roomD: Door in the lower room
+        :param room_up: Door in the upper room
+        :param room_down: Door in the lower room
         :return:
         """
-        roomU.downDoor.toDoor = roomD.upDoor
-        roomD.upDoor.toDoor = roomU.downDoor
-        roomU.downDoor.to1 = roomD
-        roomD.upDoor.to1 = roomU
+        room_up.down_door.to_door = room_down.up_door
+        room_down.up_door.to_door = room_up.down_door
+        room_up.down_door.to_room = room_down
+        room_down.up_door.to_room = room_up
 
-    def getRoomID(self, x, y):
+    def get_room_id(self, x, y):
         """
         Method that returns id of the room depending on coordinates
         :param x: coordinate on the x axis
@@ -1003,7 +1011,7 @@ class LevelGenerator:
         """
         return self.map[y][x]
 
-    def addWallsAndDoors(self, x=0, y=0):
+    def add_walls_and_doors(self, x=0, y=0):
         """
         Method that creates room where walls, doors, and sprites are specified
         :param x: coordinate of the room on the x axis
@@ -1013,7 +1021,7 @@ class LevelGenerator:
         import Scripts.Enemies
         from Scripts.AnimatedSprites import AnimatedExitElevator
 
-        room = Room([], self.getRoomID(x, y))
+        room = Room([], self.get_room_id(x, y))
 
         if x == 0 and y == 0:
             room_type = 'boss_' + str(GameManager.lvl_number % 4)
@@ -1047,66 +1055,67 @@ class LevelGenerator:
         walls = []
         map_data = json.load(open('Sprites\Levels\map_data.json', 'r'))
         room.type = room_type
-        room_sprite = Sprite("Sprites/Levels/"+ room.type + tags[GameManager.lvl_number % 4], z=-3)
+        room_sprite = Sprite("Sprites/Levels/" + room.type + tags[GameManager.lvl_number % 4], z=-3)
         room.filling.append(InteractableObject(0, 0, room_sprite))
         room.filling.append(InteractableObject(0, 0,
                                                Sprite("Sprites/Levels/background" +
                                                       tags[GameManager.lvl_number % 4], z=-4)
                                                ))
         GameManager.background = InteractableObject(0, 0,
-                                               Sprite("Sprites/Levels/background" +
-                                                      tags[GameManager.lvl_number % 4], z=-4)
-                                               )
-        for i in map_data[room_type]['platforms']:
-            room.filling.append(Ground(i['x'], i['y'], i['x_size']*30, i['y_size']*30))
-        for i in map_data[room_type]['spawners']:
-            Spawner(i['x'], i['y'], Scripts.Enemies.BaseEnemy, room)
+                                                    Sprite("Sprites/Levels/background" +
+                                                           tags[GameManager.lvl_number % 4], z=-4)
+                                                    )
+        for platform_info in map_data[room_type]['platforms']:
+            room.filling.append(Ground(platform_info['x'], platform_info['y'],
+                                       platform_info['x_size'] * 30, platform_info['y_size'] * 30))
+        for spawner_info in map_data[room_type]['spawners']:
+            Spawner(spawner_info['x'], spawner_info['y'], Scripts.Enemies.BaseEnemy, room)
         GameManager.Rooms.append(room)
-        if self.checkRoomExistence(x - 1, y):
+        if self.check_room_existence(x - 1, y):
             walls.append(Ground(0, 0, 30, 300))
             walls.append(Ground(0, 420, 30, 330))
-            room.leftDoor = Door(-90, 300, None, Hitbox(120, 120), room, None, None,
-                                 type='left')
-            if x-1 == 0 and y == 0:
-                room.leftDoor.usable = True
-                self.bossWall = room_sprite
+            room.left_door = Door(-90, 300, None, Hitbox(120, 120), room, None, None,
+                                  enter_type='left')
+            if x - 1 == 0 and y == 0:
+                room.left_door.usable = False
+                self.boss_wall = room_sprite
             else:
                 room_sprite.image.fill((255, 255, 255, 0), ((0, 300), (30, 120)))
-            room.filling.append(room.leftDoor)
+            room.filling.append(room.left_door)
         else:
             walls.append(Ground(0, 0, 30, 720))
 
-        if self.checkRoomExistence(x + 1, y):
+        if self.check_room_existence(x + 1, y):
             walls.append(Ground(930, 0, 30, 300))
             walls.append(Ground(930, 420, 30, 330))
-            room.rightDoor = Door(930, 300, None, Hitbox(120, 120), room, None, None,
-                                  type='right')
+            room.right_door = Door(930, 300, None, Hitbox(120, 120), room, None, None,
+                                   enter_type='right')
             if x == 0 and y == 0 and GameManager.lvl_number % 4 == 3:
-                room.rightDoor.usable = False
+                room.right_door.usable = False
             else:
                 room_sprite.image.fill((255, 255, 255, 0), ((930, 300), (30, 120)))
-            room.filling.append(room.rightDoor)
+            room.filling.append(room.right_door)
         else:
             walls.append(Ground(930, 0, 30, 720))
 
-        if self.checkRoomExistence(x, y - 1):
+        if self.check_room_existence(x, y - 1):
             walls.append(Ground(0, 0, 420, 30))
             walls.append(Ground(540, 0, 450, 30))
             room_sprite.image.fill((255, 255, 255, 0), ((420, 0), (120, 30)))
-            room.upDoor = Door(420, -80, None, Hitbox(110, 110), room, None, None,
-                               type='up')
-            room.upDoor.upwards = True
-            room.filling.append(room.upDoor)
+            room.up_door = Door(420, -80, None, Hitbox(110, 110), room, None, None,
+                                enter_type='up')
+            room.up_door.upwards = True
+            room.filling.append(room.up_door)
         else:
             walls.append(Ground(0, 0, 960, 30))
 
-        if self.checkRoomExistence(x, y + 1):
+        if self.check_room_existence(x, y + 1):
             walls.append(Ground(0, 690, 420, 30))
             walls.append(Ground(540, 690, 450, 30))
             room_sprite.image.fill((255, 255, 255, 0), ((420, 690), (120, 30)))
-            room.downDoor = Door(420, 690, None, Hitbox(110, 110), room, None, None,
-                                 type='down')
-            room.filling.append(room.downDoor)
+            room.down_door = Door(420, 690, None, Hitbox(110, 110), room, None, None,
+                                  enter_type='down')
+            room.filling.append(room.down_door)
         else:
             walls.append(Ground(0, 690, 960, 30))
         for i in walls:
@@ -1119,42 +1128,43 @@ class LevelGenerator:
         :param x: coordinate of the room on the x axis
         :param y: coordinate of the room on the y axis
         """
-        room = GameManager.searchByID(self.getRoomID(x, y))
-        if self.checkRoomExistence(x - 1, y):
-            self.combineLeftRight(GameManager.searchByID(self.getRoomID(x - 1, y)), room)
-        if self.checkRoomExistence(x + 1, y):
-            self.combineLeftRight(room, GameManager.searchByID(self.getRoomID(x + 1, y)))
-        if self.checkRoomExistence(x, y - 1):
-            self.combineUpDown(GameManager.searchByID(self.getRoomID(x, y - 1)), room)
-        if self.checkRoomExistence(x, y + 1):
-            self.combineUpDown(room, GameManager.searchByID(self.getRoomID(x, y + 1)))
+        room = GameManager.search_by_id(self.get_room_id(x, y))
+        if self.check_room_existence(x - 1, y):
+            self.combine_left_right(GameManager.search_by_id(self.get_room_id(x - 1, y)), room)
+        if self.check_room_existence(x + 1, y):
+            self.combine_left_right(room, GameManager.search_by_id(self.get_room_id(x + 1, y)))
+        if self.check_room_existence(x, y - 1):
+            self.combine_up_down(GameManager.search_by_id(self.get_room_id(x, y - 1)), room)
+        if self.check_room_existence(x, y + 1):
+            self.combine_up_down(room, GameManager.search_by_id(self.get_room_id(x, y + 1)))
 
-    def checkRoomExistence(self, x, y):
+    def check_room_existence(self, x, y):
         """
         Method that checks if the room exist at specified coordinates
         :param x: coordinate on the x axis
-        :param y:  coordinate on the y axis
+        :param y: coordinate on the y axis
         :return: boolean depending on the result
         """
         if 0 <= x <= 6 and 0 <= y <= 6:
-            if self.map[y][x] != None:
+            if self.map[y][x] is not None:
                 return True
         return False
 
 
 class FinalManager(GameObject):
     """Class that changes the final room depending on the ending"""
+
     def add_to_manager(self):
         """Method that adds FinalManager Instance to the GameManager"""
         if GameManager.player.hp >= 70:
             from Scripts.AnimatedSprites import AnimatedEnding
-            GameManager.toAdd.append(InteractableObject(0, 0, AnimatedEnding()))
-            GameManager.toAdd.append(InteractableObject(0, 0, Sprite("Sprites/Levels/foreground_true_final.png", z=3)))
+            GameManager.to_add.append(InteractableObject(0, 0, AnimatedEnding()))
+            GameManager.to_add.append(InteractableObject(0, 0, Sprite("Sprites/Levels/foreground_true_final.png", z=3)))
         else:
             from Scripts.Enemies import Boss3
-            GameManager.toAdd.append(InteractableObject(0, 0, Sprite("Sprites/Levels/foreground_final.png", z=3)))
-            GameManager.toAdd.append(InfiniteSpawner(480, 360))
-            GameManager.toAdd.append(Boss3(GameManager.player))
+            GameManager.to_add.append(InteractableObject(0, 0, Sprite("Sprites/Levels/foreground_final.png", z=3)))
+            GameManager.to_add.append(InfiniteSpawner(480, 360))
+            GameManager.to_add.append(Boss3(GameManager.player))
 
 
 class Elevator(InteractableObject):

@@ -1,5 +1,3 @@
-import pygame
-
 from Scripts.Weapons import *
 from Scripts.AnimatedSprites import *
 from Scripts.TestObjects import Ground
@@ -19,7 +17,7 @@ class Player(InteractableObject, Damageable, Persistent):
     active = True
     bullets_bounce = False
     sword_reflect = False
-    onlyFists = False
+    only_fists = False
     colliding = True
 
     def __init__(self, x, y, sprite, hitbox, dx=0, dy=0, g=0.002):
@@ -29,8 +27,8 @@ class Player(InteractableObject, Damageable, Persistent):
         :param y: y coordinate of the Player
         :param sprite: Sprite of the Player
         :param hitbox: Hitbox of the Player
-        :param dx: change on the x axis
-        :param dy: change on the y axis
+        :param dx: change on the x-axis
+        :param dy: change on the y-axis
         :param g: acceleration of gravity
         """
         InteractableObject.__init__(self, x, y, sprite, hitbox, dx, dy, g)
@@ -44,19 +42,19 @@ class Player(InteractableObject, Damageable, Persistent):
         """Actions that Player do each tick"""
         keys = pygame.key.get_pressed()
         if not self.active:
-            if keys[pygame.K_1] and isinstance(GameManager.currentRoom, InterDimensionalRoom):
-                GameManager.currentRoom.power_ups[0][1].apply()
-                GameManager.currentRoom.quit()
-            elif keys[pygame.K_2] and isinstance(GameManager.currentRoom, InterDimensionalRoom):
-                GameManager.currentRoom.power_ups[1][1].apply()
-                GameManager.currentRoom.quit()
-            elif keys[pygame.K_3] and isinstance(GameManager.currentRoom, InterDimensionalRoom):
-                GameManager.currentRoom.power_ups[2][1].apply()
-                GameManager.currentRoom.quit()
+            if keys[pygame.K_1] and isinstance(GameManager.current_room, InterDimensionalRoom):
+                GameManager.current_room.power_ups[0][1].apply()
+                GameManager.current_room.quit()
+            elif keys[pygame.K_2] and isinstance(GameManager.current_room, InterDimensionalRoom):
+                GameManager.current_room.power_ups[1][1].apply()
+                GameManager.current_room.quit()
+            elif keys[pygame.K_3] and isinstance(GameManager.current_room, InterDimensionalRoom):
+                GameManager.current_room.power_ups[2][1].apply()
+                GameManager.current_room.quit()
             return
         if self.hp <= 0:
-            GameManager.toRemove.append(self)
-            GameManager.toAdd.append(InteractableObject(0, 0, AnimatedGameOver()))
+            GameManager.to_remove.append(self)
+            GameManager.to_add.append(InteractableObject(0, 0, AnimatedGameOver()))
             return
 
         keys = pygame.key.get_pressed()
@@ -104,8 +102,8 @@ class Player(InteractableObject, Damageable, Persistent):
                 elif type(i.parent) == Door and i.parent.usable:
                     i.parent.use()
                     movement = (movement[0], (self.x, self.y))
-                    if i.parent.type=='up':
-                        movement = (movement[0], (self.x, self.y-30))
+                    if i.parent.type == 'up':
+                        movement = (movement[0], (self.x, self.y - 30))
                 elif isinstance(i.parent, DeathPlane):
                     self.x = 440
                     self.y = 400
@@ -126,7 +124,7 @@ class Player(InteractableObject, Damageable, Persistent):
         Method that occurs when player wants to change weapon
         :param new_weapon: new weapon
         """
-        GameManager.toRemove.append(self.weapon)
+        GameManager.to_remove.append(self.weapon)
         self.weapon = new_weapon
         new_weapon.parent = self
         new_weapon.ammo = random.randint(5, 9)
@@ -134,8 +132,8 @@ class Player(InteractableObject, Damageable, Persistent):
     def add_to_manager(self):
         """Method that adds Player instance in GameManager"""
         GameManager.all_Objects.add(self)
-        for i in self.gui:
-            GameManager.all_Sprites.add(i)
+        for element_of_interface in self.gui:
+            GameManager.all_Sprites.add(element_of_interface)
         if self.weapon:
             self.weapon.add_to_manager()
         if self.hitbox:
@@ -158,6 +156,7 @@ class Player(InteractableObject, Damageable, Persistent):
 
 class WeaponGUI(Sprite, Persistent):
     """Class that provides Weapon GUI"""
+
     def __init__(self, parent):
         """
         The initialization method for weapon GUI
@@ -179,10 +178,10 @@ class WeaponGUI(Sprite, Persistent):
             return
 
         Sprite.draw(self)
-        self.parent.weapon.guiIcon.x = 35
-        self.parent.weapon.guiIcon.y = 50
-        self.parent.weapon.guiIcon.parent = self
-        self.parent.weapon.guiIcon.draw()
+        self.parent.weapon.gui_icon.x = 35
+        self.parent.weapon.gui_icon.y = 50
+        self.parent.weapon.gui_icon.parent = self
+        self.parent.weapon.gui_icon.draw()
 
         if self.parent.weapon.ammo >= 0:
             amount = str(self.parent.weapon.ammo)
@@ -194,14 +193,14 @@ class WeaponGUI(Sprite, Persistent):
         text_position.center = (self.x + 145, self.y + 135)
         GameManager.screen.blit(ammo, text_position)
 
-    def getx(self):
+    def get_x(self):
         """
         Method that returns x coordinate
         :return: x coordinate
         """
         return self.x
 
-    def gety(self):
+    def get_y(self):
         """
         Method that returns y coordinate
         :return: y coordinate
@@ -211,6 +210,7 @@ class WeaponGUI(Sprite, Persistent):
 
 class HealthGUI(Sprite, Persistent):
     """Class that provides Health GUI"""
+
     def __init__(self, parent):
         """
         The initialization method for health GUI
@@ -234,7 +234,7 @@ class HealthGUI(Sprite, Persistent):
             return
 
         self.time += GameManager.time_elapsed
-        size_fraction = math.sin(10*((self.time / 200) % 5)) * math.e ** (4 * (1 - (self.time / 200 % 5))) / 100 + 0.9
+        size_fraction = math.sin(10 * ((self.time / 200) % 5)) * math.e ** (4 * (1 - (self.time / 200 % 5))) / 100 + 0.9
         hp_fraction = (self.parent.hp + 100) / 200
         size_fraction *= hp_fraction
 
@@ -246,7 +246,7 @@ class HealthGUI(Sprite, Persistent):
 
         hp_fraction = 1 - hp_fraction
         self.image.fill(tuple([255 - int((255 - i) * hp_fraction) for i in brown]),
-                                     special_flags=pygame.BLEND_MULT)
+                        special_flags=pygame.BLEND_MULT)
         self.x = 75 - new_size[0] // 2
         self.y = 75 - new_size[1] // 2
 
@@ -257,14 +257,14 @@ class HealthGUI(Sprite, Persistent):
         text_position.center = (self.x + 70, self.y + 80)
         GameManager.screen.blit(ammo, text_position)
 
-    def getx(self):
+    def get_x(self):
         """
         Method that returns x coordinate
         :return: x coordinate
         """
         return self.x
 
-    def gety(self):
+    def get_y(self):
         """
         Method that returns y coordinate
         :return: y coordinate
@@ -274,6 +274,7 @@ class HealthGUI(Sprite, Persistent):
 
 class MapGUI(Sprite, Persistent):
     """Class that provides Map GUI"""
+
     def __init__(self, parent):
         """
         The initialization method for Map GUI
@@ -294,11 +295,11 @@ class MapGUI(Sprite, Persistent):
         pygame.draw.rect(GameManager.screen, (0, 0, 0), pygame.Rect(845, 0, 115, 110), 2)
         for y in range(7):
             for x in range(7):
-                if GameManager.lev.map[y][x] is not None:
-                    if GameManager.currentRoom.id == GameManager.lev.map[y][x]:
+                if GameManager.level.map[y][x] is not None:
+                    if GameManager.current_room.id == GameManager.level.map[y][x]:
                         pygame.draw.rect(GameManager.screen, (255, 0, 0), pygame.Rect(855 + x * 15, 10 + y * 15,
                                                                                       15, 15))
-                    elif GameManager.searchByID(GameManager.lev.map[y][x]).cleaned:
+                    elif GameManager.search_by_id(GameManager.level.map[y][x]).cleaned:
                         pygame.draw.rect(GameManager.screen, (55, 253, 18), pygame.Rect(855 + x * 15, 10 + y * 15,
                                                                                         15, 15))
                     pygame.draw.rect(GameManager.screen, (0, 0, 0), pygame.Rect(855 + x * 15, 10 + y * 15,
