@@ -1078,9 +1078,12 @@ class LevelGenerator:
         if self.checkRoomExistence(x + 1, y):
             walls.append(Ground(930, 0, 30, 300))
             walls.append(Ground(930, 420, 30, 330))
-            room_sprite.image.fill((255, 255, 255, 0), ((930, 300), (30, 120)))
             room.rightDoor = Door(930, 300, None, Hitbox(120, 120), room, None, None,
                                   type='right')
+            if x == 0 and y == 0 and GameManager.lvl_number % 4 == 3:
+                room.rightDoor.usable = False
+            else:
+                room_sprite.image.fill((255, 255, 255, 0), ((930, 300), (30, 120)))
             room.filling.append(room.rightDoor)
         else:
             walls.append(Ground(930, 0, 30, 720))

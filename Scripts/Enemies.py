@@ -86,12 +86,14 @@ class Movement:
     def RandomWalkingMove(self, target):
         if self.cooldown < 0:
             self.cooldown = 0
+            self.dy += self.g * GameManager.time_elapsed
             self.dx = random.choice([1, -1]) / 10
             self.walkTime = random.randint(500, 2000)
             movement = [[self.x, self.y],
                         [self.x,
                          self.y + self.dy * GameManager.time_elapsed]]
         elif self.cooldown > 0:
+            self.dy += self.g * GameManager.time_elapsed
             self.cooldown -= GameManager.time_elapsed
             movement = [[self.x, self.y],
                         [self.x,
