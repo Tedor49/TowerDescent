@@ -69,8 +69,10 @@ class InfiniteSpawner(GameObject):
         if self.cooldown > 0:
             self.cooldown -= GameManager.time_elapsed
         else:
-            self.room.filling.append(BaseEnemy(self.x, self.y, Sprite('Sprites/playernew.png'), Hitbox(50, 50),
-                                                GameManager.player, move=Movement.FollowFlyingMove))
+            enemy = BaseEnemy(self.x, self.y, Sprite('Sprites/playernew.png'), Hitbox(50, 50),
+                                                GameManager.player, move=Movement.FollowFlyingMove)
+            self.room.filling.append(enemy)
+            GameManager.toAdd.append(enemy)
             self.cooldown = random.randint(5000, 10000)
 
 class Hitbox(GameObject):
