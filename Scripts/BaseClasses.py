@@ -717,6 +717,9 @@ class LevelGenerator:
                 room.filling.append(Scripts.Enemies.Boss0(GameManager.player, exit_elevator))
                 room.filling.append(Scripts.Enemies.GunArm(GameManager.player))
                 room.filling.append(exit_elevator)
+            elif room_type == "boss_1":
+                room.filling.append(Scripts.Enemies.Boss1(GameManager.player, exit_elevator))
+                room.filling.append(exit_elevator)
             elif room_type == "boss_2":
                 room.filling.append(exit_elevator)
                 exit_elevator.spawn(310)

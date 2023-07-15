@@ -1,3 +1,5 @@
+import math
+
 import pygame.transform
 
 from Scripts.BaseClasses import *
@@ -249,6 +251,58 @@ class GunArm(Enemy):
         if self.sprite:
             GameManager.all_Sprites.remove(self.sprite)
 
+
+class Boss1(Enemy):
+    def __init__(self, player_enemy, elevator):
+        super().__init__(-200, 310, Sprite("Sprites/boss0.png", z=4), Hitbox(180, 250, x=-4), player_enemy)
+        self.iframes = 0.1
+        self.elevator = elevator
+        self.baseImage = self.sprite.image.copy()
+        self.damage = 1
+        self.hp = 1
+        self.movement = Movement.FollowFlyingMove
+        self.weapon = None
+        self.parent = None
+
+    def tick(self):
+        x = self.player_enemy.hitbox.getx() + self.player_enemy.hitbox.x_size / 2
+        y = self.player_enemy.hitbox.gety() + self.player_enemy.hitbox.y_size / 2
+
+        self_center_x = self.hitbox.getx() + self.hitbox.x_size / 2
+        self_center_y = self.hitbox.gety() + self.hitbox.y_size / 2
+
+        angle = math.atan2(x - self_center_x, y - self_center_y) * 180 / math.pi
+
+        self.sprite.image = pygame.transform.rotate(self.baseImage, angle)
+
+        self.move(self.player_enemy)
+
+        if self.hp <= 0:
+            GameManager.toRemove.append(self)
+            GameManager.currentRoom.filling.remove(self)
+            self.elevator.spawn(585)
+
+        for i in self.hitbox.check_intersections():
+            if isinstance(i.parent, Damageable):
+                i.parent.hurt(self, self.damage)
+
+    def move(self, target):
+        return self.movement(self, target)
+
+    def add_to_manager(self):
+        GameManager.all_Objects.add(self)
+        if self.hitbox:
+            GameManager.all_Hitboxes.add(self.hitbox)
+        if self.sprite:
+            GameManager.all_Sprites.add(self.sprite)
+
+
+    def delete(self):
+        GameManager.all_Objects.remove(self)
+        if self.hitbox:
+            GameManager.all_Hitboxes.remove(self.hitbox)
+        if self.sprite:
+            GameManager.all_Sprites.remove(self.sprite)
 
 class Boss2(Enemy):
     def __init__(self, player_enemy):
