@@ -55,8 +55,13 @@ These steps will ensure that you have everything required to be able to install 
 
 ## Controls
 W - jump
+
 A - move left
+
 D - mode right
+
 Left Click - use weapon / press menu buttons
+
 Left CLick / 1 2 3 number keys - select perk
+
 F - discard weapon (only possible with perk)
