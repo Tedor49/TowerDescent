@@ -1,3 +1,5 @@
+import pygame.locals
+
 from Scripts.Weapons import *
 from Scripts.AnimatedSprites import *
 from Scripts.TestObjects import Ground
@@ -41,14 +43,18 @@ class Player(InteractableObject, Damageable, Persistent):
     def tick(self):
         """Actions that Player do each tick"""
         keys = pygame.key.get_pressed()
+        x, y = pygame.mouse.get_pos()
         if not self.active:
-            if keys[pygame.K_1] and isinstance(GameManager.current_room, InterDimensionalRoom):
+            if (keys[pygame.K_1] or (pygame.mouse.get_pressed()[0] and 150 <= x <= 270 and 540 <= y <= 660))\
+                    and isinstance(GameManager.current_room, InterDimensionalRoom):
                 GameManager.current_room.power_ups[0][1].apply()
                 GameManager.current_room.quit()
-            elif keys[pygame.K_2] and isinstance(GameManager.current_room, InterDimensionalRoom):
+            elif (keys[pygame.K_2] or (pygame.mouse.get_pressed()[0] and 420 <= x <= 540 <= y <= 660))and\
+                    isinstance(GameManager.current_room, InterDimensionalRoom):
                 GameManager.current_room.power_ups[1][1].apply()
                 GameManager.current_room.quit()
-            elif keys[pygame.K_3] and isinstance(GameManager.current_room, InterDimensionalRoom):
+            elif (keys[pygame.K_3] or (pygame.mouse.get_pressed()[0] and 690 <= x <= 810 and 540 <= y <= 660))and\
+                    isinstance(GameManager.current_room, InterDimensionalRoom):
                 GameManager.current_room.power_ups[2][1].apply()
                 GameManager.current_room.quit()
             return
