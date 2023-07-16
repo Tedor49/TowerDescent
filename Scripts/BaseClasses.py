@@ -548,7 +548,7 @@ class Menu:
     def __init__(self):
         """Initialization of the Menu, where main pygame cycle for a Menu page occurs"""
         pygame.init()
-        size = [700, 700]
+        size = [960, 720]
         screen = pygame.display.set_mode(size)
         pygame.display.set_caption('Madness Descent menu')
         running = True
@@ -556,15 +556,15 @@ class Menu:
         font = pygame.font.SysFont('arial', 50)
         text = font.render('Start',
                            True, (0, 0, 0))
-        text_x = 280
-        text_y = 300
+        text_x = 440
+        text_y = 330
         screen.blit(text, (text_x, text_y))
-        screen.blit(pygame.image.load("Sprites/logo.png"), (100, 60))
+        screen.blit(pygame.image.load("Sprites/logo.png"), (220, 60))
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     x, y = event.pos
-                    if 210 < x < 410 and 310 < y < 350:
+                    if 440 < x < 540 and 330 < y < 370:
                         pygame.quit()
                         GameManager()
                 if event.type == pygame.QUIT:
@@ -619,6 +619,7 @@ class GameManager:
         pygame.display.set_caption('Madness Descent')
         GameManager.clock = pygame.time.Clock()
         GameManager.current_room = GameManager.search_by_id(0)
+        pygame.display.set_icon(pygame.image.load("Sprites/playernew.png"))
         self.update()
         GameManager.to_add.append(GameManager.player)
         GameManager.current_room.enter(enter_type="up")

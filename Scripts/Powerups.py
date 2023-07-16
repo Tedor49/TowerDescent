@@ -124,7 +124,7 @@ class SwordReflect(PowerUp):
     @staticmethod
     def apply():
         """Method that applies SwordReflect PowerUp on the Player"""
-        GameManager.sword_reflect = True
+        GameManager.player.sword_reflect = True
 
 
 class LowGravity(PowerUp):

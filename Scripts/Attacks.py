@@ -57,6 +57,14 @@ class Bullet(Attack):
                 GameManager.to_remove.append(self)
             else:
                 GameManager.to_remove.append(self)
+        for i in self.hitbox.check_intersections():
+            if self.parent != GameManager.player and \
+                    isinstance(i.parent, SwordSwing) and \
+                    GameManager.player.sword_reflect:
+                self.dx *= -1
+                self.dy *= -1
+                self.damage *= 10
+                self.parent = GameManager.player
         self.x = movement[1][0]
         self.y = movement[1][1]
 
