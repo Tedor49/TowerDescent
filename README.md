@@ -39,7 +39,7 @@ Pygame is a library this project is built on, so you need it to launch the proje
 pip install pygame
 ```
 
-### 2.4. Get the source code
+### 2.4. Get the source code and resources
 Once you have the access to the code, to get it, use the following command:
 ```bash
 git clone https://github.com/Tedor49/TowerDescent.git
