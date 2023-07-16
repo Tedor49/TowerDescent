@@ -71,3 +71,5 @@ Left Click - use weapon / press menu buttons
 Left CLick / 1 2 3 number keys - select perk
 
 F - discard weapon (only possible with perk)
+
+F1 - reset health to full (cheat)
