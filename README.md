@@ -60,7 +60,7 @@ python main.py
 These steps will ensure that you have everything required to be able to install and use the game.
 
 ## Controls
-W - jump
+W - jump / enter elevator
 
 A - move left
 
