@@ -612,7 +612,7 @@ class GameManager:
         from Scripts.Player import Player
         pygame.init()
         size = [960, 720]
-        GameManager.level = LevelGenerator()
+        GameManager.level = LevelGenerator(GameManager.lvl_number + 7)
         GameManager.player = Player(455, 100, Sprite('Sprites/playernew.png'), Hitbox(50, 50))
         GameManager.screen = pygame.display.set_mode(size)
         GameManager.not_cleared_rooms = len(GameManager.Rooms)
@@ -934,28 +934,28 @@ class Ground(InteractableObject):
 class LevelGenerator:
     """Class that is used to generate random level"""
 
-    def __init__(self, rooms_minimum=6):
+    def __init__(self, rooms_minimum=7):
         """
         Initialization for a LevelGenerator class, which creates level and adds it to the GameManager
         :param rooms_minimum: minimum rooms on this level
         """
         self.id = 0
-        self.map = [[None]*7 for i in range(7)]
-        self.rooms_maximum = 10
+        self.map = [[None]*6 for i in range(7)]
+        self.rooms_maximum = rooms_minimum + 2
         self.rooms_minimum = rooms_minimum
         self.generate_level(0, 1)
         self.boss_wall = None
         self.dim_room = InterDimensionalRoom()
-        while not self.id >= 5:
+        while not self.id >= rooms_minimum:
             self.id = 0
-            self.map = [[None]*7 for i2 in range(7)]
+            self.map = [[None]*6 for i2 in range(7)]
             self.generate_level(0, 1)
-        for y in range(7):
-            for x in range(7):
+        for y in range(len(self.map)):
+            for x in range(len(self.map[0])):
                 if self.map[y][x] is not None:
                     self.add_walls_and_doors(x, y)
-        for y in range(7):
-            for x in range(7):
+        for y in range(len(self.map)):
+            for x in range(len(self.map[0])):
                 if self.map[y][x] is not None:
                     self.connect(x, y)
 
@@ -967,7 +967,8 @@ class LevelGenerator:
         :return:
         """
         forbidden = [(0, 1), (1, 1)]
-        if 0 <= x <= 6 and 0 <= y <= 6 and self.map[y][x] is None and self.id < self.rooms_maximum:
+        if 0 <= x <= len(self.map[0]) - 1 and 0 <= y <= len(self.map) - 1\
+                and self.map[y][x] is None and self.id < self.rooms_maximum:
             self.map[y][x] = self.id
             self.id += 1
             if x == 1 and y == 0:
@@ -1145,7 +1146,7 @@ class LevelGenerator:
         :param y: coordinate on the y axis
         :return: boolean depending on the result
         """
-        if 0 <= x <= 6 and 0 <= y <= 6:
+        if 0 <= x <= len(self.map[0]) - 1 and 0 <= y <= len(self.map) - 1:
             if self.map[y][x] is not None:
                 return True
         return False

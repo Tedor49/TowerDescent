@@ -45,15 +45,15 @@ class Player(InteractableObject, Damageable, Persistent):
         keys = pygame.key.get_pressed()
         x, y = pygame.mouse.get_pos()
         if not self.active:
-            if (keys[pygame.K_1] or (pygame.mouse.get_pressed()[0] and 150 <= x <= 270 and 540 <= y <= 660))\
+            if (keys[pygame.K_1] or (pygame.mouse.get_pressed()[0] and 150 <= x <= 270 and 540 <= y <= 660)) \
                     and isinstance(GameManager.current_room, InterDimensionalRoom):
                 GameManager.current_room.power_ups[0][1].apply()
                 GameManager.current_room.quit()
-            elif (keys[pygame.K_2] or (pygame.mouse.get_pressed()[0] and 420 <= x <= 540 <= y <= 660))and\
+            elif (keys[pygame.K_2] or (pygame.mouse.get_pressed()[0] and 420 <= x <= 540 <= y <= 660)) and \
                     isinstance(GameManager.current_room, InterDimensionalRoom):
                 GameManager.current_room.power_ups[1][1].apply()
                 GameManager.current_room.quit()
-            elif (keys[pygame.K_3] or (pygame.mouse.get_pressed()[0] and 690 <= x <= 810 and 540 <= y <= 660))and\
+            elif (keys[pygame.K_3] or (pygame.mouse.get_pressed()[0] and 690 <= x <= 810 and 540 <= y <= 660)) and \
                     isinstance(GameManager.current_room, InterDimensionalRoom):
                 GameManager.current_room.power_ups[2][1].apply()
                 GameManager.current_room.quit()
@@ -299,9 +299,10 @@ class MapGUI(Sprite, Persistent):
 
         pygame.draw.rect(GameManager.screen, (255, 255, 255), pygame.Rect(845, 0, 115, 110))
         pygame.draw.rect(GameManager.screen, (0, 0, 0), pygame.Rect(845, 0, 115, 110), 2)
-        for y in range(7):
-            for x in range(7):
-                if GameManager.level.map[y][x] is not None:
+        for y in range(len(GameManager.level.map)):
+            for x in range(len(GameManager.level.map[0])):
+                if (GameManager.level.map[y][x] is not None and not (x == 0 and y == 0)) \
+                        or (x == 0 and y == 0 and GameManager.search_by_id(0).left_door.usable):
                     if GameManager.current_room.id == GameManager.level.map[y][x]:
                         pygame.draw.rect(GameManager.screen, (255, 0, 0), pygame.Rect(855 + x * 15, 10 + y * 15,
                                                                                       15, 15))
