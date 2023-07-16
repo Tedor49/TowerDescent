@@ -611,6 +611,7 @@ class GameManager:
         ]
         from Scripts.Player import Player
         pygame.init()
+        pygame.mixer.init()
         size = [960, 720]
         GameManager.level = LevelGenerator(GameManager.lvl_number + 7)
         GameManager.player = Player(455, 100, Sprite('Sprites/playernew.png'), Hitbox(50, 50))
@@ -661,6 +662,7 @@ class GameManager:
         :param room_id: id of a room
         :return: room with the required id
         """
+
         for room in GameManager.Rooms:
             if room.id == room_id:
                 return room
