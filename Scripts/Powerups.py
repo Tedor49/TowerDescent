@@ -1,4 +1,3 @@
-from Scripts.BaseClasses import *
 from Scripts.Attacks import *
 from Scripts.Player import Player
 
@@ -114,7 +113,7 @@ class InfiniteAmmo(PowerUp):
                 self.weapon.ammo = -1
 
             return wrapper
-
+        GameManager.player.weapon.ammo = -1
         Player.change_weapon = change_ammo_decorator(Player.change_weapon)
 
 
