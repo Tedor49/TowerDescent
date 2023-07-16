@@ -341,7 +341,7 @@ class Boss1(Enemy):
         :param elevator: elevator which will be spawned after death of the boss
         """
         super().__init__(-200, 310, Sprite("Sprites/boss1.png", z=4), Hitbox(198, 198, x=-4), player_enemy)
-        self.iframes = 0.1
+        self.iframes = 0.5
         self.elevator = elevator
         self.baseImage = self.sprite.image.copy()
         self.damage = 1
@@ -430,7 +430,7 @@ class Boss2(Enemy):
         :param elevator: elevator which will be spawned after death of the boss
         """
         super().__init__(400, 30, Sprite("Sprites/boss2.png", z=4), Hitbox(180, 250, x=-4), player_enemy)
-        self.iframes = 0.1
+        self.iframes = 0.5
         self.baseImage = self.sprite.image.copy()
         self.damage = 1
         self.hp = 20

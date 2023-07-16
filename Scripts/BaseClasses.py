@@ -619,6 +619,7 @@ class GameManager:
         pygame.display.set_caption('Madness Descent')
         GameManager.clock = pygame.time.Clock()
         GameManager.current_room = GameManager.search_by_id(0)
+        pygame.display.set_icon(pygame.image.load("Sprites/playernew.png"))
         self.update()
         GameManager.to_add.append(GameManager.player)
         GameManager.current_room.enter(enter_type="up")
