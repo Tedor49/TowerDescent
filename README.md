@@ -5,6 +5,7 @@ This is an roguelite game about slowly descending into madness. In this game you
 - [About](#about)
 - [Getting Started](#getting_started)
 - [Controls](#controls)
+- [License](#license)
 
 # About
 The player takes control of the character that can steal weapons from enemies. After stealing a weapon the player can use it a limited number of times, after which you can steal another one. A level consists of a number of randomly generated rooms, which all need to be cleared of enemies to open the boss room. Leaving and re-entering a room respawns all unkilled enemies with full health. In the boss room, there is a unique boss that is dependent on the level. After the boss is defeated, an elevator that can take you further into this twisted world. At each elevator ride, you are offered a choice of 3 perks, which can help you. Also, this game includes a functional minimap and 2 endings, the better of which is achieved by no more than 30 damage.
@@ -73,3 +74,10 @@ Left CLick OR 1-3 number keys - select perk
 F - discard weapon (only possible with perk)
 
 F1 - reset health to full (cheat)
+
+## License
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
