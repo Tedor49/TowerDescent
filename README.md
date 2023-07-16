@@ -7,7 +7,7 @@ This is an roguelite game about slowly descending into madness. In this game you
 - [Controls](#controls)
 
 # About
-The player takes control of the character that can steal weapons from enemies. After stealing a weapon the player can use it a limited number of times, after which you can steal another one. A level consists of a number of connected rooms, which all need to be cleared of enemies to open the boss room. Leaving and re-entering a room respawns all unkilled enemies with full health. In the boss room, there is a unique boss that is dependent on the level. After the boss is defeated, an elevator that can take you further into this twisted world. At each elevator ride, you are offered a choice of 3 perks, which can help you. Also, this game includes a functional minimap and 2 endings.
+The player takes control of the character that can steal weapons from enemies. After stealing a weapon the player can use it a limited number of times, after which you can steal another one. A level consists of a number of randomly generated rooms, which all need to be cleared of enemies to open the boss room. Leaving and re-entering a room respawns all unkilled enemies with full health. In the boss room, there is a unique boss that is dependent on the level. After the boss is defeated, an elevator that can take you further into this twisted world. At each elevator ride, you are offered a choice of 3 perks, which can help you. Also, this game includes a functional minimap and 2 endings.
 
 # Getting Started
 
