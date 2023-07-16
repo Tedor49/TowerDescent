@@ -71,6 +71,9 @@ class Player(InteractableObject, Damageable, Persistent):
         if self.coyote > 0:
             self.extra_jumps = self.max_extra_jumps
 
+        if keys[pygame.K_F1]:
+            self.hp = 100
+
         if self.colliding:
             if keys[pygame.K_w] and not self.prev_jump_pressed:
                 if self.coyote > 0:
