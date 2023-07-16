@@ -15,7 +15,7 @@ There are 2 ways to install our project:
 
 ## 1. Using a compiled standalone Windows application
 
-Head to (insert link at the end) and download the file. This folder is a copy of dist from the repository
+Head to [this link](https://drive.google.com/file/d/1lDcoUUXR5T_G51LqupkCNVunzkQf5ItC/view?usp=sharing) and download the archive. This folder is a copy of dist from the repository
 After downloading and un-zipping the folder, launch "Madness Descent.exe" and enjoy!
 
 This method does not require Python to be installed, so you can play the game without complications
