@@ -31,7 +31,7 @@ You can check if pyhton is installed correctly by typing
 ```cmd
 python --version
 ```
-Into the terminal. If it does not recognise Python, and you are sure you installed it, add it to PATH by following [this guide](https://www.educative.io/answers/how-to-add-python-to-path-variable-in-windows) 
+into the terminal. If it does not recognise Python, and you are sure you installed it, add it to PATH by following [this guide](https://www.educative.io/answers/how-to-add-python-to-path-variable-in-windows) 
 
 ### 2.2. Install pip
 Pip is a package manager for Python packages. It allows you to install and manage additional packages that are not included with Python by default. To install Pip, follow the instructions below:
